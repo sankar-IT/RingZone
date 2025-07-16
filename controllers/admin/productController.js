@@ -26,7 +26,7 @@ const addProduct = async (req, res) => {
     const parsedVariants = JSON.parse(variants).map((variant, index) => {
       const fieldname = `variantImages-variant-${index + 1}`;
       
-      console.log(req.files.filename);
+ 
       
       const variantImages = req.files
         .filter(file => file.fieldname === fieldname)
@@ -197,7 +197,7 @@ const updateProduct = async (req, res) => {
       variants: []
     };
 
-    console.log(req.files);
+
 
     
     if (req.files?.productImages) {

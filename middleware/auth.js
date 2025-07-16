@@ -2,8 +2,6 @@ const User=require('../models/userSchema')
 
 const  userAuth=(req,res,next)=>{
 
-  console.log(req.session.user);
-
   if(req.session.user){
     
     User.findById(req.session.user?._id)
@@ -18,7 +16,7 @@ const  userAuth=(req,res,next)=>{
     }).catch(error => {
 
       res.locals.user = null;
-      console.log('Error in user auth middleware')
+     
       return res.status(500).send(error.message)
 
     });
@@ -42,7 +40,6 @@ const adminAuth=(req,res,next)=>{
       res.redirect('/admin/login')
     }
   }).catch(error=>{
-    console.log('Error in adminauth middleware')
     res.status(500).send('Internal server error')
   })
 }else{

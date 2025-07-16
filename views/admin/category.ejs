@@ -481,7 +481,7 @@ async function addOffer(categoryId) {
         Swal.fire('Failed', data.message || 'Adding offer failed.', 'error');
       }
     } catch (error) {
-      console.log('Error adding offer:', error);
+
       Swal.fire('Error', 'An error occurred while adding the offer.', 'error');
     }
   } else if (amount !== undefined) {

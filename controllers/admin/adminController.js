@@ -37,7 +37,6 @@ const login = async (req, res) => {
     }
 
   } catch (error) {
-    console.log('login error', error);
     return res.redirect('/pageerror');
   }
 };
@@ -63,7 +62,6 @@ const logout = async (req, res) => {
         req.session.adminUser = null;
     res.redirect('/admin/login');
   } catch (error) {
-    console.log('logout error', error);
     res.redirect('/pageerror');
   }
 };

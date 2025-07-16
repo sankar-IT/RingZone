@@ -73,8 +73,6 @@ const updateCoupon = async (req, res) => {
       instruction,
       active
     } = req.body;
-    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-    console.log(req.body)
 
     await Coupon.findByIdAndUpdate(couponId, {
       couponCode,

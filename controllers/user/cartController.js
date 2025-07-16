@@ -32,7 +32,7 @@ const getCartPage=async(req,res)=>{
     res.redirect('/login')
     }
   } catch (error) {
-    console.log(error);
+ 
     
    res.redirect('/pageNotFound')
   }
@@ -111,7 +111,7 @@ const addToCart = async (req, res) => {
     });
 
   } catch (error) {
-    console.log('Add to Cart Error:', error);
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
@@ -156,7 +156,7 @@ const updateCartQuantity = async (req, res) => {
     res.json({ success: true, itemTotal });
 
   } catch (error) {
-    console.log('Update Cart Quantity Error:', error);
+   
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
@@ -164,7 +164,7 @@ const updateCartQuantity = async (req, res) => {
 const deleteCartItem=async(req,res)=>{
   try {
     const{productId,color,storage}=req.body;
-    console.log(req.body);
+  
     const userId=req.session.user?._id;
 
     const cart=await Cart.findOne({user : userId})
@@ -237,6 +237,7 @@ const getCheckoutPage = async (req, res) => {
     let subtotal = 0;
     let discount = 0;
     let shipment = 0;
+  
 
     if (req.session.appliedCoupon) {
       discount = req.session.appliedCoupon.discount;
@@ -263,7 +264,7 @@ const getCheckoutPage = async (req, res) => {
 
     const addressData = await Address.findOne({ userId });
     const couponData = await Coupon.find({ active: true });
-
+    const cartCount = cart?.items?.length || 0;
     return res.render('cart-checkout', {
       addressData,
       cart,
@@ -276,11 +277,11 @@ const getCheckoutPage = async (req, res) => {
         grandTotal
       },
       appliedCoupon: req.session.appliedCoupon || null,
-      cartCount: res.locals.cartCount
+      cartCount
     });
 
   } catch (error) {
-    console.log('Checkout Page Error:', error);
+ 
     res.redirect('/user-cart');
   }
 };
@@ -408,7 +409,7 @@ const applyCoupon = async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
+
     
     return res.status(500).json({ success: false, message: 'Server error. Try again later.' });
   }
@@ -445,7 +446,7 @@ const removeCoupon = async (req, res) => {
     return res.status(200).json({ success: true, grandTotal });
 
   } catch (error) {
-    console.log('Remove coupon error:', error);
+   
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -461,6 +462,7 @@ const postCheckoutToPayment = async (req, res) => {
 
     let subtotal = 0;
     let discount = req.session.appliedCoupon?.discount || 0;
+    console.log(discount);
     let shipment = 0;
 
     const productIds = cart.items.map(item => item.product);
@@ -499,14 +501,13 @@ const postCheckoutToPayment = async (req, res) => {
     });
 
   } catch (error) {
-    console.log('Checkout Page Error:', error);
+   
     res.redirect('/checkout');
   }
 };
 
 const getCartPayment = async (req, res) => {
   try {
-    console.log(req.session.user);
     if (req.session.user) {
       const userId = req.session.user?._id;
       const cart = await Cart.findOne({ user: userId });
@@ -514,7 +515,7 @@ const getCartPayment = async (req, res) => {
 
       const { shipment, addressId, couponCode, discountAmount } = req.body;
 
-      console.log(req.body);
+ 
       
 
       if(!addressId){
@@ -525,7 +526,7 @@ const getCartPayment = async (req, res) => {
       req.session.selectedAddress = addressId;
       req.session.appliedCoupon = {
         code: couponCode,
-        discount: discountAmount
+        discount : Number(discountAmount)
       };
 
       if (!cart || cart.items.length <= 0) {
@@ -535,8 +536,14 @@ const getCartPayment = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Address is Empty' });
       }
       
-      res.locals.cartCount = cart.items.length;
-      return res.status(200).json({ success: true, redirectUrl: '/load-payment' });
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ success: false, message: 'Session error' });
+        }
+
+        return res.status(200).json({ success: true, redirectUrl: '/load-payment' });
+      });
     }
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });
@@ -565,14 +572,14 @@ const postPaymentToOrder = async (req, res) => {
     const shippingCharge = parseInt(req.session.selectedShipment);
     const shippingAddressId = req.session.selectedAddress;
 
-    console.log(shippingAddressId);
+ 
     
     
     const shippingAddress = addressDoc.addresses.find(
       addr => addr._id.toString() == shippingAddressId
     );
     
-    console.log(addressDoc);
+
 
     if (!shippingAddress) {
       return res.status(404).json({ success: false, message: 'Selected address not found' });
@@ -695,14 +702,14 @@ try {
     const shippingCharge = parseInt(req.session.selectedShipment);
     const shippingAddressId = req.session.selectedAddress;
 
-    console.log(shippingAddressId);
+
     
     
     const shippingAddress = addressDoc.addresses.find(
       addr => addr._id.toString() == shippingAddressId
     );
     
-    console.log(addressDoc);
+
 
     if (!shippingAddress) {
       return res.status(404).json({ success: false, message: 'Selected address not found' });
@@ -811,7 +818,7 @@ try {
     });
 
 } catch (error) {
-  console.log('Razorpay order creation error:', err);
+
     res.status(500).json({ success: false, message: 'Failed to create Razorpay order' });
 }
 }
@@ -828,7 +835,7 @@ const userId = req.session.user._id;
 
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    console.log(req.body);
+
     
     
 

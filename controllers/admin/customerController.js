@@ -45,7 +45,6 @@ const count = await User.countDocuments({
     });
 
   } catch (error) {
-    console.log('Error in customerInfo:', error);
     res.status(500).send("Server Error");
   }
 };

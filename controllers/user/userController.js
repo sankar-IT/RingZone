@@ -65,7 +65,7 @@ const loadSignup = async (req, res) => {
   try {
     res.render('signup');
   } catch (error) {
-    console.log('signup page is not loading', error);
+
     res.status(500).send('server error');
   }
 };
@@ -176,13 +176,6 @@ const signup = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
-
-    console.log(req.body);
-
-    console.log(req.session.userOtp);
-    
-    
-
     if (otp == req.session.userOtp) {
       const user = req.session.userData;
       const passwordHash = await securePassword(user.password);
@@ -289,7 +282,7 @@ const logout = async (req,res)=>{
     req.session.user = null;
     res.redirect('/')
   } catch (error) {
-    console.log('logout error',error)
+  
     res.redirect('/pageNotFound')
   }
 
@@ -315,21 +308,15 @@ const loadShoppingPage = async (req, res) => {
 
     const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
-
-    // Extract filters from query params
     const selectedCategory = req.query.category || null;
     const selectedBrand = req.query.brand || null;
     const gt = parseInt(req.query.gt) || 0;
     const lt = parseInt(req.query.lt) || null;
     const search = req.query.search || "";
-    const sort = req.query.sort || "latest"; // latest or price_asc or price_desc
+    const sort = req.query.sort || "latest"; 
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const skip = (page - 1) * limit;
-
-    console.log(gt,lt)
-
-    // Build MongoDB filter
     const query = {
       isBlocked: false,
       variants: { $elemMatch: { quantity: { $gt: 0 } } }
@@ -536,7 +523,6 @@ const loadProductDetails = async (req, res) => {
         return res.redirect('/login?error=blocked');
       }
       const cart = await Cart.findOne({ user: userData._id  });
-      console.log(cart,userData)
 
       if(cart){
         res.locals.cartCount = cart.items?.length;
@@ -580,7 +566,7 @@ const loadProductDetails = async (req, res) => {
     });
 
   } catch (error) {
-    console.log('Product load error:', error.message);
+    
     res.status(500).render('page-500'); 
   }
 };
@@ -589,12 +575,12 @@ const checkProductStatus = async (req, res) => {
   try {
     // First check if ID exists
     if (!req.params.id) {
-      console.log("No ID provided in params:", req.params);
+
       return res.status(400).json({ error: "Product ID is required", active: false });
     }
 
     const product = await Product.findById(req.params.id).lean();
-    console.log("Product found:", product); // This will show what's actually returned
+
     
     if (!product) {
       return res.json({ active: false, message: "Product not found" });

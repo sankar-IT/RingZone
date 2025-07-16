@@ -74,7 +74,7 @@ router.get('/download-invoice/:orderId',userAuth,profileController.downloadInvoi
 router.post('/request-return',userAuth,profileController.returnOrder)
 
 //address management
-router.get('/user-address',userAuth,profinmleController.userAddress)
+router.get('/user-address',userAuth,profileController.userAddress)
 router.get('/add-address',userAuth,profileController.addAddress)
 router.post('/add-address',userAuth,profileController.addressAdd)
 router.post('/address-dlt', userAuth, profileController.addressDlt);

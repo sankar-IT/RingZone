@@ -226,13 +226,12 @@ const userProfile=async(req,res)=>{
     } else {
       res.locals.cartCount = 0;
     }
-    console.log(res.locals.cartCount);
     const addressData=await Address.findOne({ userId: new mongoose.Types.ObjectId(userId) });
       const ordersCount = await Order.countDocuments({ user: userId});
      const addressCount = addressData ? addressData.addresses.length : 0;
     res.render('user-profile',{user: userData, userAddress:addressData,ordersCount, addressCount, cartCount: res.locals.cartCount})
   } catch (err) {
-    console.log(err);
+  
     
     res.json(err)
   }
@@ -479,7 +478,7 @@ const editAddress = async (req, res) => {
     const userId = req.session.user?._id;
     const addressIndex = req.params.index;
 
-    console.log(userId);
+
 
     
     
@@ -498,7 +497,7 @@ const editAddress = async (req, res) => {
     });
     
   } catch (error) {
-    console.log('Error in editAddress:', error);
+   
     res.redirect('/pageNotFound');
   }
 };
@@ -559,11 +558,6 @@ const updateAddress = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-
-
-    console.log(req.body);
-    console.log(req.file);
-
     
     const userId = req.session.user._id;
     const { fname, lname, dob } = req.body;
@@ -646,7 +640,7 @@ const changePassword = async (req, res) => {
 const userChangeEmail = async (req, res) => {
   const { newEmail, verificationCode } = req.body;
 
-  console.log(req.body);
+
   
 
   if (!req.session.emailVerification || 
@@ -702,7 +696,7 @@ const userSendEmail = async (req, res) => {
       expiresAt: Date.now() + 15 * 60 * 1000 
     };
 
-    console.log('///////////////////',verificationCode)
+    console.log(verificationCode)
    
     await sendVerificationEmails(newEmail, verificationCode);
     console.log(verificationCode);
@@ -713,7 +707,7 @@ const userSendEmail = async (req, res) => {
     });
 
   } catch (error) {
-    console.log('Email change error:', error);
+   
     res.status(500).json({ error: 'Failed to process email change' });
   }
 };
@@ -872,9 +866,6 @@ const orderDetails = async (req, res) => {
       .populate('user')
       .populate('orderedItems.product');
 
-      console.log("ORDERD:::",order);
-      
-
     if (!order) {
       return res.status(404).send('Order not found');
     }
@@ -907,7 +898,7 @@ const orderCancel=async(req,res)=>{
     res.json({ success: true, message: 'Order status updated to cancelled' });
     
   } catch (error) {
-    console.log('Error cancelling order:', error);
+
     res.status(500).json({ success: false, message: 'Server error' });
   }
 }
@@ -961,7 +952,7 @@ const cancelItem = async (req, res) => {
       finalAmount: order.finalAmount
     });
   } catch (error) {
-    console.log('Error cancelling item:', error);
+
     return res.status(500).json({ message: 'Server error' });
   }
 };

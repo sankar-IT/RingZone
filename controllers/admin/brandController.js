@@ -36,9 +36,6 @@ res.render('brands', {
 
 
 const addBrand=async(req,res)=>{
-
-  console.log(req.body);
-  
   try {
     const brand=req.body.name;
 const findBrand = await Brand.findOne({ brandName: brand });
