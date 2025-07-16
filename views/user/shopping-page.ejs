@@ -1,0 +1,63 @@
+<%-include('../../views/partials/user/header')%>
+<div class="shop_page py-5">
+  <div class="container">
+    <div class="row">
+      <!-- Filter Sidebar -->
+      <div class="col-lg-3 mb-4">
+        <h5 class="mb-3">Filters</h5>
+
+        <!-- Price Range -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Price Range</h6>
+          <input type="range" class="form-range" id="priceRange" min="1000" max="100000" step="1000" oninput="updatePriceLabel(this.value)">
+          <p>Up to ₹<span id="priceLabel">100000</span></p>
+        </div>
+        
+        <!-- Categories -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Category</h6>
+          <ul class="list-unstyled">
+            <li><input type="checkbox" class="form-check-input" id="newArrival"> <label for="newArrival">New Arrival</label></li>
+            <li><input type="checkbox" class="form-check-input" id="brands"> <label for="brands">Brands</label></li>
+            <li><input type="checkbox" class="form-check-input" id="refurbished"> <label for="refurbished">Refurbished</label></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="col-lg-9">
+        <div class="row" id="productContainer">
+          <% products.forEach(product => { %>
+            <div class="col-md-4 mb-4 product-card" data-price="<%= product.price %>">
+              <div class="product discount product_filter d-flex flex-column justify-content-between p-3 h-100">
+                <div class="product_image d-flex justify-content-center align-items-center mt-3" style="height: 180px;">
+                  <img src="<%= product.image %>" class="img-fluid" style="max-height: 160px;">
+                </div>
+                <div class="product_info text-center mt-3">
+                  <h6 class="product_name"><a href="/products/<%= product.slug %>"><%= product.name %></a></h6>
+                  <div class="product_price">₹<%= product.price %> <span>₹<%= product.oldPrice %></span></div>
+                </div>
+                <div class="red_button add_to_cart_button text-center mt-3">
+                  <a href="/cart/add/<%= product._id %>">add to cart</a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updatePriceLabel(value) {
+    document.getElementById("priceLabel").innerText = value;
+    const productCards = document.querySelectorAll(".product-card");
+    productCards.forEach(card => {
+      const price = parseInt(card.dataset.price);
+      card.style.display = price <= value ? 'block' : 'none';
+    });
+  }
+</script>
+
+<%-include('../../views/partials/user/footer')%>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    .error-message{
+      color:red;
+      font-size: 0.75rem;
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-white-900 flex items-center justify-center min-h-screen">
+  <div class="bg-white shadow-xl rounded-lg w-full max-w-5xl flex flex-col md:flex-row overflow-hidden">
+    
+    <!-- Left Side Image -->
+    <div class="w-full md:w-1/2 bg-white-100 flex items-center justify-center p-6">
+      <img 
+        src="https://i.pinimg.com/736x/88/10/52/8810521b6114c23be76ca2937daa5f4e.jpg" 
+        alt="E-commerce Signup" 
+        class="w-72 h-72 object-contain" />
+    </div>
+    
+    <!-- Right Side Form -->
+    <div class="w-full md:w-1/2 p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Register now</h2>
+
+      <form id="signform" class="space-y-4" method="post" action="/signup">
+        <input id="firstname" type="text" name="firstName" placeholder="First name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+        <div id="error1" class="error-message"></div>
+        <input id="secondname" type="text" name="lastName" placeholder="Last name" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+         <div id="error2" class="error-message"></div>
+        <input id="email" type="email" name="email" placeholder="Email address" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+         <div id="error3" class="error-message"></div>
+        <input id="phone" type="tel" name="phone" placeholder="Phone number" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+         <div id="error4" class="error-message"></div>
+        <input id="password" type="password" name="password" placeholder="Password" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+         <div id="error5" class="error-message"></div>
+        <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm password" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+         <div id="error6" class="error-message"></div>
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md font-semibold">Signup</button>
+      </form>
+      
+      <% if (locals.message && message.length > 0) { %>
+        <div class="bg-red-100 text-red-700 border border-red-400 px-4 py-3 rounded text-center mb-4">
+          <%= message %>
+        </div>
+      <% } %>
+
+      <div class="text-center text-gray-500 my-4">or</div>
+
+      <a href="/auth/google" class="w-full border border-gray-300 py-2 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-100">
+        <img src="https://i.pinimg.com/736x/50/96/e7/5096e746d19b9c407089dfd220471bbe.jpg" class="w-5 h-5" />
+        <span>Sign in with Google</span>
+      </a>
+
+      <p class="text-center text-sm mt-4">Already have an account? 
+        <a href="login" class="text-blue-500 hover:underline">Sign in</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const firstnameid = document.getElementById('firstname');
+    const secondnameid = document.getElementById('secondname');
+    const emailid = document.getElementById('email');
+    const phoneid = document.getElementById('phone');
+    const passwordid = document.getElementById('password');
+    const cpasswordid = document.getElementById('confirmPassword');
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const error3 = document.getElementById('error3');
+    const error4 = document.getElementById('error4');
+    const error5 = document.getElementById('error5');
+    const error6 = document.getElementById('error6');
+    const signform = document.getElementById('signform');
+
+    function firstnameValidateChecking() {
+      const firstval = firstnameid.value;
+      const firstnamePattern = /^[A-Za-z]{2,25}$/;
+      if (firstval.trim() === "") {
+        error1.style.display = 'block';
+        error1.innerHTML = 'Please enter a valid Firstname';
+      } else if (!firstnamePattern.test(firstval)) {
+        error1.style.display = 'block';
+        error1.innerHTML = 'Name can only contain alphabets';
+      } else {
+        error1.style.display = 'none';
+        error1.innerHTML = '';
+      }
+    }
+
+    function secondnameValidateChecking() {
+      const secondval = secondnameid.value;
+      const secondnamePattern = /^[A-Za-z]{1,25}$/;
+      if (secondval.trim() === "") {
+        error2.style.display = 'block';
+        error2.innerHTML = 'Please enter a valid second name';
+      } else if (!secondnamePattern.test(secondval)) {
+        error2.style.display = 'block';
+        error2.innerHTML = 'Second name must be alphabetic';
+      } else {
+        error2.style.display = 'none';
+        error2.innerHTML = '';
+      }
+    }
+
+    function emailValidateChecking() {
+      const emailval = emailid.value;
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (emailval.trim() === "") {
+        error3.style.display = 'block';
+        error3.innerHTML = 'Email cannot be empty';
+      } else if (!emailPattern.test(emailval)) {
+        error3.style.display = 'block';
+        error3.innerHTML = 'Invalid email format';
+      } else {
+        error3.style.display = 'none';
+        error3.innerHTML = '';
+      }
+    }
+
+    function phoneValidateChecking() {
+      const phoneval = phoneid.value;
+      if (phoneval.trim() === "") {
+        error4.style.display = 'block';
+        error4.innerHTML = 'Enter a valid phone number';
+      } else if (phoneval.length !== 10 || isNaN(phoneval)) {
+        error4.style.display = 'block';
+        error4.innerHTML = 'Enter exactly 10 digits';
+      } else {
+        error4.style.display = 'none';
+        error4.innerHTML = '';
+      }
+    }
+
+    function passwordValidateChecking() {
+      const passval = passwordid.value;
+      const cpassval = cpasswordid.value;
+      const alpha = /[a-zA-Z]/;
+      const digit = /\d/;
+
+      if (passval.length < 8) {
+        error5.style.display = 'block';
+        error5.innerHTML = 'Should contain at least 8 characters';
+      } else if (!alpha.test(passval) || !digit.test(passval)) {
+        error5.style.display = 'block';
+        error5.innerHTML = 'Should contain letters and numbers';
+      } else {
+        error5.style.display = 'none';
+        error5.innerHTML = '';
+      }
+
+      if (passval !== cpassval) {
+        error6.style.display = 'block';
+        error6.innerHTML = 'Passwords do not match';
+      } else {
+        error6.style.display = 'none';
+        error6.innerHTML = '';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      signform.addEventListener('submit', function (e) {
+        firstnameValidateChecking();
+        secondnameValidateChecking();
+        emailValidateChecking();
+        phoneValidateChecking();
+        passwordValidateChecking();
+
+        if (
+          error1.innerHTML ||
+          error2.innerHTML ||
+          error3.innerHTML ||
+          error4.innerHTML ||
+          error5.innerHTML ||
+          error6.innerHTML
+        ) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+
+  <% if (typeof emailExists !== 'undefined' && emailExists) { %>
+    <script>
+      Swal.fire({
+        icon: 'warning',
+        title: 'Email Already Registered',
+        text: 'Please try logging in or use another email.',
+        confirmButtonColor: '#f97316'
+      });
+    </script>
+  <% } %>
+
+  <% if (typeof phoneExists !== 'undefined' && phoneExists) { %>
+    <script>
+      Swal.fire({
+        icon: 'warning',
+        title: 'Phone Number Already Used',
+        text: 'Please use a different phone number.',
+        confirmButtonColor: '#f97316'
+      });
+    </script>
+  <% } %>
+</body>
+</html>

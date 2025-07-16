@@ -1,0 +1,322 @@
+<%- include('../../views/partials/user/header') %>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 50px;
+      margin-top: 100px;
+    }
+    /* Pagination Styles */
+.pagination {
+  margin-top: 30px;
+}
+
+.page-item.active .page-link {
+  background-color: #ff4646;
+  border-color: #ff4646;
+}
+
+.page-link {
+  color: #ff4646;
+}
+
+.page-link:hover {
+  color: #ff4646;
+  background-color: #f8f9fa;
+}
+   
+.address-card {
+  transition: all 0.3s ease;
+}
+
+.address-card.border-danger {
+  border: 2px solid #ff4646 !important;
+  box-shadow: 0 0 15px rgba(255, 70, 70, 0.1);
+}
+
+.badge.bg-danger {
+  background-color: #ff4646 !important;
+}
+
+    .sidebar {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .sidebar .nav-link {
+      color: #333;
+      font-weight: 500;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background-color: #ff4646;
+      color: #fff;
+    }
+
+    .address-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    .address-actions {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn-outline-danger {
+      border-color: #ff4646;
+      color: #ff4646;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: #ff4646;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background-color: #ff4646;
+      border-color: #ff4646;
+    }
+
+    .btn-danger:hover {
+      background-color: #e64545;
+    }
+
+    .badge-default {
+      background-color: #ff4646;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        margin-bottom: 20px;
+      }
+    }
+
+    .address-container{
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 500;
+    color: #989898;
+    margin-bottom: 4px;
+    word-wrap: break-word;      
+  overflow-wrap: break-word; 
+  white-space: normal;        
+    }
+    .profile-pic{
+      width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+    
+
+  </style>
+</head>
+<body>
+
+<div class="container my-4 px-3 px-md-4">
+  <div class="row g-4 flex-column flex-md-row">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+      <div class="sidebar">
+        <div class="text-center mb-3">
+            <img src="<%= user?.profileImage %>" class="profile-pic" alt="User">
+          <h6 class="mt-2 mb-0">Welcome,<%=user.firstname%></h6>
+          <small class="text-muted"><%=user.email%></small>
+        </div>
+        <nav class="nav flex-column">
+           <a class="nav-link " href="user-profile"><i class="fas fa-gauge me-2"></i> Dashboard</a>
+          <a class="nav-link " href="edit-profile"><i class="fas fa-user-edit me-2"></i> Edit Profile</a>
+          <a class="nav-link" href="view-orders"><i class="fas fa-box me-2"></i> My Orders</a>
+          <a class="nav-link active " href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
+          <a class="nav-link" href="#"><i class="fas fa-wallet me-2"></i> My Wallet</a>
+          <!-- <a class="nav-link" href="#"><i class="fas fa-key me-2"></i> Change Password</a> -->
+
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">My Addresses</h4>
+        <a href="/add-address" class="btn btn-danger btn-sm"><i class="fas fa-plus me-1"></i> Add New Address</a>
+      </div>
+
+      <div class="row g-3">
+        <!-- Address Card -->
+    <div class="row" style="margin-top: 50px;">
+  <% if (addressData.addresses.length === 0) { %>
+    <p>No addresses found.</p>
+  <% } %>
+
+  <% addressData.addresses.forEach((addr, i) => { %>
+  <div class="col-md-6 mb-4">
+    <div class="address-card p-3 border rounded shadow-sm <%= addr.isDefault ? 'border-danger' : '' %>">
+      <div class="d-flex justify-content-end mb-2 gap-2">
+  <% if (!addr.isDefault) { %>
+    <form action="/set-default-address/<%= i %>" method="POST" class="d-inline set-default-form">
+      <button type="submit" class="btn btn-sm btn-outline-danger" title="Set as Default">
+        <i class="fas fa-star"></i>
+      </button>
+    </form>
+  <% } else { %>
+    <span class="badge bg-danger d-flex align-items-center gap-1">
+      <i class="fas fa-star"></i> Default
+    </span>
+  <% } %>
+  
+          <!-- Edit Button -->
+         <a href="/edit-address/<%= i %>" class="btn btn-sm btn-outline-primary" title="Edit">
+  <i class="fas fa-pen"></i>
+</a>
+
+
+          <!-- Delete Button -->
+ <form id="deleteForm-<%= addr._id %>" action="/address-dlt" method="POST" class="d-inline">
+  <input type="hidden" name="addressId" value="<%= addr._id %>">
+  <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Delete" data-form-id="deleteForm-<%= addr._id %>">
+    <i class="fas fa-trash"></i>
+  </button>
+</form>
+        </div>
+
+        <h6 class="mb-1">
+          <%= addr.firstName %> <%= addr.lastName %>
+        </h6>
+        <div class="address-container">
+          <%= addr.address %>
+          <%= addr.city %>
+          <%= addr.state %> - <%= addr.pinCode %> 
+        </div>
+        <p class="mb-1">
+          Phone: <%= addr.phone %>
+        </p>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+
+       
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Pagination -->
+<% if (totalPages > 1) { %>
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="/user-address?page=<%= currentPage - 1 %>" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      <% } %>
+      
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" href="/user-address?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+      
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="/user-address?page=<%= currentPage + 1 %>" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      <% } %>
+    </ul>
+  </nav>
+<% } %>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle all delete buttons
+    document.querySelectorAll('.delete-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const formId = this.getAttribute('data-form-id');
+        
+        Swal.fire({
+          title: 'Delete Address?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ff4646',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            document.getElementById(formId).submit();
+          }
+        });
+      });
+    });
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+  // Handle all delete buttons
+  document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const formId = this.getAttribute('data-form-id');
+      
+      Swal.fire({
+        title: 'Delete Address?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ff4646',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById(formId).submit();
+        }
+      });
+    });
+  });
+
+  // NEW: Handle set default address buttons
+  document.querySelectorAll('form[action^="/set-default-address"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent immediate form submission
+      
+      Swal.fire({
+        title: 'Set as Default Address?',
+        text: "This will replace your current default shipping address",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff4646',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, set as default'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit(); // Submit the form if confirmed
+        }
+      });
+    });
+  });
+});
+</script>
+
+
+<%- include('../../views/partials/user/footer') %>

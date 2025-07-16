@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Add Product</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+
+
+  <style>
+    :root {
+      --sidebar-bg: #2c3e50;
+      --sidebar-hover: #34495e;
+      --topbar-bg: #ffffff;
+      --content-bg: #f8f9fa;
+      --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--content-bg);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background-color: var(--sidebar-bg);
+      width: 250px;
+      height: 100vh;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      z-index: 1000;
+    }
+
+    .sidebar h2 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      padding: 0 20px 20px;
+      margin: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar .nav-link {
+      color: rgba(255,255,255,0.8);
+      padding: 10px 20px;
+      margin: 5px 0;
+      font-weight: 500;
+      border-radius: 0;
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link:hover, 
+    .sidebar .nav-link.active {
+      color: white;
+      background-color: var(--sidebar-hover);
+      border-left: 3px solid #ffffff;
+    }
+
+    .sidebar .nav-link i {
+      width: 24px;
+      text-align: center;
+      margin-right: 10px;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .image-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .image-preview img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .image-preview .remove-img {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #e74c3c;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .topbar {
+      height: 60px;
+      background-color: var(--topbar-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .content {
+      margin-top: 20px;
+      padding: 25px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .btn-logout {
+      background-color: #e74c3c;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background-color: #c0392b;
+      transform: translateY(-1px);
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      .main {
+        margin-left: 0;
+      }
+      .accordion-button {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+      }
+      .form-control,
+      .form-select {
+        font-size: 0.9rem;
+      }
+      .image-preview img {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <h2>RingZone</h2>
+    <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+     <a href="/admin/productlist" class="nav-link"><i class="fas fa-box-open"></i> Products</a>
+   <a href="/admin/orders-list" class="nav-link"><i class="fas fa-receipt"></i> Order Lists</a>
+    <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a>
+    <a href="/admin/brands" class="nav-link"><i class="fas fa-briefcase"></i> Brands</a>
+    <a href="/admin/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales</a>
+    <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
+    <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Categories</a>
+    <a href="/admin/Banner" class="nav-link"><i class="fas fa-image"></i> Banners</a>
+    <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
+    <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <h1 class="m-0 fs-4 text-dark">Add New Product</h1>
+      <div>
+       
+        <a href="/admin/logout" class="btn-logout text-white">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+      </div>
+    </div>
+    <!-- Product Form -->
+    <div class="container mt-5">
+      <a href="/admin/productlist" class=" ms-3">Back</a>
+      <div class="alert alert-danger" id="errorAlert" style="display: none;"></div>
+      <div class="alert alert-success" id="successAlert" style="display: none;"></div>
+      
+      <div class="content">
+        <h2 class="mb-4">Add Product</h2>
+      <form id="productForm" action="/admin/addProduct" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="variants" id="variantsData">
+          
+          <div class="mb-3">
+            <label for="productName" class="form-label">Product Name</label>
+            <input type="text" id="productName" class="form-control" name="productName" required>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="brand" class="form-label">Brand</label>
+              <select id="brand" class="form-select" name="brand" required>
+                <option value="">-- Select Brand --</option>
+                <% brands.forEach(function(brand) { %>
+                <option value="<%= brand._id %>"><%= brand.brandName %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="category" class="form-label">Category</label>
+              <select id="category" class="form-select" name="category" required>
+                <option value="">-- Select Category --</option>
+                <% categories.forEach(function(category) { %>
+                <option value="<%= category._id %>"><%= category.name %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="description" class="form-label">Product Description</label>
+            <textarea id="description" class="form-control" name="description" rows="4" required></textarea>
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label">Product Images (Max 5)</label>
+            <input type="file" class="form-control" id="productImages" accept="image/*" multiple 
+                   onchange="handleImageUpload(event, 'product')" />
+            <small class="text-muted">First image will be used as the main product image</small>
+            <div class="image-preview mt-2" id="productPreview"></div>
+          </div>
+
+          <div id="variantAccordionArea" class="mb-3"></div>
+          
+          <div class="text-end mb-4">
+            <button type="button" class="btn btn-warning" onclick="addVariantAccordion()">
+              <i class="fas fa-plus me-2"></i>Add Variant
+            </button>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button type="reset" class="btn btn-secondary" onclick="resetForm()">
+              <i class="fas fa-undo me-2"></i>Reset Form
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Save Product
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Cropping Modal -->
+  <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Crop Image</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="img-container">
+            <img id="cropperImage" style="max-width: 100%;" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="cropImage()">Crop & Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+  <script>
+    // Global variables
+    let cropper;
+    let currentUploadType = "";
+    let currentVariantIndex = null;
+    const uploadedImages = {
+      product: [],
+      variant: {}
+    };
+    let variantCount = 0;
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('productForm');
+      if (form) {
+        form.addEventListener('submit', handleFormSubmit);
+      }
+    });
+
+    // Reset form completely
+    function resetForm() {
+      document.getElementById('productForm').reset();
+      document.getElementById('productPreview').innerHTML = '';
+      document.getElementById('variantAccordionArea').innerHTML = '';
+      uploadedImages.product = [];
+      uploadedImages.variant = {};
+      variantCount = 0;
+    }
+
+    // Handle form submission
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      // Validate required fields
+      if (!validateForm()) return;
+      
+      // Show loading overlay
+      document.getElementById('loadingOverlay').style.display = 'flex';
+      
+      try {
+        // Gather all variant data
+        const variants = gatherVariantData();
+        document.getElementById('variantsData').value = JSON.stringify(variants);
+        
+        // Create and submit FormData
+        const formData = createFormData();
+        const response = await submitForm(formData);
+        
+        if (response.success) {
+          showSuccess('Product added successfully!');
+          setTimeout(resetForm, 2000);
+        } else {
+          showError(response.message || 'Error adding product');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'An error occurred while submitting the form');
+      } finally {
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }
+    }
+
+    function validateForm() {
+      const productName = document.getElementById('productName').value;
+      const brand = document.getElementById('brand').value;
+      const category = document.getElementById('category').value;
+      const description = document.getElementById('description').value;
+      
+      if (!productName || !brand || !category || !description) {
+        showError('Please fill all required fields');
+        return false;
+      }
+      
+      if (uploadedImages.product.length === 0) {
+        showError('Please upload at least one product image');
+        return false;
+      }
+      
+      const accordions = document.querySelectorAll('.accordion-item');
+      if (accordions.length === 0) {
+        showError('Please add at least one variant');
+        return false;
+      }
+      
+      return true;
+    }
+function gatherVariantData() {
+  const variants = [];
+  const accordions = document.querySelectorAll('.accordion-item');
+  
+  accordions.forEach((accordion, index) => {
+    const variantId = accordion.id;  // <--- FIXED HERE
+    const variant = {
+      color: accordion.querySelector('[name="color"]').value,
+      storage: accordion.querySelector('[name="storage"]').value,
+      regularPrice: parseFloat(accordion.querySelector('[name="regularPrice"]').value),
+      discountPrice: parseFloat(accordion.querySelector('[name="discountPrice"]').value),
+      quantity: parseInt(accordion.querySelector('[name="quantity"]').value),
+      images: uploadedImages.variant[variantId] || []
+    };
+    
+    if (!variant.color || !variant.storage || isNaN(variant.regularPrice) || isNaN(variant.quantity)) {
+      throw new Error(`Please fill all required fields for Variant ${index + 1}`);
+    }
+    
+    if (variant.images.length === 0) {
+      throw new Error(`Please upload at least one image for Variant ${index + 1}`);
+    }
+    
+    variants.push(variant);
+  });
+
+  return variants;
+}
+
+
+    function createFormData() {
+      const formData = new FormData(document.getElementById('productForm'));
+      
+      // Append product images
+      uploadedImages.product.forEach((imgData, index) => {
+        const file = dataURLtoFile(imgData, `product-${index}.jpg`);
+        formData.append('productImages', file);
+      });
+      
+      // Append variant images
+      for (const [variantId, images] of Object.entries(uploadedImages.variant)) {
+        images.forEach((imgData, index) => {
+          const file = dataURLtoFile(imgData, `variant-${variantId}-${index}.jpg`);
+          formData.append(`variantImages-${variantId}`, file);
+        });
+      }
+      
+      return formData;
+    }
+
+    async function submitForm(formData) {
+      const response = await fetch('/admin/addproduct', {
+        method: 'POST',
+        body: formData
+      });
+      return await response.json();
+    }
+
+    function handleImageUpload(event, type, variantId = null) {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      
+      currentUploadType = type;
+      if (type === 'variant') {
+        currentVariantIndex = variantId;
+        if (!uploadedImages.variant[variantId]) {
+          uploadedImages.variant[variantId] = [];
+        }
+      }
+      
+      const maxImages = 5;
+      let currentCount = type === 'product' ? 
+        uploadedImages.product.length : 
+        uploadedImages.variant[variantId].length;
+      
+      if (currentCount + files.length > maxImages) {
+        showError(`Maximum ${maxImages} images allowed. You can add ${maxImages - currentCount} more.`);
+        event.target.value = '';
+        return;
+      }
+      
+      const file = files[0];
+      const reader = new FileReader();
+      
+      reader.onload = () => {
+        document.getElementById('cropperImage').src = reader.result;
+        const modal = new bootstrap.Modal(document.getElementById('cropModal'));
+        modal.show();
+        
+        setTimeout(() => {
+          if (cropper) cropper.destroy();
+          cropper = new Cropper(document.getElementById('cropperImage'), {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 0.8,
+            responsive: true,
+            guides: false
+          });
+        }, 200);
+      };
+      
+      reader.readAsDataURL(file);
+    }
+
+    function cropImage() {
+      const canvas = cropper.getCroppedCanvas({
+        width: 800,
+        height: 800,
+        minWidth: 400,
+        minHeight: 400,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        fillColor: '#fff',
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+      
+      if (!canvas) {
+        showError('Could not crop image. Please try again.');
+        return;
+      }
+      
+      const imageUrl = canvas.toDataURL('image/jpeg', 0.9);
+      
+      if (currentUploadType === 'product') {
+        uploadedImages.product.push(imageUrl);
+        addImageToPreview(imageUrl, 'productPreview');
+      } else if (currentUploadType === 'variant' && currentVariantIndex) {
+        uploadedImages.variant[currentVariantIndex].push(imageUrl);
+        addImageToPreview(imageUrl, `variantPreview-${currentVariantIndex}`);
+      }
+      
+      cropper.destroy();
+      cropper = null;
+      bootstrap.Modal.getInstance(document.getElementById('cropModal')).hide();
+      
+      const fileInput = document.querySelector(`input[type="file"][data-variant="${currentVariantIndex}"]`) || 
+                       document.getElementById('productImages');
+      if (fileInput) fileInput.value = '';
+    }
+
+    function addImageToPreview(imageUrl, previewId) {
+      const previewDiv = document.getElementById(previewId);
+      if (!previewDiv) return;
+      
+      const imgContainer = document.createElement('div');
+      imgContainer.style.position = 'relative';
+      imgContainer.style.display = 'inline-block';
+      imgContainer.style.margin = '5px';
+      
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.style.width = '120px';
+      img.style.height = '120px';
+      img.style.objectFit = 'cover';
+      img.style.border = '2px solid #ddd';
+      img.style.borderRadius = '8px';
+      
+      const removeBtn = document.createElement('span');
+      removeBtn.className = 'remove-img';
+      removeBtn.innerHTML = '×';
+      removeBtn.onclick = function() {
+        removeImage(imageUrl, currentUploadType, currentVariantIndex);
+        imgContainer.remove();
+      };
+      
+      imgContainer.appendChild(img);
+      imgContainer.appendChild(removeBtn);
+      previewDiv.appendChild(imgContainer);
+    }
+
+    function removeImage(imageUrl, type, variantId = null) {
+      if (type === 'product') {
+        uploadedImages.product = uploadedImages.product.filter(img => img !== imageUrl);
+      } else if (type === 'variant' && variantId) {
+        uploadedImages.variant[variantId] = uploadedImages.variant[variantId].filter(img => img !== imageUrl);
+      }
+    }
+
+    function addVariantAccordion() {
+      variantCount++;
+      const accordionId = `variant-${variantCount}`;
+      uploadedImages.variant[accordionId] = [];
+      
+      const html = `
+        <div class="accordion-item mb-3" id="${accordionId}">
+          <h2 class="accordion-header" id="heading-${accordionId}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#collapse-${accordionId}" aria-expanded="false" 
+                    aria-controls="collapse-${accordionId}">
+              Variant ${variantCount}
+            </button>
+          </h2>
+          <div id="collapse-${accordionId}" class="accordion-collapse collapse" 
+               aria-labelledby="heading-${accordionId}" data-bs-parent="#variantAccordion">
+            <div class="accordion-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="color-${accordionId}" class="form-label">Color</label>
+                  <input type="text" id="color-${accordionId}" class="form-control" name="color" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="storage-${accordionId}" class="form-label">Storage</label>
+                  <select id="storage-${accordionId}" class="form-select" name="storage" required>
+                    <option value="">-- Select Storage --</option>
+                    <option value="32GB">32GB</option>
+                    <option value="64GB">64GB</option>
+                    <option value="128GB">128GB</option>
+                    <option value="256GB">256GB</option>
+                    <option value="512GB">512GB</option>
+                    <option value="1TB">1TB</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="form-label">Variant Images (Max 5)</label>
+                <input type="file" class="form-control" accept="image/*" multiple
+                       data-variant="${accordionId}"
+                       onchange="handleImageUpload(event, 'variant', '${accordionId}')" />
+                <div class="image-preview mt-2" id="variantPreview-${accordionId}"></div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Regular Price (₹)</label>
+                  <input type="number" class="form-control" name="regularPrice" min="0" step="0.01" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Discount Price (₹)</label>
+                  <input type="number" class="form-control" name="discountPrice" min="0" step="0.01">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Quantity</label>
+                  <input type="number" class="form-control" name="quantity" min="0" required>
+                </div>
+              </div>
+              
+              <button type="button" class="btn btn-danger btn-sm" 
+                      onclick="removeVariant('${accordionId}')">
+                <i class="fas fa-trash me-1"></i> Remove Variant
+              </button>
+            </div>
+          </div>
+        </div>`;
+      
+      const container = document.getElementById('variantAccordionArea');
+      if (!container.querySelector('.accordion')) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'accordion';
+        wrapper.id = 'variantAccordion';
+        wrapper.innerHTML = html;
+        container.appendChild(wrapper);
+      } else {
+        container.querySelector('.accordion').insertAdjacentHTML('beforeend', html);
+      }
+      
+      new bootstrap.Collapse(document.getElementById(`collapse-${accordionId}`));
+    }
+
+    function removeVariant(accordionId) {
+      if (confirm('Are you sure you want to remove this variant?')) {
+        const variantElement = document.getElementById(accordionId);
+        if (variantElement) {
+          variantElement.remove();
+          delete uploadedImages.variant[accordionId];
+          variantCount--;
+        }
+      }
+    }
+
+    function dataURLtoFile(dataurl, filename) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      
+      return new File([u8arr], filename, { type: mime });
+    }
+
+   function showError(message) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Oops...',
+    text: message
+  });
+}
+    function showSuccess(message) {
+  Swal.fire({
+    icon: 'success',
+    title: 'Success!',
+    text: message,
+    showConfirmButton: false,
+    timer: 2500
+  });
+}
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

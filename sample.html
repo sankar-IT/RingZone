@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coupon Management</title>
+  <style>
+    :root {
+      --accent: #ff4646;
+      --bg: #f9f9f9;
+      --white: #fff;
+      --text: #333;
+      --gray: #ddd;
+      --light-text: #777;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      color: var(--accent);
+      margin-bottom: 25px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .filters select,
+    .filters input[type="text"] {
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .filters label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-add {
+      background-color: var(--accent);
+      color: white;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .coupon-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray);
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #fafafa;
+    }
+
+    .status {
+      background-color: var(--accent);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      display: inline-block;
+    }
+
+    .action-buttons button {
+      margin-right: 6px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .edit-btn {
+      background-color: #ffa500;
+      color: #fff;
+    }
+
+    .deactivate-btn {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 500px;
+      max-width: 90%;
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .modal-content label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 500;
+    }
+
+    .modal-content input,
+    .modal-content select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .modal-content input[type="checkbox"] {
+      width: auto;
+    }
+
+    .modal-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      background-color: #ccc;
+      color: #333;
+    }
+
+    .btn-save {
+      background-color: var(--accent);
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Coupon Management</h2>
+
+    <div class="filters">
+      <select>
+        <option>All Coupons</option>
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+
+      <select>
+        <option>All Users</option>
+        <option>Premium</option>
+        <option>VIP</option>
+      </select>
+
+      <label><input type="checkbox"> Show Expired</label>
+      <input type="text" placeholder="Search coupon codes...">
+      <button class="btn">🔍</button>
+      <button class="btn">Reset</button>
+    </div>
+
+    <button class="btn btn-add" onclick="document.getElementById('addCouponModal').style.display='flex'">+ Add Coupon</button>
+
+    <div class="coupon-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Coupon Code</th>
+            <th>Discount</th>
+            <th>User Type</th>
+            <th>Min Order</th>
+            <th>Usage</th>
+            <th>Expires</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1234</td>
+            <td>60% OFF (max: ₹200)</td>
+            <td>All Users</td>
+            <td>₹200.00</td>
+            <td>0/1</td>
+            <td>2025-07-16</td>
+            <td><span class="status">Active</span></td>
+            <td class="action-buttons">
+              <button class="edit-btn">Edit</button>
+              <button class="deactivate-btn">Deactivate</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="addCouponModal" class="modal">
+    <div class="modal-content">
+      <h3>Add Coupon</h3>
+      <form>
+        <label>Coupon Code</label>
+        <input type="text" name="couponCode">
+
+        <label>Discount Percentage</label>
+        <input type="text" name="discountPercent">
+
+        <label>Max Discount Amount</label>
+        <input type="text" name="maxDiscount">
+
+        <label>Minimum Order Amount</label>
+        <input type="text" name="minOrder">
+
+        <label>Maximum Usage Count</label>
+        <input type="text" name="maxUsage">
+
+        <label>User Type</label>
+        <select>
+          <option>All Users</option>
+          <option>Premium</option>
+          <option>VIP</option>
+        </select>
+
+        <label>Expiry Date</label>
+        <input type="date" name="expiryDate">
+
+        <label><input type="checkbox" name="active"> Active</label>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-cancel" onclick="document.getElementById('addCouponModal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn btn-save">Save Coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('addCouponModal');
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+  </script>
+
+</body>
+</html>

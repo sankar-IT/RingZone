@@ -1,0 +1,492 @@
+<%- include('../../views/partials/user/header') %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  :root {
+    --brand: #ff4646;
+    --brand-light: #ffecec;
+  }
+
+  body {
+   margin-top: 180px;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .container {
+    max-width: 1300px;
+    margin: auto;
+  }
+
+  .order-details-container {
+    padding: 0 5px 5px;
+  }
+
+  .product-item {
+    width: auto;
+    height: auto;
+  }
+
+  .order-summary-card,
+  .products-list,
+  .price-summary {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .order-summary-card {
+    border-left: 4px solid var(--brand);
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+
+  .order-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--brand);
+    margin: 0;
+  }
+
+  .order-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .status-processing { background-color: #089ae9; color: #fffffe; border-radius: 20px; width: 100px; text-align: center; }
+  .status-shipped { background-color: #0674e9; color: #f9fafb; border-radius: 20px; width: 100px; text-align: center;  }
+  .status-delivered { background-color: #f0c507; color: #f2f5f3; border-radius: 20px; width: 100px; text-align: center;  }
+  .status-cancelled { background-color: #ff0a1e; color: #f9f5f5; border-radius: 20px; width: 100px; text-align: center;  }
+  .status-confirmed { background-color: #0aeb1c; color: #f5f3f4; border-radius: 20px; width: 100px; text-align: center;  }
+  .status-pending { background-color: #a0eb0a; color: #f5f3f4; border-radius: 20px; width: 100px; text-align: center;  }
+   .status-Returned { background-color: #e60f97; color: #f5f3f4; border-radius: 20px; width: 100px; text-align: center;  }
+    .status-Return-Requested { background-color: #5ca10d; color: #f5f3f4; border-radius: 20px; width: 100px; text-align: center;  }
+  
+
+  .order-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.9rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .meta-label {
+    font-weight: 500;
+    color: #555;
+  }
+
+  .meta-value {
+    color: #333;
+  }
+
+  .product-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr 1fr 1fr;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+  }
+.bg-warning { background-color: #ffc107; color: #000; }
+.bg-success { background-color: #28a745; color: #fff; }
+.bg-danger { background-color: #dc3545; color: #fff; }
+
+  .product-item:last-child {
+    border-bottom: none;
+  }
+
+  .product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+  .return-btn {
+  border: 1px solid #ff4646;
+  color: #ff4646;
+  background-color: transparent;
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+}
+.return-btn:hover {
+  background-color: #ff4646;
+  color: white;
+}
+
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+  }
+
+  .product-name {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .product-variant {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .product-price {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #222;
+  }
+
+  .action-col {
+    text-align: right;
+  }
+
+  .cancel-btn {
+    border: 1px solid var(--brand);
+    color: var(--brand);
+    background-color: transparent;
+    padding: 5px 12px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .cancel-btn:hover {
+    background-color: var(--brand);
+    color: white;
+  }
+
+  .cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.95rem;
+  }
+
+  .price-total {
+    font-weight: 700;
+    color: var(--brand);
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .invoice-btn,
+  .back-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: white;
+  }
+  
+  .product-item:hover::after{
+    box-shadow: none;
+    border: none;
+  }
+
+  .invoice-btn {
+    background-color: var(--brand);
+  }
+
+  .invoice-btn:hover {
+    background-color: #e63e3e;
+  }
+
+  .back-btn {
+    background-color: #6c757d;
+  }
+
+  .back-btn:hover {
+    background-color: #5a6268;
+  }
+
+  @media (max-width: 768px) {
+    .product-item {
+      grid-template-columns: 1fr;
+      text-align: left;
+    }
+
+    .action-col {
+      text-align: left;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+
+<body>
+  <div class="container">
+    <div class="order-details-container">
+      <div class="order-summary-card">
+        <div class="order-header">
+          <h1 class="order-title"><%=order.orderId%></h1>
+          <div class="order-status status-<%= order.status.toLowerCase() %>">
+            <%= order.status %>
+          </div>
+        </div>
+        
+        <div class="order-meta">
+          <div class="meta-item">
+            <span class="meta-label"><i class="far fa-calendar-alt"></i> Date:</span>
+            <span class="meta-value"><%=order.createdOn%></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="products-list">
+        <% if (order.orderedItems.length > 0) { %>
+          <% order.orderedItems.forEach(item => { %>
+            <div class="product-item">
+              <img src="/<%= item.product.images[0] %>" class="product-image" alt="Product Image">
+              <div class="product-info">
+                <div class="product-name"><%= item.product.productName %></div>
+                <div class="product-variant"><%= item.variant.color %>, <%= item.variant.storage %></div>
+              </div>
+              <div class="product-price">₹<%= item.price %></div>
+              <div class="order-status status-<%= item.status ? item.status.toLowerCase() : order.status.toLowerCase() %>">
+                <%= item.status || order.status %>
+              </div>
+             <div class="action-col">
+  <% if (item.status === 'Delivered') { %>
+    <button class="return-btn" 
+      data-order-id="<%= order._id %>" 
+      data-item-id="<%= item._id %>">
+      Return Order
+    </button>
+  <% } else if (item.status === 'Return Requested') { %>
+    <span class="badge bg-warning">Return Requested</span>
+  <% } else if (item.status === 'Return Approved') { %>
+    <span class="badge bg-success">Return Approved</span>
+  <% } else if (item.status === 'Return Rejected') { %>
+    <span class="badge bg-danger">Return Rejected</span>
+  <% } else if (item.status === 'Cancelled' || order.status === 'Cancelled') { %>
+    <button class="cancel-btn" disabled>Cancelled</button>
+  <% } else if (order.status == 'Pending') { %>
+    <button class="cancel-btn" 
+      data-order-id="<%= order._id %>" 
+      data-item-id="<%= item._id %>">
+      Cancel
+    </button>
+  <% } else { %>
+    <button class="cancel-btn" disabled>Cannot Cancel</button>
+  <% } %>
+</div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <div class="price-summary">
+  <div class="price-row">
+    <span>Subtotal:</span>
+    <span>₹<%= order.totalPrice %></span>
+  </div>
+
+  <div class="price-row">
+    <span>Discount:</span>
+    <span>- ₹<%= order.coupon.discountAmount %></span>
+  </div>
+
+  <div class="price-row">
+    <span>Shipping:</span>
+    <span>₹<%= order.shipping %></span>
+  </div>
+
+  <div class="price-row price-total fw-bold border-top pt-2 mt-2">
+    <span>Total:</span>
+    <span>₹<%= order.finalAmount %></span>
+  </div>
+</div>
+
+      <div class="action-buttons">
+        <button class="back-btn" onclick="window.history.back()">
+          <i class="fas fa-arrow-left me-1"></i> Back
+        </button>
+       <button class="invoice-btn" 
+  onclick="window.location.href='/download-invoice/<%= order._id %>'" 
+  <%= order.status === 'Cancelled' ? 'disabled' : '' %>>
+  <i class="fas fa-file-invoice me-1"></i> Invoice
+</button>
+
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="returnModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Return Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="returnForm">
+          <input type="hidden" id="returnOrderId">
+          <input type="hidden" id="returnItemId">
+          <div class="mb-3">
+            <label class="form-label">Reason for return</label>
+            <textarea class="form-control" id="returnReason" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.querySelector('.invoice-btn')?.addEventListener('click', function() {
+      alert('Invoice download would start here');
+    });
+
+    document.querySelectorAll('.cancel-btn:not(:disabled)').forEach(button => {
+  button.addEventListener('click', async function() {
+    const productName = this.closest('.product-item').querySelector('.product-name').textContent;
+    const orderId = this.dataset.orderId;
+    const itemId = this.dataset.itemId;
+
+    // Replace confirm() with SweetAlert2
+    const result = await Swal.fire({
+      title: `Cancel ${productName}?`,
+      text: "Are you sure you want to cancel this item?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, cancel it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        this.disabled = true;
+        this.textContent = 'Confirmed';
+
+        const response = await fetch(`/cancel-item/${orderId}/${itemId}`, {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Cancelled!',
+            text: data.message || 'Item cancelled successfully',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          window.location.reload();
+        } else {
+          throw new Error(data.message || 'Failed to cancel item');
+        }
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+        });
+        this.disabled = false;
+        this.textContent = 'Cancel';
+      }
+    }
+  });
+});
+// Return button click handler
+document.querySelectorAll('.return-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const orderId = this.dataset.orderId;
+    const itemId = this.dataset.itemId;
+    
+    // Set the hidden fields
+    document.getElementById('returnOrderId').value = orderId;
+    document.getElementById('returnItemId').value = itemId;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('returnModal'));
+    modal.show();
+  });
+});
+
+// Form submission handler
+document.getElementById('returnForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const orderId = document.getElementById('returnOrderId').value;
+  const itemId = document.getElementById('returnItemId').value;
+  const reason = document.getElementById('returnReason').value;
+  
+  try {
+    const response = await fetch('/request-return', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        orderId,
+        itemId, 
+        reason
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Return Requested!',
+        text: 'Your return request has been submitted',
+        timer: 2000
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message
+    });
+  }
+});
+
+  </script>
+</body>
+<%- include('../../views/partials/user/footer') %>

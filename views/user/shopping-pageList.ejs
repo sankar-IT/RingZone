@@ -1,0 +1,409 @@
+<%- include('../../views/partials/user/header') %>
+<%
+function buildFilterUrl(newParams) {
+  const params = {
+    brand: typeof selectedBrand !== 'undefined' && selectedBrand ? selectedBrand : undefined,
+    category: typeof selectedCategory !== 'undefined' && selectedCategory ? selectedCategory : undefined,
+    gt: typeof gt !== 'undefined' && gt ? gt : undefined,
+    lt: typeof lt !== 'undefined' && lt ? lt : undefined,
+    search: typeof search !== 'undefined' && search ? search : undefined,
+    sort: typeof sort !== 'undefined' && sort ? sort : undefined,
+    page: typeof currentPage !== 'undefined' && currentPage ? currentPage : undefined,
+    ...newParams
+  };
+  const query = Object.entries(params)
+    .filter(([k, v]) => typeof v !== 'undefined' && v !== null && v !== '')
+    .map(([k, v]) => `${k}=${v}`)
+    .join('&');
+  return '/shopping-pageList?' + query;
+}
+%>
+
+
+<style>
+body {
+  background: #f7f7f7;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+}
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.product-list-page {
+  display: flex;
+  max-width: 1200px;
+  margin: 40px auto 0 auto;
+  gap: 32px;
+  padding: 0 16px;
+  margin-top: 120px;
+  align-items: flex-start;
+}
+
+.sidebar {
+  width: 250px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  flex-shrink: 0;
+  padding-inline: 30px;
+}
+.sidebar h2 {
+  margin-top: 0;
+  color: #ff4646;
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+.filter-group {
+  margin-bottom: 24px;
+}
+.filter-group h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1em;
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar li {
+  margin-bottom: 8px;
+}
+.sidebar a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1em;
+  transition: color 0.2s;
+}
+.sidebar a:hover {
+  color: #1e918b;
+}
+.products-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  width: 100%;
+  justify-content: flex-start;
+  /* Optional: add margin-top if you want more space from header */
+  /* margin-top: 20px; */
+}
+.product-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 220px;       
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+.product-card img {
+  width: 100%;
+  height: 180px; 
+  object-fit: contain; 
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9; 
+}
+
+.product-card h3 {
+  margin: 8px 0 4px 0;
+  font-size: 1.05em;
+  color: #222;
+}
+.product-card .desc {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 0.97em;
+}
+.price-row {
+  margin-bottom: 12px;
+}
+.old-price {
+  color: #aaa;
+  text-decoration: line-through;
+  font-size: 0.95em;
+  margin-right: 5px;
+}
+.new-price {
+  color: #1e918b;
+  font-weight: bold;
+  font-size: 1.05em;
+}
+.product-card button {
+  background: #ff4646;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 0;
+  width: 100%;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.product-card button:hover {
+  background: #007b7b;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 32px 0;
+}
+.wishlist-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px; /* ✅ move to right */
+  z-index: 10;
+  background: #fff;
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.pagination a {
+  padding: 8px 14px;
+  background: #fff;
+  color: #1e918b;
+  border-radius: 4px;
+  text-decoration: none;
+  border: 1px solid #e0e0e0;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+.pagination a.active, .pagination a:hover {
+  background: #1e918b;
+  color: #fff;
+}
+@media (max-width: 900px) {
+  .product-list-page {
+    flex-direction: column;
+    gap: 0;
+  }
+  .sidebar {
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .products-grid {
+    justify-content: center;
+  }
+}
+
+.search-sort-bar {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.search-sort-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 600px;
+  justify-content: space-between;
+}
+
+.search-sort-form .search-input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 1em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.search-sort-form .sort-select {
+  padding: 8px 12px;
+  font-size: 1em;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .search-sort-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .search-sort-bar {
+    justify-content: center;
+  }
+}
+
+
+.sidebar a.active {
+  color: #ff4646;
+  font-weight: bold;
+  position: relative;
+}
+
+.sidebar a.active::before {
+  content: '•';
+  color: #ff4646;
+  position: absolute;
+  left: -16px;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.sidebar button {
+  margin-top: 12px;
+  padding: 8px 12px;
+  width: 100%;
+  background-color: #1e918b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.sidebar button:hover {
+  background-color: #ff4646;
+}
+
+</style>
+
+<main class="product-list-page" style="padding-top: 80px;">
+
+
+
+
+  <aside class="sidebar">
+    <h2>Filters</h2>
+    <div class="filter-group">
+      <h4>Categories</h4>
+      <ul>
+<% for(let i = 0; i < category.length; i++) { 
+     const isActive = selectedCategory == category[i]._id.toString(); %>
+  <li>
+    <a href="<%= buildFilterUrl({ category: category[i]._id, page: 1 }) %>" class="<%= isActive ? 'active' : '' %>">
+      <%= category[i].name %>
+    </a>
+  </li>
+<% } %>
+
+
+      </ul>
+    </div>
+    <div class="filter-group">
+      <h4>Brands</h4>
+      <ul>
+<% for(let i = 0; i < brand.length; i++) { 
+     const isActive = selectedBrand == brand[i]._id.toString(); %>
+  <li>
+    <a href="<%= buildFilterUrl({ brand: brand[i]._id, page: 1 }) %>" class="<%= isActive ? 'active' : '' %>">
+      <%= brand[i].brandName %>
+    </a>
+  </li>
+<% } %>
+
+
+      </ul>
+    </div>
+    <div class="filter-group">
+      <h4>Price</h4>
+      <ul>
+<%
+const priceRanges = [
+  { label: "Under ₹10000", gt: 0, lt: 10000 },
+  { label: "₹10000 - ₹50000", gt: 10000, lt: 50000 },
+  { label: "Above ₹50000", gt:50000,lt:200000}
+];
+%>
+<% priceRanges.forEach(range => {
+  const isActive = parseInt(gt) === range.gt && parseInt(lt) === range.lt;
+%>
+  <li>
+    <a href="<%= buildFilterUrl({ gt: range.gt, lt: range.lt, page: 1 }) %>" class="<%= isActive ? 'active' : '' %>">
+      <%= range.label %>
+    </a>
+  </li>
+<% }) %>
+
+
+      </ul>
+      <button onclick="location.href = '/shopping-pageList'">Clear all</button>
+    </div>
+  </aside>
+
+
+  <div>
+
+
+    <!-- Search and Sort Bar -->
+    <div class="search-sort-bar">
+      <form method="GET" action="/shopping-pageList" class="search-sort-form">
+        <input type="text" name="search" value="<%= search || '' %>" placeholder="Search products..." class="search-input" />
+        
+        <select name="sort" onchange="this.form.submit()" class="sort-select">
+          <option value="latest" <%= sort === 'latest' ? 'selected' : '' %>>Latest</option>
+          <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+      <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+    </select>
+    
+    <% if (selectedCategory) { %>
+      <input type="hidden" name="category" value="<%= selectedCategory %>" />
+      <% } %>
+      <% if (selectedBrand) { %>
+        <input type="hidden" name="brand" value="<%= selectedBrand %>" />
+        <% } %>
+        <% if (gt && lt) { %>
+          <input type="hidden" name="gt" value="<%= gt %>">
+          <input type="hidden" name="lt" value="<%= lt %>">
+          <% } %>
+        </form>
+      </div>
+      
+      <!-- Product Grid -->
+      <section class="products-grid">
+    <% for(let i = 0; i < products.length; i++) { %>
+   <a href="/products/<%= products[i]._id %>" class="product-link">
+      <div class="product-card">
+        <div class="wishlist-icon">
+          <i class="fa fa-heart-o"></i> 
+        </div>
+        <img src="/<%= products[i].images[0] %>" alt="<%= products[i].productName %>">
+        <h3 class=""><%= products[i].productName?.length > 10 ? products[i].productName.slice(0,15) + '...' : products[i].productName %></h3>
+        <p class="desc"><%= products[i].brand.name %></p>
+        <div class="price-row">
+          <span class="new-price">₹<%= products[i].variants[0].discountPrice.toLocaleString('en-IN') %></span>
+          <span class="old-price">₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %></span>
+        </div>
+        <button>Add to Cart</button>
+      </div>
+      </a>
+      <% } %>
+    </section>
+  </div>
+  </main>
+  
+  <nav class="pagination">
+    <% for (let p = 1; p <= totalPages; p++) { %>
+    <a href="<%= buildFilterUrl({ page: p }) %>" class="<%= currentPage === p ? 'active' : '' %>"><%= p %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="<%= buildFilterUrl({ page: currentPage + 1 }) %>">Next</a>
+  <% } %>
+</nav>
+
+
+<%- include('../../views/partials/user/footer') %>

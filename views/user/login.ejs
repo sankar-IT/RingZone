@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    .forget-password-link{
+      font-size: 0.875rem;
+      color:blue;
+      text-decoration: none;
+    }
+    .forget-password-link:hover{
+      color:rgb(70, 70, 213);
+      text-decoration: underline;
+    }
+    .form-group{
+      display: flex;
+      justify-content: end;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body class="bg-white-50 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white rounded-xl shadow-lg flex w-full max-w-4xl overflow-hidden">
+    
+    <!-- Left Side Image -->
+    <div class="hidden md:flex w-1/2 bg-white-100 items-center justify-center">
+      <img src="https://i.pinimg.com/736x/88/10/52/8810521b6114c23be76ca2937daa5f4e.jpg" alt="Phone" class="w-2/3">
+    </div>
+    
+    <!-- Right Side Login Form -->
+    <div class="w-full md:w-1/2 p-10">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Login to your account</h2>
+      <form  action="/login" method="post" class="space-y-4">
+        <input name="email" type="email" placeholder="Email address" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        
+        <input name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition">Login</button>
+      </form>
+    
+        <div class="form-group d-flex justify-content-end">
+    <a href="/forget-password" class="forget-password-link ms-auto">forget password</a>
+        </div>
+      <% if (locals.message && message.length > 0) { %>
+  <div class="bg-red-100 text-red-700 border border-red-400 px-4 py-3 rounded text-center mb-4">
+    <%= message %>
+  </div>
+<% } %>
+
+      <div class="flex items-center my-4">
+        <hr class="flex-grow border-t border-gray-300">
+        <span class="mx-2 text-gray-500">or</span>
+        <hr class="flex-grow border-t border-gray-300">
+      </div>
+
+
+      <a href="/auth/google" class="w-full border border-gray-300 py-2 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-100">
+        <img src="https://i.pinimg.com/736x/50/96/e7/5096e746d19b9c407089dfd220471bbe.jpg" class="w-5 h-5" />
+        <span>Sign in with Google</span>
+      </a>
+      <p class="text-center mt-4 text-sm text-gray-600">
+        Don't have an account?
+        <a href="/signup" class="text-blue-600 hover:underline">Sign up</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+
+const params = new URLSearchParams(window.location.search);
+const error = params.get('error'); 
+
+if (error === 'blocked') {
+        Swal.fire({
+        icon: 'error',
+        title: 'Your Account is blocked',
+        text: 'Please try logging in or use another email.',
+        confirmButtonColor: '#f97316'
+      });
+}
+
+
+  </script>
+
+</body>
+</html>
