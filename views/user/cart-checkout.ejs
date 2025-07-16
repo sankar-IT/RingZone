@@ -316,7 +316,7 @@
         shipmentEl.textContent = shipment === 0 ? 'Free' : formatRupee(shipment);
     }
 
-    // Include discount in grand total calculation
+    
     const grandTotal = subtotal - discount + shipment;
     grandTotalEl.textContent = formatRupee(grandTotal);
 }
@@ -488,6 +488,7 @@
             body: JSON.stringify({ 
                 shipment: selectedShipment,
                 addressId,
+                couponCode:couponCode,
                 discount: discount 
             })  
         });

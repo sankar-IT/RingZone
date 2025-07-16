@@ -65,8 +65,8 @@ const orderSchema = new Schema({
     pincode: { type: String, required: true }
    },
    coupon: {
-     couponCode: { type: String },
-     discountAmount: { type: Number }
+     couponCode: { type: String , default: null },
+     discountAmount: { type: Number , default: 0}
    },
    paymentMethod: {
      type: String,
