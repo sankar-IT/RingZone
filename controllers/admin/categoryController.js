@@ -6,7 +6,7 @@ const Product=require('../../models/productsSchema')
 const categoryInfo = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 6;
+    const limit = 4;
     const search = req.query.search || '';
 
     const query = search
@@ -89,7 +89,7 @@ const addCategoryOffer = async (req, res) => {
     await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
     for (const product of products) {
-      product.productOffer = 0; // Remove individual product offers
+      product.productOffer = 0; 
       const discount = (percentage / 100) * product.regularPrice;
       product.salePrice = Math.round(product.regularPrice - discount);
       await product.save();
@@ -181,7 +181,6 @@ const editCategory = async (req, res) => {
       return res.redirect(`/admin/editCategory?id=${id}&error=Category name cannot be empty`);
     }
 
-    // Check for duplicate (case-insensitive, trimmed)
     const existingCategory = await Category.findOne({
       _id: { $ne: id },
       name: { $regex: new RegExp(`^${categoryName}$`, 'i') }

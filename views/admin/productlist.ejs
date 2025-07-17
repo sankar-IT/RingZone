@@ -130,13 +130,78 @@
       padding: 4px 10px;
       font-size: 0.8rem;
     }
-    .pagination {
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .search-bar {
-      margin-bottom: 20px;
-    }
+   .pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 6px;
+}
+
+.pagination-container a,
+.pagination-container .current-page {
+  display: inline-block;
+  padding: 8px 14px;
+  margin: 0 3px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  color: #ff4646; 
+  border: 1px solid #ff4646;
+}
+
+.pagination-container a:hover {
+  background-color: #ff4646;
+  color: #fff; 
+}
+
+.pagination-container .current-page {
+  background-color: #ff4646;
+  color: #fff;
+  border: 1px solid #ff4646;
+  cursor: default;
+}
+
+    .search-group {
+  max-width: 500px;
+  margin-top: 10px;
+  border-radius: 50px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+  border: none !important;
+  padding: 10px 15px;
+  font-size: 14px;
+}
+
+.search-btn {
+  border-radius: 0;
+  background-color: #6c5ce7;
+  border: none;
+  font-weight: 500;
+  padding: 10px 20px;
+}
+
+.search-btn:hover {
+  background-color: #5849c8;
+}
+
+.clear-btn {
+  border-radius: 0;
+  font-weight: 500;
+  background-color: #ff4646;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+}
+
+.clear-btn:hover {
+  background-color: #e63e3e;
+}
+
   </style>
 </head>
 <body>
@@ -169,14 +234,20 @@
         </a>
       </div>
 
-      <!-- Search Bar -->
-      <div class="search-bar mt-3">
+   
+      <div class="search-bar mt-3" style="margin-bottom: 10px;">
         <form action="/admin/productlist" method="GET" class="d-flex">
-          <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search products..." value="<%= searchQuery || '' %>">
-            <button class="btn btn-outline-secondary" type="submit">Search</button>
-            <a href="/admin/productlist" class="btn btn-outline-danger">Clear</a>
-          </div>
+         <div class="input-group search-group">
+  <input type="text" name="search" class="form-control search-input" 
+         placeholder="Search products..." value="<%= searchQuery || '' %>">
+  <button class="btn btn-primary search-btn" type="submit">
+    <i class="fas fa-search"></i> Search
+  </button>
+  <a href="/admin/productlist" class="btn btn-danger clear-btn">
+    <i class="fas fa-times"></i> Clear
+  </a>
+</div>
+
         </form>
       </div>
 
@@ -193,81 +264,86 @@
             <th style="width: 180px;">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <% products.forEach((product, index) => { %>
-            <tr>
-              <td><%= (currentPage - 1) * perPage + index + 1 %></td>
-              <td>
-                <% if (product.images && product.images.length > 0) { %>
-                  <img src="/<%= product.images[0] %>" alt="Product Image" class="product-img" />
-                <% } else { %>
-                  <div class="product-img bg-light d-flex align-items-center justify-content-center">
-                    <i class="fas fa-image text-muted"></i>
-                  </div>
-                <% } %>
-              </td>
-              <td><%= product.productName %></td>
-              <td><%= product.brand ? product.brand.brandName : 'N/A' %></td>
-              <td><%= product.category ? product.category.name : 'N/A' %></td>
-              <td>
-                <% if (product.variants && product.variants.length > 0) { %>
-                  ₹<%= product.variants[0].discountPrice || product.variants[0].regularPrice %>
-                <% } else { %>
-                  N/A
-                <% } %>
-              </td>
-              <td>
-                <% if (product.isBlocked) { %>
-                  <span class="badge bg-danger">Blocked</span>
-                <% } else { %>
-                  <span class="badge bg-success">Active</span>
-                <% } %>
-              </td>
-              <td>
-                <a href="/admin/product-edit/<%= product._id %>" class="btn btn-sm btn-warning me-1">
-                  <i class="fas fa-edit"></i> Edit
-                </a>
-                <% if (product.isBlocked) { %>
-                  <button onclick="toggleBlock('<%= product._id %>', false)" class="btn btn-sm btn-success">
-                    <i class="fas fa-lock-open"></i> Unblock
-                  </button>
-                <% } else { %>
-                  <button onclick="toggleBlock('<%= product._id %>', true)" class="btn btn-sm btn-danger">
-                    <i class="fas fa-lock"></i> Block
-                  </button>
-                <% } %>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
+       <tbody>
+  <% if (products.length === 0) { %>
+    <tr>
+      <td colspan="8" class="text-center text-muted py-4">
+        <i class="fas fa-box-open fa-2x mb-2"></i>
+        <p class="m-0">No products found</p>
+      </td>
+    </tr>
+  <% } else { %>
+    <% products.forEach((product, index) => { %>
+      <tr>
+        <td><%= (currentPage - 1) * perPage + index + 1 %></td>
+        <td>
+          <% if (product.images && product.images.length > 0) { %>
+            <img src="/<%= product.images[0] %>" alt="Product Image" class="product-img" />
+          <% } else { %>
+            <div class="product-img bg-light d-flex align-items-center justify-content-center">
+              <i class="fas fa-image text-muted"></i>
+            </div>
+          <% } %>
+        </td>
+        <td><%= product.productName %></td>
+        <td><%= product.brand ? product.brand.brandName : 'N/A' %></td>
+        <td><%= product.category ? product.category.name : 'N/A' %></td>
+        <td>
+          <% if (product.variants && product.variants.length > 0) { %>
+            ₹<%= product.variants[0].discountPrice || product.variants[0].regularPrice %>
+          <% } else { %>
+            N/A
+          <% } %>
+        </td>
+        <td>
+          <% if (product.isBlocked) { %>
+            <span class="badge bg-danger">Blocked</span>
+          <% } else { %>
+            <span class="badge bg-success">Active</span>
+          <% } %>
+        </td>
+        <td>
+          <a href="/admin/product-edit/<%= product._id %>" class="btn btn-sm btn-warning me-1">
+            <i class="fas fa-edit"></i> Edit
+          </a>
+          <% if (product.isBlocked) { %>
+            <button onclick="toggleBlock('<%= product._id %>', false)" class="btn btn-sm btn-success">
+              <i class="fas fa-lock-open"></i> Unblock
+            </button>
+          <% } else { %>
+            <button onclick="toggleBlock('<%= product._id %>', true)" class="btn btn-sm btn-danger">
+              <i class="fas fa-lock"></i> Block
+            </button>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  <% } %>
+</tbody>
+
       </table>
 
       <!-- Pagination -->
-      <nav aria-label="Page navigation">
-        <ul class="pagination">
-          <% if (currentPage > 1) { %>
-            <li class="page-item">
-              <a class="page-link" href="/admin/productlist?page=<%= currentPage - 1 %><%= searchQuery ? `&search=${searchQuery}` : '' %>" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-          <% } %>
-          
-          <% for (let i = 1; i <= totalPages; i++) { %>
-            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-              <a class="page-link" href="/admin/productlist?page=<%= i %><%= searchQuery ? `&search=${searchQuery}` : '' %>"><%= i %></a>
-            </li>
-          <% } %>
-          
-          <% if (currentPage < totalPages) { %>
-            <li class="page-item">
-              <a class="page-link" href="/admin/productlist?page=<%= currentPage + 1 %><%= searchQuery ? `&search=${searchQuery}` : '' %>" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          <% } %>
-        </ul>
-      </nav>
+    <div class="pagination-container">
+  <div class="pagination">
+    <% if (currentPage > 1) { %>
+      <a href="/admin/productlist?page=<%= currentPage - 1 %><%= searchQuery ? `&search=${searchQuery}` : '' %>">&laquo; Prev</a>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <% if (i === currentPage) { %>
+        <span class="current-page"><%= i %></span>
+      <% } else { %>
+        <a href="/admin/productlist?page=<%= i %><%= searchQuery ? `&search=${searchQuery}` : '' %>"><%= i %></a>
+      <% } %>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+      <a href="/admin/productlist?page=<%= currentPage + 1 %><%= searchQuery ? `&search=${searchQuery}` : '' %>">Next &raquo;</a>
+    <% } %>
+  </div>
+</div>
+
     </div>
   </div>
 

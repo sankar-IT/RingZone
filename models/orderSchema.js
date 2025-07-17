@@ -34,7 +34,7 @@ const orderSchema = new Schema({
       type: String,
       enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 
              'Return Requested', 'Return Approved', 'Return Rejected', 'Returned'],
-      default: 'Pending'
+      default: 'Processing'
     },
     variant: {
       color: { type: String },
@@ -76,8 +76,8 @@ const orderSchema = new Schema({
    paymentStatus: {
      type: String,
      required: true,
-     enum: ['Paid', 'Pending'],
-     default: 'Pending'
+     enum: ['Paid', 'Pending','Processing'],
+     default: 'Processing'
    },
   invoiceDate: {
     type: Date,

@@ -390,7 +390,7 @@ const applyCoupon = async (req, res) => {
     const grandTotal = subtotal - discount + shipment;
 
     req.session.appliedCoupon = {
-       code: coupon.couponCode.toString(),
+      code: coupon.couponCode.toString(),
       discount,
       discountPercent: coupon.discountPercent
     };
@@ -527,7 +527,7 @@ const getCartPayment = async (req, res) => {
       req.session.selectedShipment = shipment;
       req.session.selectedAddress = addressId;
       req.session.appliedCoupon = {
-        code: couponCode,
+        code: couponCode || null,
         discount : Number(discount)
       };
 
@@ -665,7 +665,7 @@ const postPaymentToOrder = async (req, res) => {
       finalAmount,
       shipping: shippingCharge,
       paymentMethod: 'cod',
-      paymentStatus: 'Pending',
+      paymentStatus: 'Processing',
       address: {
         name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
         phone: shippingAddress.phone,
@@ -802,18 +802,18 @@ try {
     }, 0);
 
     
-    const {discount=0, code=null} = req.session.appliedCoupon;
+    const couponData = req.session.appliedCoupon;
 
     console.log(req.session.appliedCoupon);
     
 
-    const finalAmount = totalPrice - discount + shippingCharge;
+    const finalAmount = totalPrice - (couponData.discount || 0) + shippingCharge;
 
     await Order.create({
       user: userId,
       orderedItems: activeItems,
       totalPrice,
-      discount: discount,
+      discount: couponData.discount,
       finalAmount,
       shipping: shippingCharge,
       paymentMethod: 'online',
@@ -827,11 +827,13 @@ try {
         pincode: shippingAddress.pinCode
       },
       cartCount: res.locals.cartCount,
-      couponApplied: !!code,
+      couponApplied: !!couponData.code,
       coupon: 
         {
-            couponCode: code || null,
-            discountAmount: discount || 0
+            couponCode: (couponData.code && typeof couponData.code === 'string') 
+      ? couponData.code 
+      : null,
+            discountAmount: couponData.discount || 0
           }
       
         
@@ -866,51 +868,135 @@ try {
 }
 
 
-const verifyRazorPayOrder = async (req,res) => {
-  try{
 
+const verifyRazorPayOrder = async (req, res) => {
+  try {
+    // Validate user session
     if (!req.session.user) {
-  return res.status(401).json({ success: false, message: 'User not logged in' });
-}
+      console.log('Payment verification failed: User not logged in');
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User not logged in',
+        redirectUrl: '/login' 
+      });
+    }
 
-const userId = req.session.user._id;
+    const userId = req.session.user._id;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = req.body;
 
+    // Validate required fields
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      console.log('Payment verification failed: Missing Razorpay fields');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing payment verification fields' 
+      });
+    }
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-
-    
-    
-
+    // Verify Razorpay signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
       .update(body)
       .digest("hex");
 
-    const isValid = expectedSignature == razorpay_signature;
-
-    if (isValid) {
-
-      const latestOrder = await Order.findOne({ user: userId, paymentStatus: 'Pending' }).sort({ createdAt: -1 });
-
-      if (latestOrder) {
-        latestOrder.paymentStatus = 'Paid';
-        latestOrder.status = 'Confirmed';
-        await latestOrder.save();
-      }
-
-      return res.status(200).json({ success: true, redirectUrl: `/payment-success/${latestOrder._id}` });
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid signature" });
+    if (expectedSignature !== razorpay_signature) {
+      console.log('Payment verification failed: Invalid signature');
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid signature",
+        redirectUrl: '/payment-failed?reason=invalid_signature' 
+      });
     }
 
+    let order;
+    
+    // Try to find order by provided order_id first
+    if (order_id) {
+      order = await Order.findOne({
+        _id: order_id,
+        user: userId
+      }).populate('orderedItems.product'); // Ensure items are populated if they're references
 
+      if (!order) {
+        console.log(`Order not found for ID: ${order_id}`);
+        return res.status(404).json({ 
+          success: false, 
+          message: "Order not found.",
+          redirectUrl: '/payment-failed?reason=order_not_found' 
+        });
+      }
+    } else {
+      // Fallback to finding latest pending order
+      order = await Order.findOne({ 
+        user: userId, 
+        paymentStatus: 'Pending' 
+      }).sort({ createdAt: -1 }).populate('orderedItems.product');
 
+      if (!order) {
+        console.log('No pending order found for user:', userId);
+        return res.status(404).json({ 
+          success: false, 
+          message: "No pending order found.",
+          redirectUrl: '/payment-failed?reason=no_pending_order' 
+        });
+      }
+    }
 
-  }catch(err){
-    res.status(500).json({message: err.message, success:false})
+    // Validate order items
+    if (!order.orderedItems || !Array.isArray(order.orderedItems)) {
+      console.log('Invalid items data in order:', order._id);
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid order items data",
+        redirectUrl: '/payment-failed?reason=invalid_order_data' 
+      });
+    }
+
+    // Validate order status
+    if (order.paymentStatus !== 'Pending') {
+      console.log(`Order ${order._id} already processed with status: ${order.paymentStatus}`);
+      return res.status(400).json({ 
+        success: false, 
+        message: "Order already processed",
+        redirectUrl: `/order/${order._id}` 
+      });
+    }
+
+    // Update order with payment details
+    order.paymentStatus = 'Paid';
+    order.status = 'Processing';
+    order.paymentDate = new Date();
+    order.razorpayOrderId = razorpay_order_id;
+    order.razorpayPaymentId = razorpay_payment_id;
+    order.razorpaySignature = razorpay_signature;
+
+    await order.save();
+
+    console.log(`Payment verified successfully for order: ${order._id}`);
+    return res.status(200).json({ 
+      success: true, 
+      message: "Payment verified successfully",
+      orderId: order._id,
+      redirectUrl: `/payment-success/${order._id}`,
+      orderDetails: {
+        amount: order.totalAmount,
+        items: Array.isArray(order.items) ? order.items.length : 0
+      }
+    });
+
+  } catch (err) {
+    console.error("Error in verifyRazorPayOrder:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Payment verification failed",
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      redirectUrl: '/payment-failed?reason=server_error' 
+    });
   }
-}
+
+
+};
 
 
 const paymentSuccessPage = async (req,res) => {
@@ -931,6 +1017,7 @@ const paymentSuccessPage = async (req,res) => {
   }catch(err){
 
   }
+
 }
 
 

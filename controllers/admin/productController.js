@@ -64,7 +64,7 @@ const addProduct = async (req, res) => {
 
 const addProductList = async (req, res) => {
   try {
-    const perPage = 10;
+    const perPage = 5;
     const page = parseInt(req.query.page) || 1;
     const searchQuery = req.query.search || '';
 

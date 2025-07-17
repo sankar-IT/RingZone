@@ -158,6 +158,7 @@
 
     if (selectedPaymentMethod === 'card') {
       try {
+
         const orderRes = await fetch('/create-razorpay-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -177,9 +178,10 @@
           description: "Payment for order",
           image: "/images/logo.png",
           handler: async function (response) {
-            const verifyRes = await fetch('/verify-razorpay-payment', {
+
+            const verifyRes = await fetch('/verify-razorpay-payment',{
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type' : 'application/json' },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id:  response.razorpay_payment_id ,
@@ -191,8 +193,7 @@
             if (verifyData.success) {
               window.location.href = verifyData.redirectUrl;
             } else {
-              Swal.fire('Payment Failed', verifyData.message || 'Try again', 'error');
-              resetBtn();
+               window.location.href = verifyData.redirectUrl;
             }
           },
  prefill: {
@@ -209,8 +210,7 @@
         rzp.open();
       } catch (err) {
         console.error(err);
-        Swal.fire('Error', err.message || 'Unable to proceed with payment', 'error');
-        resetBtn();
+         window.location.href = verifyData.redirectUrl;
       }
       
     } else {

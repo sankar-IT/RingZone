@@ -11,7 +11,6 @@
       --content-bg: #f8f9fa;
       --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
     }
-
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -27,21 +26,19 @@
       display: flex;
       flex-direction: column;
       padding: 20px 0;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
       position: fixed;
       z-index: 1000;
     }
-
     .sidebar h2 {
       font-weight: 700;
       font-size: 1.5rem;
       padding: 0 20px 20px;
       margin: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-
     .sidebar .nav-link {
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       padding: 10px 20px;
       margin: 5px 0;
       font-weight: 500;
@@ -49,14 +46,12 @@
       border-left: 3px solid transparent;
       transition: all 0.3s ease;
     }
-
-    .sidebar .nav-link:hover, 
+    .sidebar .nav-link:hover,
     .sidebar .nav-link.active {
       color: white;
       background-color: var(--sidebar-hover);
       border-left: 3px solid #ffffff;
     }
-
     .sidebar .nav-link i {
       width: 24px;
       text-align: center;
@@ -67,7 +62,6 @@
       margin-left: 250px;
       padding: 20px;
     }
-
     .topbar {
       height: 60px;
       background-color: var(--topbar-bg);
@@ -75,12 +69,11 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       position: sticky;
       top: 0;
       z-index: 100;
     }
-
     .content {
       margin-top: 20px;
       padding: 25px;
@@ -88,7 +81,6 @@
       border-radius: 8px;
       box-shadow: var(--card-shadow);
     }
-
     .content h1 {
       margin: 0;
       font-size: 1.75rem;
@@ -106,12 +98,10 @@
       font-weight: 600;
       transition: all 0.3s;
     }
-
     .btn-logout:hover {
       background-color: #c0392b;
       transform: translateY(-1px);
     }
-
     .search {
       padding: 0.6rem 1rem;
       width: 100%;
@@ -121,14 +111,13 @@
       background-color: #fff;
       outline: none;
     }
-
     .filters {
       display: flex;
       gap: 0.8rem;
       margin-bottom: 1.2rem;
       flex-wrap: wrap;
+      align-items: center;
     }
-
     .filters select,
     .filter-btn {
       padding: 0.5rem 0.8rem;
@@ -138,55 +127,67 @@
       cursor: pointer;
       font-size: 0.9rem;
     }
-
     .filter-btn {
       display: flex;
       align-items: center;
       gap: 0.4rem;
     }
-
     .table-container {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
       overflow-x: auto;
+      padding: 15px;
     }
-
-    table {
+    #orderTable {
       width: 100%;
-      border-collapse: collapse;
-      min-width: 750px;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+      font-size: 15px;
     }
-
-    thead {
-      background-color: #f9fafc;
+    #orderTable thead {
+      background-color: #f8f9fc;
+      color: #333;
     }
-
-    th, td {
+    #orderTable th {
       text-align: left;
-      padding: 0.6rem 0.8rem;
-      border-bottom: 1px solid #eee;
-      font-size: 0.9rem;
+      padding: 14px 12px;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-
+    #orderTable tbody tr {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+    }
+    #orderTable tbody tr:nth-child(even) {
+      background-color: #f9fbff;
+    }
+    #orderTable tbody tr:hover {
+      background-color: #eef4ff;
+      transform: scale(1.01);
+    }
+    #orderTable td {
+      padding: 12px 14px;
+      color: #333;
+      font-size: 14px;
+      vertical-align: middle;
+    }
     .badge {
-      padding: 0.3rem 0.6rem;
-      border-radius: 15px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 20px;
     }
-
-    .badge.delivered { background-color: #d1f5e0; color: #2e7d59; }
-    .badge.processing { background-color: #fff3cd; color: #856404; }
-    .badge.cancelled { background-color: #f8d7da; color: #a94442; }
-    .badge.confirmed { background-color: #23df91; color: #ffffff; }
-    .badge.pending { background-color: #df23b6; color: #ffffff; }
-    .badge.shipped { background-color: #da8911; color: #ffffff; }
-
-
-
-
+    .badge.delivered { background-color: #155724; color: #f9fcfa; }
+    .badge.processing { background-color: #856404; color: #fafaf9; }
+    .badge.cancelled { background-color: #721c24; color: #f3f1f1; }
+    .badge.confirmed { background-color: #155724; color: #f9f9f9; }
+    .badge.pending { background-color: #6c757d; color: #f1f2f4; }
+    .badge.shipped { background-color: #0c5460; color: #fafcfd; }
     .edit-btn {
       border: none;
       background: #edf2f7;
@@ -195,29 +196,46 @@
       cursor: pointer;
       color: #333;
     }
+    #pagination {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin: 1.2rem 0 0;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
+.pagination-container {
+  display: inline-flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-    .pagination button {
-      padding: 0.4rem 0.8rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background: white;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
+.pagination-container a,
+.pagination-container .current-page {
+  display: inline-block;
+  padding: 8px 14px;
+  margin: 0 3px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  color: #ff4646; 
+  border: 1px solid #ff4646;
+}
 
-    .pagination button.active {
-      background-color: #007bff;
-      color: white;
-      border-color: #007bff;
-    }
+.pagination-container a:hover {
+  background-color: #ff4646;
+  color: #fff; 
+}
+
+.pagination-container .current-page {
+  background-color: #ff4646;
+  color: #fff;
+  border: 1px solid #ff4646;
+  cursor: default;
+}
 
     @media screen and (max-width: 768px) {
       .wrapper { padding: 1rem; }
@@ -226,14 +244,14 @@
       table { font-size: 0.85rem; }
       th, td { padding: 0.5rem 0.6rem; }
     }
+    
   </style>
 </head>
 <body>
-  
   <div class="sidebar">
     <h2>RingZone</h2>
     <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-     <a href="/admin/productlist" class="nav-link"><i class="fas fa-box-open"></i> Products</a>
+    <a href="/admin/productlist" class="nav-link"><i class="fas fa-box-open"></i> Products</a>
     <a href="/admin/order-list" class="nav-link"><i class="fas fa-receipt"></i> Order Lists</a>
     <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a>
     <a href="/admin/brands" class="nav-link"><i class="fas fa-briefcase"></i> Brands</a>
@@ -244,190 +262,232 @@
     <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
     <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
   </div>
-
-  <!-- Main Content - Structure unchanged, styling enhanced -->
   <div class="main">
-    <!-- Topbar -->
     <div class="topbar">
       <h1 class="m-0 fs-4 text-dark">Orders List</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
     </div>
-<body>
-  <div class="wrapper" style="margin-top: 20px;">
-   <header style="display: flex; gap: 10px; align-items: center;">
-  <input type="text" class="search" placeholder="🔍 Search orders..." id="searchInput" />
-  <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
-</header>
-
-
-    </header>
-
-    <div class="filters" style="margin-top: 20px;">
-      <label class="filter-btn"><i class="fas fa-sort"></i> Filter By</label>
-      <select id="sortSelect">
-        <option value="default">Default</option>
-        <option value="az">A-Z</option>
-        <option value="za">Z-A</option>
-        <option value="latest">Latest</option>
-        <option value="oldest">Oldest</option>
-      </select>
+    <div class="wrapper" style="margin-top: 20px;">
+      <header style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" class="search" placeholder="🔍 Search orders..." id="searchInput" />
+        <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
+      </header>
+      <!-- Filters Row -->
+      <div class="filters" style="margin-top: 20px;">
+        <label class="filter-btn"><i class="fas fa-filter"></i> Status</label>
+        <select id="statusFilter">
+          <option value="all">All</option>
+          <option value="processing">Processing</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <label class="filter-btn"><i class="fas fa-sort"></i> Sort</label>
+        <select id="sortSelect">
+          <option value="default">Default</option>
+          <option value="az">A-Z</option>
+          <option value="za">Z-A</option>
+          <option value="latest">Latest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+      </div>
+      <div class="table-container">
+        <table id="orderTable">
+          <thead style="color: white; background-color: #ff4646;">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (orders.length === 0) { %>
+              <tr><td colspan="7" class="text-center">No orders found</td></tr>
+            <% } else { %>
+              <% orders.forEach((order, index) => { %>
+                <tr data-status="<%= order.status.toLowerCase().replace(/\s+/g,'-') %>">
+                  <td><%= order.orderId %></td>
+                  <td>
+                    <%= order.address && order.address.name
+                        ? order.address.name.replace(/\+/g, ' ').split(' ')[0]
+                        : 'N/A' %>
+                  </td>
+                  <td><%= order.address?.address %></td>
+                  <td><%= order.invoiceDate.toISOString().slice(0, 10) %></td>
+                  <td>
+                    <span class="badge <%= order.status.toLowerCase().replace(/\s+/g, '-') %>"><%= order.status %></span>
+                  </td>
+                  <td>
+                    <a href="/admin/update-orders/<%= order._id %>"><button class="edit-btn"><i class="fas fa-pen"></i></button></a>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
     </div>
-
-    <div class="table-container">
-      <table id="orderTable">
-      <thead style="color: white; background-color: #ff4646;">
-
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Date</th>
-
-            <th>Status</th>
-            <th>Edit</th>
-          </tr>
-        </thead>
-        <tbody>
-  <% if (orders.length === 0) { %>
-    <tr><td colspan="7" class="text-center">No orders found</td></tr>
-  <% } else { %>
-    <% orders.forEach((order, index) => { %>
-      <tr>
-        <td><%= order.orderId %></td>
-        <td>
-  <%= order.address && order.address.name
-      ? order.address.name.replace(/\+/g, ' ').split(' ')[0]
-      : 'N/A' %>
-</td>
-
-        <td>
-          <%= order.address?.address %>
-        </td>
-        <td><%= order.invoiceDate.toISOString().slice(0, 10) %></td>
-        <td>
-          <span class="badge <%= order.status.toLowerCase().replace(/\s+/g, '-') %>"><%= order.status %></span>
-        </td>
-        <td>
-         <a href="/admin/update-orders/<%= order._id %>"><button class="edit-btn"><i class="fas fa-pen"></i></button></a>
-        </td>
-      </tr>
-    <% }); %>
-  <% } %>
-</tbody>
-
-      </table>
-    </div>
-
-    <div class="pagination" id="pagination"></div>
-  </div> 
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  const rowsPerPage = 8;
-  let currentPage = 1;
+  <script>
+    const rowsPerPage = 5;
+    let currentPage = 1;
 
-  const table = document.getElementById('orderTable');
-  const tbody = table.querySelector('tbody');
-  const allRows = Array.from(tbody.querySelectorAll('tr'));
-  const pagination = document.getElementById('pagination');
-  const sortSelect = document.getElementById('sortSelect');
-  const searchInput = document.getElementById('searchInput');
-  const clearBtn = document.getElementById('clearBtn');
+    const table = document.getElementById('orderTable');
+    const tbody = table.querySelector('tbody');
+    const allRows = Array.from(tbody.querySelectorAll('tr'));
+    const pagination = document.getElementById('pagination');
+    const sortSelect = document.getElementById('sortSelect');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
 
-  function renderTable(page = 1, items = allRows) {
-    tbody.innerHTML = '';
-    const start = (page - 1) * rowsPerPage;
-    const visibleRows = items.slice(start, start + rowsPerPage);
-    visibleRows.forEach(row => tbody.appendChild(row));
+function renderTable(page = 1, items = allRows) {
+  tbody.innerHTML = '';
+
+  if (items.length === 0) {
+    const noDataRow = document.createElement('tr');
+    noDataRow.innerHTML = `
+      <td colspan="6" class="text-center" style="padding: 30px; color: #777;">
+        <i class="fas fa-box-open" style="font-size: 28px; color: #bbb; display:block; margin-bottom:10px;"></i>
+        No orders found
+      </td>`;
+    tbody.appendChild(noDataRow);
+    pagination.innerHTML = ''; 
+    return;
   }
 
-  function renderPagination(items = allRows) {
-    pagination.innerHTML = '';
-    const pageCount = Math.ceil(items.length / rowsPerPage);
-    for (let i = 1; i <= pageCount; i++) {
-      const btn = document.createElement('button');
-      btn.innerText = i;
-      btn.classList.toggle('active', i === currentPage);
-      btn.onclick = () => {
+  const start = (page - 1) * rowsPerPage;
+  const visibleRows = items.slice(start, start + rowsPerPage);
+  visibleRows.forEach(row => tbody.appendChild(row));
+}
+
+
+function renderPagination(items = allRows) {
+  const pageCount = Math.ceil(items.length / rowsPerPage) || 1;
+  pagination.innerHTML = ''; // pagination is the container div in your HTML
+
+  // Create wrapper container
+  const paginationWrapper = document.createElement('div');
+  paginationWrapper.className = 'pagination-container';
+
+  const paginationDiv = document.createElement('div');
+  paginationDiv.className = 'pagination';
+
+  // Prev Button
+  if (currentPage > 1) {
+    const prevLink = document.createElement('a');
+    prevLink.href = '#';
+    prevLink.innerHTML = '&laquo; Prev';
+    prevLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentPage--;
+      renderTable(currentPage, items);
+      renderPagination(items);
+    });
+    paginationDiv.appendChild(prevLink);
+  }
+
+  // Page Numbers
+  for (let i = 1; i <= pageCount; i++) {
+    if (i === currentPage) {
+      const span = document.createElement('span');
+      span.className = 'current-page';
+      span.textContent = i;
+      paginationDiv.appendChild(span);
+    } else {
+      const link = document.createElement('a');
+      link.href = '#';
+      link.textContent = i;
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
         currentPage = i;
         renderTable(currentPage, items);
         renderPagination(items);
-      };
-      pagination.appendChild(btn);
+      });
+      paginationDiv.appendChild(link);
     }
   }
 
-  function sortRows(value, rows = allRows) {
-    const sorted = [...rows];
-    switch (value) {
-      case 'az':
-        return sorted.sort((a, b) => a.children[1].innerText.localeCompare(b.children[1].innerText));
-      case 'za':
-        return sorted.sort((a, b) => b.children[1].innerText.localeCompare(a.children[1].innerText));
-      case 'latest':
-        return sorted.sort((a, b) => new Date(b.children[3].innerText) - new Date(a.children[3].innerText));
-      case 'oldest':
-        return sorted.sort((a, b) => new Date(a.children[3].innerText) - new Date(b.children[3].innerText));
-      default:
-        return sorted;
-    }
+  // Next Button
+  if (currentPage < pageCount) {
+    const nextLink = document.createElement('a');
+    nextLink.href = '#';
+    nextLink.innerHTML = 'Next &raquo;';
+    nextLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentPage++;
+      renderTable(currentPage, items);
+      renderPagination(items);
+    });
+    paginationDiv.appendChild(nextLink);
   }
 
+  paginationWrapper.appendChild(paginationDiv);
+  pagination.appendChild(paginationWrapper);
+}
 
-  searchInput.addEventListener('input', () => {
-    const searchTerm = searchInput.value.toLowerCase();
 
-    const filteredRows = allRows.filter(row => {
-      const orderId = row.children[0].innerText.toLowerCase();   // Order ID
-      const name = row.children[1].innerText.toLowerCase();      // Customer Name
-      const date = row.children[3].innerText.toLowerCase();      // Invoice Date
+    function sortRows(value, rows = []) {
+      const sorted = [...rows];
+      switch (value) {
+        case 'az':
+          return sorted.sort((a, b) => a.children[1].innerText.localeCompare(b.children[1].innerText));
+        case 'za':
+          return sorted.sort((a, b) => b.children[1].innerText.localeCompare(a.children[1].innerText));
+        case 'latest':
+          return sorted.sort((a, b) => new Date(b.children[3].innerText) - new Date(a.children[3].innerText));
+        case 'oldest':
+          return sorted.sort((a, b) => new Date(a.children[3].innerText) - new Date(b.children[3].innerText));
+        default:
+          return sorted; 
+      }
+    }
 
-      return (
-        orderId.includes(searchTerm) ||
-        name.includes(searchTerm) ||
-        date.includes(searchTerm)
-      );
+    function filterRows(searchTerm, statusValue) {
+      const s = (searchTerm || '').toLowerCase();
+      const st = (statusValue || 'all');
+      return allRows.filter(row => {
+        // search match
+        const orderId = row.children[0].innerText.toLowerCase();
+        const name = row.children[1].innerText.toLowerCase();
+        const date = row.children[3].innerText.toLowerCase();
+        const rowStatus = (row.dataset.status || '').toLowerCase();
+        const matchesSearch = !s || orderId.includes(s) || name.includes(s) || date.includes(s);
+        const matchesStatus = st === 'all' || rowStatus === st;
+        return matchesSearch && matchesStatus;
+      });
+    }
+
+    function applyFiltersAndRender() {
+      const searchTerm = searchInput.value.trim();
+      const statusValue = statusFilter.value; // e.g. 'delivered'
+      const filteredRows = filterRows(searchTerm, statusValue);
+      const sortedRows = sortRows(sortSelect.value, filteredRows);
+      currentPage = 1;
+      renderTable(currentPage, sortedRows);
+      renderPagination(sortedRows);
+    }
+
+    // Event Listeners
+    searchInput.addEventListener('input', applyFiltersAndRender);
+    sortSelect.addEventListener('change', applyFiltersAndRender);
+    statusFilter.addEventListener('change', applyFiltersAndRender);
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      statusFilter.value = 'all';
+      sortSelect.value = 'default';
+      applyFiltersAndRender();
     });
 
-    currentPage = 1;
-    const sortedRows = sortRows(sortSelect.value, filteredRows);
-    renderTable(currentPage, sortedRows);
-    renderPagination(sortedRows);
-  });
-
-  clearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    currentPage = 1;
-    const sorted = sortRows(sortSelect.value);
-    renderTable(currentPage, sorted);
-    renderPagination(sorted);
-  });
-
-
-  sortSelect.addEventListener('change', () => {
-    currentPage = 1;
-    const searchTerm = searchInput.value.toLowerCase();
-    const filteredRows = searchTerm
-      ? allRows.filter(row => {
-          const orderId = row.children[0].innerText.toLowerCase();
-          const name = row.children[1].innerText.toLowerCase();
-          const date = row.children[3].innerText.toLowerCase();
-          return (
-            orderId.includes(searchTerm) ||
-            name.includes(searchTerm) ||
-            date.includes(searchTerm)
-          );
-        })
-      : allRows;
-
-    const sorted = sortRows(sortSelect.value, filteredRows);
-    renderTable(currentPage, sorted);
-    renderPagination(sorted);
-  });
-
-  renderTable(currentPage);
-  renderPagination();
-</script>
-
+    // Initial render
+    applyFiltersAndRender();
+  </script>
 </body>
-</html>

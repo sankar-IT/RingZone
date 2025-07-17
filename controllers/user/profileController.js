@@ -912,7 +912,6 @@ const cancelItem = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    
     const item = order.orderedItems.id(itemId);
     if (!item) {
       return res.status(404).json({ message: 'Item not found in order' });
@@ -922,40 +921,51 @@ const cancelItem = async (req, res) => {
       return res.status(400).json({ message: 'Item is already cancelled' });
     }
 
-   
-    if (order.status !== 'Pending') {
+    // ✅ Allow cancel only for Pending, Processing, Confirmed
+    if (!['Pending', 'Processing', 'Confirmed'].includes(order.status)) {
       return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
     }
 
-    
+    // ✅ Cancel this item
     item.status = 'Cancelled';
 
-    
+    // ✅ Check remaining active items
     const activeItems = order.orderedItems.filter(itm => itm.status !== 'Cancelled');
 
-    order.totalPrice = activeItems.reduce((sum, itm) => sum + (itm.price * itm.quantity), 0);
-    order.finalAmount = order.totalPrice + order.shipping;
-
-    
-    const allCancelled = order.orderedItems.every(itm => itm.status === 'Cancelled');
-    if (allCancelled) {
+    if (activeItems.length === 0) {
+      // ✅ All items cancelled → clear totals and mark order cancelled
+      order.totalPrice = 0;
+      order.finalAmount = 0;
+      order.shipping = 0;
+      if (order.coupon) {
+        order.coupon.discountAmount = 0;
+      }
       order.status = 'Cancelled';
+    } else {
+      // ✅ Recalculate totals if some items remain
+      order.totalPrice = activeItems.reduce((sum, itm) => sum + (itm.price * itm.quantity), 0);
+
+      // Keep discount same or adjust logic if needed
+      const discount = order.coupon ? order.coupon.discountAmount : 0;
+      order.finalAmount = order.totalPrice - discount + order.shipping;
     }
 
     await order.save();
 
-    return res.status(200).json({ 
-      message: 'Item cancelled successfully', 
+    return res.status(200).json({
+      message: 'Item cancelled successfully',
       status: order.status,
       itemStatus: item.status,
       totalPrice: order.totalPrice,
+      discount: order.coupon ? order.coupon.discountAmount : 0,
+      shipping: order.shipping,
       finalAmount: order.finalAmount
     });
   } catch (error) {
-
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 const downloadInvoice = async (req, res) => {

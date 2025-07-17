@@ -115,8 +115,8 @@ body{
     }
 
     .status-processing {
-      background-color: #fff3cd;
-      color: #856404;
+      background-color: #089ae9;
+      color: #fbfafa;
     }
 
     .status-shipped {
@@ -138,8 +138,8 @@ body{
     }
 
     .status-cancelled {
-      background-color: #f8d7da;
-      color: #721c24;
+      background-color: #ff0a1e;
+      color: #fafafa;
     }
 
     .cancel-btn {
@@ -308,12 +308,17 @@ body{
                   <div class="product-price">
                     ₹<%= item.discountPrice || item.price %>
                   </div>
-                  <div class="product-status 
-                    <%= order.status === 'Confirmed' ? 'status-confirmed' :
-                        order.status === 'Shipped' ? 'status-shipped' :
-                        order.status === 'Delivered' ? 'status-delivered' : 'status-cancelled' %>">
-                    <%= order.status %>
-                  </div>
+                 <div class="product-status 
+  <%= order.status === 'Processing' ? 'status-processing' :
+      order.status === 'Confirmed' ? 'status-confirmed' :
+      order.status === 'Shipped' ? 'status-shipped' :
+      order.status === 'Delivered' ? 'status-delivered' :
+      order.status === 'Returned' ? 'status-Returned' :
+      order.status === 'Return Requested' ? 'status-Return-Requested' :
+      'status-cancelled' %>">
+  <%= order.status %>
+</div>
+
                  <div class="d-flex gap-2">
  <% if (order.status !== 'Cancelled') { %>
   <button class="btn btn-danger btn-sm" onclick="deleteOrder('<%= order._id %>', this)">Cancel</button>

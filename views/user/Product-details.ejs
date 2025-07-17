@@ -445,7 +445,7 @@ text-decoration:line-through;
           </div>
         </div>
 
-        <!-- Right Info Panel -->
+       
         <div class="details">
           <h1><%= product.productName %></h1>
           <p class="short-desc"><%= product.description %></p>
@@ -461,15 +461,19 @@ text-decoration:line-through;
             <% } %>
           </div>
           
-          <% if (product.variants[0].quantity <= 0) { %>
-            <p class="out-of-stock">Currently out of stock</p>
-          <% } %>
-          
+  <div id="stockMessageContainer">
+    <% if (product.variants[0].quantity <= 0) { %>
+      <p class="out-of-stock">Currently out of stock</p>
+    <% } else { %>
+      <p class="in-stock">In stock</p>
+    <% } %>
+  
+<div>
           <div class="ratings">
             ★★★★★ <span>(<%= product.reviewCount || 0 %> reviews)</span>
           </div>
 
-          <!-- Color Variants -->
+         
           <% if (product.variants.some(v => v.color)) { %>
             <div class="variant-group">
               <label>Colour</label>
@@ -494,7 +498,7 @@ text-decoration:line-through;
             </div>
           <% } %>
 
-          <!-- Storage Options -->
+         
           <% if (product.variants.some(v => v.storage)) { %>
   <div class="variant-group">
     <label>Storage</label>
@@ -646,17 +650,47 @@ text-decoration:line-through;
   }
 
   
-  function checkStockStatus(variantId, quantity) {
+function checkStockStatus(variantId, quantity) {
     const buyNowBtn = document.querySelector('.buy-now');
     const addToBasketBtn = document.querySelector('.add-to-basket');
+    const stockMessageContainer = document.getElementById('stockMessageContainer');
     const isOutOfStock = quantity <= 0;
 
+    // Update button states
     buyNowBtn.disabled = isOutOfStock;
     addToBasketBtn.disabled = isOutOfStock;
+    
 
-    buyNowBtn.textContent = isOutOfStock ? 'Out of Stock' : 'Buy Now';
-    addToBasketBtn.textContent = isOutOfStock ? 'Out of Stock' : 'Add to Basket';
-  }
+    // Update stock message
+    // if (isOutOfStock) {
+    //     stockMessageContainer.innerHTML = '<p class="out-of-stock">Currently out of stock</p>';
+    // } else {
+    //     stockMessageContainer.innerHTML = '<p class="in-stock">In stock</p>';
+    // }
+}
+
+// Make sure to call this function whenever the variant changes
+// document.querySelectorAll('input[name="color"]').forEach(radio => {
+//     radio.addEventListener('change', function() {
+//         const variantId = this.dataset.variantId;
+//         const quantity = parseInt(this.dataset.quantity);
+//         checkStockStatus(variantId, quantity);
+//     });
+// });
+
+// For storage select
+// if (document.getElementById('storageSelect')) {
+//     document.getElementById('storageSelect').addEventListener('change', function() {
+//         const selectedOption = JSON.parse(this.value);
+//         checkStockStatus(selectedOption.variantId, selectedOption.quantity);
+//     });
+// }
+
+// Initialize with first variant
+// checkStockStatus(
+//     '<%= product.variants[0]._id %>', 
+//     <%= product.variants[0].quantity %>
+// );
 
   
   document.addEventListener('DOMContentLoaded', function() {
@@ -695,12 +729,12 @@ text-decoration:line-through;
   const mainImage = document.getElementById('mainImage');
   if (!mainImage) return;
 
-  //  magnifier glass element
+
   let magnifier = document.createElement('div');
   magnifier.className = 'magnifier-glass';
   mainImage.parentElement.appendChild(magnifier);
 
-  // magnifier  move
+
   mainImage.addEventListener('mousemove', moveMagnifier);
   mainImage.addEventListener('mouseenter', function() {
     magnifier.style.opacity = 1;
@@ -731,8 +765,6 @@ text-decoration:line-through;
   
   mainImage.addEventListener('load', setMagnifierBackground);
 });
-
-// In your product-detail.ejs script section
 document.querySelector('.add-to-basket').addEventListener('click', async function() {
   const selectedVariant = getSelectedVariant();
   const quantity = 1;
@@ -755,8 +787,6 @@ document.querySelector('.add-to-basket').addEventListener('click', async functio
 
 
   const result = await response.json();  
-
-    // Update cart count in header (only if new product)
     if (result.success) {
       const cartCountElement = document.querySelector('.fa-shopping-cart + .cart-count');
       if (cartCountElement) {
@@ -804,11 +834,11 @@ function getSelectedVariant() {
     try {
       return JSON.parse(storageSelect.value);
     } catch {
-      return variants[0]; // Fallback to first variant
+      return variants[0]; 
     }
   }
   
-  // If no storage options, find variant by color
+ 
   return variants.find(v => v.color === selectedColor) || variants[0];
 }
 
