@@ -34,7 +34,7 @@ const orderSchema = new Schema({
       type: String,
       enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 
              'Return Requested', 'Return Approved', 'Return Rejected', 'Returned'],
-      default: 'Processing'
+      default: 'Confirmed'
     },
     variant: {
       color: { type: String },
@@ -87,7 +87,7 @@ const orderSchema = new Schema({
     type: String,
     required: true,
     enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
-    default: 'Processing'
+    default: 'Confirmed'
   },
   createdOn: {
     type: Date,

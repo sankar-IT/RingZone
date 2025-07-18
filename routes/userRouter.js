@@ -65,6 +65,10 @@ router.get('/user-change-password',userAuth,profileController.loadChangePassword
 router.post('/user-change-password',userAuth,profileController.changePassword)
 router.post('/resend-email-verification',userAuth,profileController.userChangeEmail)
 router.post('/send-email-verification',userAuth,profileController.userSendEmail)
+router.get('/user-wallet',userAuth,profileController.userWallet);
+
+router.post('/create-wallet-order', userAuth, profileController.createWalletOrder);
+router.post('/verify-wallet-payment', userAuth, profileController.verifyWalletPayment);
 
 router.get('/view-orders',userAuth,profileController.viewOrders)
 router.get('/orders-details/:orderId',userAuth,profileController.orderDetails)
@@ -72,6 +76,7 @@ router.get('/order-cancel/:orderId',userAuth,profileController.orderCancel)
 router.get('/cancel-item/:orderId/:itemId',userAuth,profileController.cancelItem)
 router.get('/download-invoice/:orderId',userAuth,profileController.downloadInvoice)
 router.post('/request-return',userAuth,profileController.returnOrder)
+
 
 //address management
 router.get('/user-address',userAuth,profileController.userAddress)

@@ -19,22 +19,39 @@ const addProduct = async (req, res) => {
   try {
     const { productName, brand, category, description, variants } = req.body;
 
+    // ✅ Fetch category to check for category offer
+    const categoryData = await Category.findById(category);
+    if (!categoryData) {
+      return res.status(400).json({ success: false, message: 'Invalid category' });
+    }
+
+    const categoryOffer = categoryData.categoryOffer || 0; // in percentage
+
+    // ✅ Product main images
     const productImages = req.files
       .filter(file => file.fieldname === 'productImages')
       .map(file => `uploads/products/${file.filename}`);
 
+    // ✅ Process variants and calculate discount price
     const parsedVariants = JSON.parse(variants).map((variant, index) => {
       const fieldname = `variantImages-variant-${index + 1}`;
-      
- 
-      
       const variantImages = req.files
         .filter(file => file.fieldname === fieldname)
         .map(file => `uploads/products/${file.filename}`);
 
-      return { ...variant, images: variantImages };
+      const regularPrice = parseFloat(variant.regularPrice) || 0;
+      const discount = (categoryOffer / 100) * regularPrice;
+      const discountPrice = Math.round(regularPrice - discount); // final price after discount
+
+      return {
+        ...variant,
+        images: variantImages,
+        regularPrice,
+        discountPrice // save discounted price
+      };
     });
 
+    // ✅ Create product
     const newProduct = new Product({
       productName,
       brand,
@@ -60,7 +77,6 @@ const addProduct = async (req, res) => {
     });
   }
 };
-
 
 const addProductList = async (req, res) => {
   try {

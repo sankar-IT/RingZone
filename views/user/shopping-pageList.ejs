@@ -385,8 +385,24 @@ const priceRanges = [
         <h3 class=""><%= products[i].productName?.length > 10 ? products[i].productName.slice(0,15) + '...' : products[i].productName %></h3>
         <p class="desc"><%= products[i].brand.name %></p>
         <div class="price-row">
-          <span class="new-price">₹<%= products[i].variants[0].discountPrice.toLocaleString('en-IN') %></span>
-          <span class="old-price">₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %></span>
+         <%
+  const variant = products[i].variants[0];
+  const rp = Number(variant.regularPrice) || 0;
+  const dp = Number(variant.discountPrice) || 0;
+
+  const hasValidDiscount = dp > 0 && dp < rp;
+%>
+
+<span class="new-price">
+  ₹<%= (hasValidDiscount ? dp : rp).toLocaleString('en-IN') %>
+</span>
+
+<% if (hasValidDiscount) { %>
+  <span class="old-price">
+    ₹<%= rp.toLocaleString('en-IN') %>
+  </span>
+<% } %>
+
         </div>
         <button>Add to Cart</button>
       </div>

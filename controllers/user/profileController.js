@@ -2,6 +2,7 @@ const User = require('../../models/userSchema');
 const Address=require('../../models/addressSchema');
 const Order=require('../../models/orderSchema');
 const Cart=require('../../models/cartSchema')
+const Wallet=require('../../models/walletSchema');
 const PDFDocument = require('pdfkit');
 const { addTable } = require('pdfkit-table');
 const nodemailer = require('nodemailer');
@@ -920,20 +921,29 @@ const cancelItem = async (req, res) => {
     if (item.status === 'Cancelled') {
       return res.status(400).json({ message: 'Item is already cancelled' });
     }
-
-    // ✅ Allow cancel only for Pending, Processing, Confirmed
     if (!['Pending', 'Processing', 'Confirmed'].includes(order.status)) {
       return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
     }
-
-    // ✅ Cancel this item
     item.status = 'Cancelled';
+    const refundAmount = item.price * item.quantity;
+    const userId = order.user;
+    let wallet = await Wallet.findOne({ user: userId });
 
-    // ✅ Check remaining active items
+    if (!wallet) {
+      wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
+    }
+
+    wallet.balance += refundAmount;
+    wallet.transactions.push({
+      type: 'credit',
+      amount: refundAmount,
+      description: `Refund for cancelled item in Order ${orderId}`
+    });
+
+    await wallet.save();
     const activeItems = order.orderedItems.filter(itm => itm.status !== 'Cancelled');
 
     if (activeItems.length === 0) {
-      // ✅ All items cancelled → clear totals and mark order cancelled
       order.totalPrice = 0;
       order.finalAmount = 0;
       order.shipping = 0;
@@ -942,10 +952,7 @@ const cancelItem = async (req, res) => {
       }
       order.status = 'Cancelled';
     } else {
-      // ✅ Recalculate totals if some items remain
       order.totalPrice = activeItems.reduce((sum, itm) => sum + (itm.price * itm.quantity), 0);
-
-      // Keep discount same or adjust logic if needed
       const discount = order.coupon ? order.coupon.discountAmount : 0;
       order.finalAmount = order.totalPrice - discount + order.shipping;
     }
@@ -953,15 +960,18 @@ const cancelItem = async (req, res) => {
     await order.save();
 
     return res.status(200).json({
-      message: 'Item cancelled successfully',
+      message: 'Item cancelled and amount credited to wallet',
       status: order.status,
       itemStatus: item.status,
+      refundAmount,
+      walletBalance: wallet.balance,
       totalPrice: order.totalPrice,
       discount: order.coupon ? order.coupon.discountAmount : 0,
       shipping: order.shipping,
       finalAmount: order.finalAmount
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: 'Server error' });
   }
 };
@@ -1109,6 +1119,57 @@ const returnOrder=async(req,res)=>{
   }
 }
 
+const userWallet = async (req, res) => {
+  const userId = req.session.user._id;
+
+  let wallet = await Wallet.findOne({ user: userId });
+  if (!wallet) {
+    wallet = await Wallet.create({ user: userId });
+  }
+
+  res.render('wallet', { user: req.session.user, wallet });
+};
+
+const createWalletOrder = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const options = { amount: amount * 100, currency: 'INR', receipt: 'wallet_' + Date.now() };
+    const order = await razorpay.orders.create(options);
+
+    res.json({ success: true, orderId: order.id, keyId: process.env.RAZORPAY_ID_KEY, amount: order.amount });
+  } catch (error) {
+    res.json({ success: false, message: 'Failed to create order' });
+  }
+};
+
+const verifyWalletPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+    const userId = req.session.user._id;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET_KEY)
+      .update(body)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.json({ success: false, message: 'Invalid signature' });
+    }
+
+    let wallet = await Wallet.findOne({ user: userId });
+    if (!wallet) wallet = await Wallet.create({ user: userId });
+
+    wallet.balance += parseFloat(amount);
+    wallet.transactions.push({ type: 'credit', amount, description: 'Wallet top-up' });
+    await wallet.save();
+
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, message: 'Error verifying payment' });
+  }
+};
+
+
 module.exports = {
   forgetpasspage,
   forgetEmailValid,
@@ -1136,5 +1197,8 @@ module.exports = {
  orderCancel,
  cancelItem,
  downloadInvoice,
- returnOrder
+ returnOrder,
+ userWallet,
+ createWalletOrder,
+ verifyWalletPayment
 };

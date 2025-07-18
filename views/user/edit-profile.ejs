@@ -79,13 +79,48 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
     padding: 20px;
   }
-  .profile-pic
-  {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
+ .profile-pic.placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f8f8, #e5e5e5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px; /* Bigger icon size */
+  color: #555; /* Icon color */
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
 }
+
+.profile-pic.placeholder:hover {
+  background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
+  color: #ff4646; /* Hover effect for icon */
+  transform: scale(1.05);
+}
+/* Base avatar size used in sidebar */
+.profile-image-wrapper {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  margin: 0 auto;            /* center wrapper in the sidebar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Applies to the actual <img> when user has a photo */
+.profile-image-wrapper .profile-pic {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;          /* crops nicely */
+  display: block;
+  border: 3px solid #ccc;     /* optional—match .profile-img style if you like */
+}
+
+
 </style>
 
 <body>
@@ -95,8 +130,16 @@
       <div class="col-md-3">
         <div class="sidebar">
           <div class="text-center mb-3">
-            <img src="<%= user.profileImage %>" class="profile-pic" alt="User" style="width: 100px; height: 100px; border-radius: 50%;">
-           <h6 class="mt-2 mb-0">Welcome,<%=user.firstname%></h6>
+             <div class="profile-image-wrapper position-relative mx-auto">
+  <% if (user && user.profileImage) { %>
+    <img src="<%= user.profileImage %>" class="profile-pic" alt="User">
+  <% } else { %>
+    <div class="profile-pic placeholder d-flex align-items-center justify-content-center">
+      <i class="fa-solid fa-user fa-xl text-muted"></i>
+    </div>
+  <% } %>
+</div>
+          <h6 class="mt-2 mb-0">weclome, <%=user.firstname%></h6>
             <small class="text-muted"><%=user.email%></small>
           </div>
           <nav class="nav flex-column">
@@ -104,27 +147,21 @@
             <a class="nav-link active" href="edit-profile"><i class="fas fa-user-edit me-2"></i> Edit Profile</a>
             <a class="nav-link" href="view-orders"><i class="fas fa-box me-2"></i> My Orders</a>
             <a class="nav-link" href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
-            <a class="nav-link" href="#"><i class="fas fa-wallet me-2"></i> My Wallet</a>
-            <!-- <a class="nav-link" href="#"><i class="fas fa-key me-2"></i> Change Password</a> -->
+            <a class="nav-link" href="/user-wallet"><i class="fas fa-wallet me-2"></i> My Wallet</a>
+           
           </nav>
         </div>
       </div>
-      <!-- Main Content -->
+      
       <div class="col-md-9">
         <div class="main-content">
           <h4 class="mb-4 border-bottom pb-2">Your Details</h4>
-          <!-- Profile Image and Upload -->
-
-          
-          
-          
-          <!-- Profle Form -->
           
           <form action="/update-profile" method="post" enctype="multipart/form-data" >
             <div class="row">
               
                         <div class="text-center mb-3">
-                          <img src="<%= user.profileImage %>" id="profilePreview" class="profile-img" alt="Profile" >
+                          <img src="<%= user.profileImage %>" id="profilePreview" class="profile-img" alt="Profile"  >
                           <div class="mt-2">
                             <label for="profilePic" class="change-photo-btn">
                               <i class="fa fa-camera"></i> Change Photo
