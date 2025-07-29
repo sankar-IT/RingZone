@@ -258,8 +258,7 @@
   display: block;
 }
 
-/* ----------------------- */
-/* Timer */
+
 .timer_num {
   width: 90px;
   height: 90px;
@@ -278,10 +277,10 @@
 <body>
 <div class="super_container">
 
-  <!-- Header -->
+
   <header class="header trans_300">
 
-    <!-- Top Navigation -->
+
     <div class="top_nav">
       <div class="container">
         <div class="row">
@@ -316,19 +315,17 @@
       </div>
     </div>
 
-    <!-- Main Navigation -->
     <div class="main_nav_container">
       <div class="container">
         <div class="row align-items-center justify-content-between">
 
-          <!-- Logo -->
+         
           <div class="col-auto">
             <div class="logo_container">
               <a href="/">Ring<span>Zone</span></a>
             </div>
           </div>
 
-          <!-- Menu -->
           <div class="col">
             <nav class="navbar justify-content-center w-100">
   <ul class="navbar_menu">
@@ -340,8 +337,6 @@
 </nav>
 
           </div>
-
-          <!-- User Icons -->
           <div class="col-auto">
             <ul class="navbar_user d-flex align-items-center mb-0">
 
@@ -377,7 +372,18 @@
                   </a>
                 </li>
               <% } %>
+ 
+              <li class="me-3">
+<a href="/wishlist" class="wishlist-navbar-icon position-relative" id="navbarWishlistIcon">
+  <i class="fa fa-heart-o" aria-hidden="true"></i>
+  <% if (wishlistLength > 0) { %>
+    <span id="wishlist-count" class="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      <%= wishlistLength %>
+    </span>
+  <% } %>
+</a>
 
+</li>
               <li class="me-3"><a href="#"><i class="fa fa-search" aria-hidden="true"></i></a></li>
              <a href="/user-cart" class="position-relative">
   <i class="fa fa-shopping-cart" aria-hidden="true"></i>
@@ -385,9 +391,8 @@
   <span id="cart-count" class="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
     <%= cartCount %>
   </span>
-
-
 </a>
+
             </ul>
           </div>
 
@@ -416,7 +421,58 @@
       }
     });
   }
+  async function updateWishlistCount() {
+    try {
+      const response = await fetch('/api/wishlist-count');
+      const data = await response.json();
+
+      const count = data.count;
+      const wishlistCountEl = document.getElementById('wishlist-count');
+
+      if (count > 0) {
+        wishlistCountEl.textContent = count;
+        wishlistCountEl.style.display = 'inline-block';
+      } else {
+        wishlistCountEl.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('Error fetching wishlist count:', err);
+    }
+  }
+
   
+  document.addEventListener('DOMContentLoaded', updateWishlistCount);
+  
+
+  document.querySelectorAll('.wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', async function () {
+      const productId = this.dataset.productId;
+
+      try {
+        const response = await fetch('/wishlist/toggle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ productId })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+         
+          updateWishlistCount();
+
+          
+          this.classList.toggle('active');
+        } else {
+          alert(result.message || 'Could not update wishlist');
+        }
+      } catch (err) {
+        console.error('Error updating wishlist:', err);
+      }
+    });
+  });
 </script>
 </body>
 </html>

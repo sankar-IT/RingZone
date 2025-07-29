@@ -14,25 +14,24 @@ const getProductPage = async (req, res) => {
   }
 };
 
-// Add new product
+
 const addProduct = async (req, res) => {
   try {
     const { productName, brand, category, description, variants } = req.body;
 
-    // ✅ Fetch category to check for category offer
     const categoryData = await Category.findById(category);
     if (!categoryData) {
       return res.status(400).json({ success: false, message: 'Invalid category' });
     }
 
-    const categoryOffer = categoryData.categoryOffer || 0; // in percentage
+    const categoryOffer = categoryData.categoryOffer || 0; 
 
-    // ✅ Product main images
+   
     const productImages = req.files
       .filter(file => file.fieldname === 'productImages')
       .map(file => `uploads/products/${file.filename}`);
 
-    // ✅ Process variants and calculate discount price
+    
     const parsedVariants = JSON.parse(variants).map((variant, index) => {
       const fieldname = `variantImages-variant-${index + 1}`;
       const variantImages = req.files
@@ -41,17 +40,17 @@ const addProduct = async (req, res) => {
 
       const regularPrice = parseFloat(variant.regularPrice) || 0;
       const discount = (categoryOffer / 100) * regularPrice;
-      const discountPrice = Math.round(regularPrice - discount); // final price after discount
+      const discountPrice = Math.round(regularPrice - discount); 
 
       return {
         ...variant,
         images: variantImages,
         regularPrice,
-        discountPrice // save discounted price
+        discountPrice 
       };
     });
 
-    // ✅ Create product
+   
     const newProduct = new Product({
       productName,
       brand,
@@ -118,7 +117,7 @@ const addProductList = async (req, res) => {
   }
 };
 
-// Block-unblock product
+
 const productBlock = async (req, res) => {
   try {
     const { block } = req.body;
@@ -268,6 +267,62 @@ const updateProduct = async (req, res) => {
   }
 };
 
+const addProductOffer = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { offer } = req.body;
+
+    if (isNaN(offer) || offer <= 0 || offer > 90) {
+      return res.status(400).json({ success: false, message: 'Invalid offer percentage' });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    
+    product.offer = offer;
+    product.variants.forEach(variant => {
+      const discountAmount = Math.floor((variant.regularPrice * offer) / 100);
+      variant.discountPrice = variant.regularPrice - discountAmount;
+    });
+
+    await product.save();
+
+    res.json({ success: true, message: 'Product offer applied successfully' });
+  } catch (error) {
+    console.error('Error in addProductOffer:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
+const removeProductOffer = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      console.log("fkjbfjbvkhbf");
+      
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    
+    product.offer = 0;
+    product.variants.forEach(variant => {
+      variant.discountPrice = variant.regularPrice;
+    });
+
+    await product.save();
+
+    res.json({ success: true, message: 'Product offer removed successfully' });
+  } catch (error) {
+    console.log('Error in removeProductOffer:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 
 module.exports = {
@@ -276,5 +331,7 @@ module.exports = {
   addProductList,
   productBlock,
   editProduct,
-  updateProduct
+  updateProduct,
+  addProductOffer,
+  removeProductOffer
 };

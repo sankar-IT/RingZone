@@ -142,106 +142,130 @@
 
 <script>
   const razorpayKey = "<%= razorpayKey %>";
+  
+  const spinner = document.getElementById('checkoutSpinner');
 
-  document.getElementById('checkoutBtn').addEventListener('click', async () => {
-    const spinner = document.getElementById('checkoutSpinner');
+  function resetBtn() {
+  spinner.classList.add('d-none');
+  const btnText = document.getElementById('checkoutText');
+  btnText.textContent = 'Place secure order';
+  const btn = document.getElementById('checkoutBtn');
+  btn.disabled = false;
+}
+
+document.getElementById('checkoutBtn').addEventListener('click', async () => {
+  try {
     const btnText = document.getElementById('checkoutText');
     const btn = document.getElementById('checkoutBtn');
     spinner.classList.remove('d-none');
-    btnText.textContent = 'Processing...';
+    btnText.textContent = 'Confirmed';
     btn.disabled = true;
 
     const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked')?.id;
     const selectedShipment = document.querySelector('input[name="shipping"]:checked')?.value || '100';
-    const grandTotal = parseInt(document.getElementById('grandTotal').textContent.replace(/[₹,]/g, ''));
-
+    const grandTotal = parseInt(
+      document.getElementById('grandTotal').textContent.replace(/[₹,]/g, '')
+    );
 
     if (selectedPaymentMethod === 'card') {
-      try {
+      
+      const orderRes = await fetch('/create-razorpay-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ finalAmount: grandTotal }),
+      });
 
-        const orderRes = await fetch('/create-razorpay-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ finalAmount: grandTotal })
-        });
+      const data = await orderRes.json();
 
-        const data = await orderRes.json();
+      if (!orderRes.ok || !data.success) {
+        throw new Error(data.message || 'Failed to create Razorpay order.');
+      }
 
-        if (!data.success) throw new Error('Failed to create Razorpay order.');
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.orderId,
+        name: "RingZone",
+        description: "Payment for order",
+        image: "/images/logo.png",
+        prefill: {
+          name: data.customer?.name || '',
+          email: data.customer?.email || '',
+          contact: data.customer?.phone || '',
+        },
+        theme: { color: "#ff4646" },
 
-        const options = {
-          key: data.keyId,
-          amount: data.amount,
-          currency: data.currency,
-          order_id: data.orderId,
-          name: "MobileMart",
-          description: "Payment for order",
-          image: "/images/logo.png",
-          handler: async function (response) {
-
-            const verifyRes = await fetch('/verify-razorpay-payment',{
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch('/verify-razorpay-payment', {
               method: 'POST',
-              headers: { 'Content-Type' : 'application/json' },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id:  response.razorpay_payment_id ,
+                razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-              })
+                order_id: data.dbOrderId,
+              }),
             });
 
             const verifyData = await verifyRes.json();
-            if (verifyData.success) {
+
+            if (verifyRes.ok && verifyData.redirectUrl) {
               window.location.href = verifyData.redirectUrl;
             } else {
-               window.location.href = verifyData.redirectUrl;
+             
+              window.location.href = `/payment-failure/${data?.orderId}`;
             }
-          },
- prefill: {
-          name: data.customer.name,
-          email: data.customer.email,
-          contact: data.customer.phone
-        },
-          theme: {
-            color: "#ff4646"
+          } catch (err) {
+            console.error("Error verifying payment:", err);
+            window.location.href = `/payment-failure/${data?.orderId}`;
           }
-        };
+        },
 
-        const rzp = new Razorpay(options);
-        rzp.open();
-      } catch (err) {
-        console.error(err);
-         window.location.href = verifyData.redirectUrl;
-      }
-      
+        modal: {
+          ondismiss: function () {
+            window.location.href = `/payment-failure/${data?.orderId}`;
+          },
+        },
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.on('payment.failed', function (response) {
+        console.error("Payment Failed:", response.error);
+
+        resetBtn(); 
+                      window.location.href = `/payment-failure/${data?.orderId}`;
+
+
+      });
+
+      rzp.open();
     } else {
-      // COD fallback
-      try {
+     
+      const response = await fetch('/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shipment: selectedShipment }),
+      });
 
-        const response = await fetch('/place-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ shipment: selectedShipment })
-        });
-
-        const result = await response.json();
-        if (result.success) {
-          window.location.href = result.redirectUrl || '/order-placed';
-        } else {
-          Swal.fire('Oops!', result.message || 'Cart is empty.', 'warning');
-          resetBtn();
-        }
-      } catch (err) {
-        Swal.fire('Error', err.message || 'Order failed', 'error');
+      const result = await response.json();
+      if (result.success) {
+        window.location.href = result.redirectUrl || '/order-placed';
+      } else {
+        Swal.fire('Oops!', result.message || 'Cart is empty.', 'warning');
         resetBtn();
       }
     }
+  } catch (err) {
+    console.error("Checkout error:", err);
+    Swal.fire('Error', err.message || 'Something went wrong during checkout.', 'error');
+    resetBtn();
+  }
+});
 
-    function resetBtn() {
-      spinner.classList.add('d-none');
-      btnText.textContent = 'Place secure order';
-      btn.disabled = false;
-    }
-  });
+
 </script>
 
 <%- include('../../views/partials/user/footer') %>

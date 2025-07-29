@@ -118,7 +118,7 @@ const removeCategoryOffer = async (req, res) => {
 
     for (const product of products) {
       for (const variant of product.variants) {
-        variant.discountPrice = variant.regularPrice; // Reset
+        variant.discountPrice = variant.regularPrice; 
       }
       await product.save();
     }

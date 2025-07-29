@@ -101,7 +101,7 @@
         </button>
       </div>
 
-      <!-- Shipping Method -->
+      
       <div>
         <div class="form-check mb-2">
         </div>
@@ -110,7 +110,6 @@
       </div>
     </div>
 
-    <!-- Order Summary -->
       <div class="col-md-4">
   <div class="cart-box">
     <h5 class="mb-3">Order summary</h5>
@@ -234,7 +233,7 @@
   </div>
 </div>
 
-<!-- Coupon Modal -->
+
 <div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
@@ -276,7 +275,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  // Coupon application function
+ 
   function applyCoupon(code) {
     document.getElementById('couponCode').value = code;
     const modal = bootstrap.Modal.getInstance(document.getElementById('couponModal'));
@@ -473,26 +472,32 @@
     const spinner = document.getElementById('checkoutSpinner');
     const btnText = document.getElementById('checkoutText');
     const btn = document.getElementById('checkoutBtn');
+    const couponCode = document.getElementById('couponCode').value;
 
     spinner.classList.remove('d-none');
     btnText.textContent = 'Processing...';
     btn.disabled = true;
 
     const selectedShipment = document.querySelector('input[name="shipping"]:checked')?.value || '100';
-    const addressId = document.querySelector('input[name="address"]:checked').value;
+    const addressId = document.querySelector('input[name="address"]:checked')?.value;
+
 
     try {
+
         const response = await fetch('/load-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 shipment: selectedShipment,
                 addressId,
-                couponCode:couponCode,
+                couponCode: couponCode,
                 discount: discount 
             })  
         });
 
+        
+
+        
         const result = await response.json();
 
         if (response.ok && result.success) {
@@ -509,6 +514,7 @@
             btn.disabled = false;
         }
     } catch (error) {
+      
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -567,6 +573,7 @@ document.getElementById('applyCoupon').addEventListener('click', async () => {
                 text: result.message || 'This coupon is not applicable.',
                 confirmButtonColor: '#dc3545'
             });
+            document.getElementById('couponCode').value = '';
         }
     } catch (error) {
         console.error(error);
@@ -611,6 +618,7 @@ document.getElementById('removeCouponBtn').addEventListener('click', async () =>
     });
   }
 });
+
 
 </script>
 

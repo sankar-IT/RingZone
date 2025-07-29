@@ -7,6 +7,7 @@ const brandController=require('../controllers/admin/brandController')
 const productController=require('../controllers/admin/productController');
 const orderController=require('../controllers/admin/orderController');
 const couponController=require('../controllers/admin/couponController');
+const salesController=require('../controllers/admin/salesController');
 const {userAuth,adminAuth}=require('../middleware/auth');
 const multer=require('multer');
 const storage=require('../helpers/multer');
@@ -43,7 +44,7 @@ router.get('/brands',adminAuth,brandController.getBrandPage);
 router.post('/addBrand',adminAuth,storage.uploadCategory.single('image'),brandController.addBrand);
 router.get('/blockBrand',adminAuth,brandController.blockBrand)
 router.get('/unBlockBrand',adminAuth,brandController.unBlockBrand)
-router.get('/deleteBrand',adminAuth,brandController.deleteBrand)
+// router.get('/deleteBrand',adminAuth,brandController.deleteBrand)
 
 //Product Management
 router.get('/product-add',adminAuth,productController.getProductPage);
@@ -52,6 +53,16 @@ router.get('/productlist',adminAuth,productController.addProductList);
 router.post('/product-toggle/:id',adminAuth,productController.productBlock);
 router.get('/product-edit/:id',adminAuth,productController.editProduct);
 router.post('/product-edit/:id',adminAuth,storage.uploadProductEdit,productController.updateProduct)
+router.post('/addProductOffer/:productId', adminAuth, productController.addProductOffer);
+router.post('/removeProductOffer/:productId', adminAuth, productController.removeProductOffer);
+
+
+
+//sale management
+router.get('/sales-report',adminAuth,salesController.loadSalesPage)
+
+
+
 
 //order management
 
@@ -64,8 +75,6 @@ router.post('/reject-return', adminAuth,orderController.rejectReturn);
 
 
 //coupon management
-
-
 router.get('/coupon-page', adminAuth, couponController.loadCouponPage);
 router.post('/add-coupons', adminAuth, couponController.addCoupons);
 router.post('/update-coupon', adminAuth, couponController.updateCoupon);

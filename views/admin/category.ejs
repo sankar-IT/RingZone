@@ -119,24 +119,22 @@
   font-weight: 500;
   text-decoration: none;
   transition: all 0.3s ease;
-  color: #ff4646; /* link text color */
-  border: 1px solid #ff4646; /* border in theme color */
+  color: #ff4646;
+  border: 1px solid #ff4646; 
 }
 
 .pagination-container a:hover {
   background-color: #ff4646;
-  color: #fff; /* text white on hover */
+  color: #fff; 
 }
 
 .pagination-container .current-page {
-  background-color: #ff4646; /* active page background */
+  background-color: #ff4646;
   color: #fff;
   border: 1px solid #ff4646;
   cursor: default;
 }
 
-
-    /* Main content - Enhanced */
     .main {
       flex: 1;
       margin-left: 250px;
@@ -174,7 +172,7 @@
       margin-bottom: 20px;
     }
 
-    /* Logout button - Enhanced */
+   
     .btn-logout {
       background-color: #e74c3c;
       border: none;
@@ -189,7 +187,7 @@
       transform: translateY(-1px);
     }
     .search-bar {
-  max-width: 350px; /* Reduce full width */
+  max-width: 350px; 
   margin-bottom: 20px;
 }
 
@@ -222,7 +220,6 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar - Structure unchanged, styling enhanced -->
   <div class="sidebar">
     <h2>RingZone</h2>
     <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -231,16 +228,12 @@
     <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a>
     <a href="/admin/brands" class="nav-link"><i class="fas fa-briefcase"></i> Brands</a>
     <a href="/admin/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Report</a>
-       <a href="/admin/coupon-page" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
+    <a href="/admin/coupon-page" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
-    <a href="/admin/Banner" class="nav-link"><i class="fas fa-image"></i> Banner</a>
-    <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
-    <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
   </div>
 
-  <!-- Main Content - Structure unchanged, styling enhanced -->
+  
   <div class="main ">
-    <!-- Topbar -->
     <div class="topbar">
       <h1 class="m-0 fs-4 text-dark">Category Management</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
@@ -255,7 +248,7 @@
 </div>
 
     <div class="row mt-3">
-    <!-- Category Form -->
+    
     <div class="col-md-4">
       <div class="card p-4">
         <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)" >
@@ -274,7 +267,7 @@
       </div>
     </div>
 
-    <!-- Category Table -->
+   
     <div class="col-md-8">
       <div class="card p-3">
         <div class="table-responsive">
@@ -340,7 +333,6 @@
           </table>
         </div>
 
-        <!-- Pagination -->
      <div class="pagination-container">
   <% if (currentPage > 1) { %>
     <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
@@ -365,7 +357,6 @@
 
   </div>
 
-  <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -399,7 +390,6 @@
       .catch(async (error) => {
   let errorMessage = error.message;
 
-  // Check if response contains JSON with 'error' field
   if (error.response) {
     const data = await error.response.json();
     errorMessage = data.error;

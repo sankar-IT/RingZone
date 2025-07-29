@@ -70,6 +70,10 @@ router.get('/user-wallet',userAuth,profileController.userWallet);
 router.post('/create-wallet-order', userAuth, profileController.createWalletOrder);
 router.post('/verify-wallet-payment', userAuth, profileController.verifyWalletPayment);
 
+router.get('/wishlist',userAuth,profileController.loadWishListPage)
+router.post('/wishlist/toggle', userAuth,profileController.toggleWishlist);
+
+
 router.get('/view-orders',userAuth,profileController.viewOrders)
 router.get('/orders-details/:orderId',userAuth,profileController.orderDetails)
 router.get('/order-cancel/:orderId',userAuth,profileController.orderCancel)
@@ -112,7 +116,8 @@ router.post('/remove-coupon',userAuth,cartController.removeCoupon);
 
 router.post('/create-razorpay-order',userAuth, cartController.createRazorpayOrder);
 router.post('/verify-razorpay-payment',userAuth, cartController.verifyRazorPayOrder);
-router.get('/payment-success/:orderId' ,userAuth, cartController.paymentSuccessPage )
+router.get('/payment-success/:orderId' ,userAuth, cartController.paymentSuccessPage );
+router.get('/payment-failure/:orderId',userAuth,cartController.paymentFailurePage);
 
 
 

@@ -40,6 +40,23 @@ body {
   margin-top: 120px;
   align-items: flex-start;
 }
+.offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #ff3e3e;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 5px;
+  z-index: 2;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.product-card {
+  position: relative;
+}
+
 
 .sidebar {
   width: 250px;
@@ -87,8 +104,7 @@ body {
   gap: 24px;
   width: 100%;
   justify-content: flex-start;
-  /* Optional: add margin-top if you want more space from header */
-  /* margin-top: 20px; */
+  
 }
 .product-card {
   background: #fff;
@@ -159,7 +175,7 @@ body {
 .wishlist-icon {
   position: absolute;
   top: 10px;
-  right: 10px; /* ✅ move to right */
+  right: 10px; 
   z-index: 10;
   background: #fff;
   padding: 6px;
@@ -167,6 +183,13 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   cursor: pointer;
   transition: color 0.2s ease;
+}
+.wishlist-icon.active i {
+  color: #ff4646; 
+}
+
+.wishlist-icon:hover i {
+  color: #ff4646; 
 }
 
 .pagination a {
@@ -348,8 +371,6 @@ const priceRanges = [
 
   <div>
 
-
-    <!-- Search and Sort Bar -->
     <div class="search-sort-bar">
       <form method="GET" action="/shopping-pageList" class="search-sort-form">
         <input type="text" name="search" value="<%= search || '' %>" placeholder="Search products..." class="search-input" />
@@ -373,35 +394,46 @@ const priceRanges = [
         </form>
       </div>
       
-      <!-- Product Grid -->
+ 
       <section class="products-grid">
     <% for(let i = 0; i < products.length; i++) { %>
    <a href="/products/<%= products[i]._id %>" class="product-link">
       <div class="product-card">
-        <div class="wishlist-icon">
-          <i class="fa fa-heart-o"></i> 
-        </div>
+       <div class="offer-badge">
+  <%
+    const productOffer = Number(products[i].offer) || 0;
+    const categoryOffer = Number(products[i].category?.categoryOffer) || 0;
+    const greaterOffer = Math.max(productOffer, categoryOffer);
+
+    if (greaterOffer > 0) {
+  %>
+    <%= greaterOffer %>% OFF
+  <% } %>
+</div>
+
+        <div class="wishlist-icon" data-product-id="<%= products[i]._id %>">
+  <i class="fa fa-heart-o"></i> 
+</div>
         <img src="/<%= products[i].images[0] %>" alt="<%= products[i].productName %>">
         <h3 class=""><%= products[i].productName?.length > 10 ? products[i].productName.slice(0,15) + '...' : products[i].productName %></h3>
         <p class="desc"><%= products[i].brand.name %></p>
         <div class="price-row">
-         <%
+<%
   const variant = products[i].variants[0];
   const rp = Number(variant.regularPrice) || 0;
-  const dp = Number(variant.discountPrice) || 0;
-
-  const hasValidDiscount = dp > 0 && dp < rp;
+  const fp = Number(variant.finalPrice) || rp;
+  const hasOffer = fp < rp;
 %>
-
 <span class="new-price">
-  ₹<%= (hasValidDiscount ? dp : rp).toLocaleString('en-IN') %>
+  ₹<%= fp.toLocaleString('en-IN') %>
 </span>
-
-<% if (hasValidDiscount) { %>
+<% if (hasOffer) { %>
   <span class="old-price">
     ₹<%= rp.toLocaleString('en-IN') %>
   </span>
 <% } %>
+
+
 
         </div>
         <button>Add to Cart</button>
@@ -420,6 +452,73 @@ const priceRanges = [
     <a href="<%= buildFilterUrl({ page: currentPage + 1 }) %>">Next</a>
   <% } %>
 </nav>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const storageKey = 'wishlistProductIds';
+
+  function getWishlist() {
+    return JSON.parse(localStorage.getItem(storageKey) || '[]');
+  }
+
+  function setWishlist(ids) {
+    localStorage.setItem(storageKey, JSON.stringify(ids));
+  }
+
+  async function updateWishlistServer(productId, isAdding) {
+    try {
+      await fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId, action: isAdding ? 'add' : 'remove' })
+      });
+    } catch (err) {
+      console.error('Wishlist update failed', err);
+    }
+  }
+
+  const wishlist = getWishlist();
+
+  document.querySelectorAll('.wishlist-icon').forEach(function (icon) {
+    const productId = icon.dataset.productId;
+    if (!productId) return; 
+
+    const heartIcon = icon.querySelector('i');
+
+    
+    if (wishlist.includes(productId)) {
+      icon.classList.add('active');
+      heartIcon.classList.remove('fa-heart-o');
+      heartIcon.classList.add('fa-heart');
+    }
+
+    icon.addEventListener('click', async function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      icon.classList.toggle('active');
+      let ids = getWishlist();
+
+      const isAdding = icon.classList.contains('active');
+
+      if (isAdding) {
+        heartIcon.classList.remove('fa-heart-o');
+        heartIcon.classList.add('fa-heart');
+        if (!ids.includes(productId)) ids.push(productId);
+      } else {
+        heartIcon.classList.remove('fa-heart');
+        heartIcon.classList.add('fa-heart-o');
+        ids = ids.filter(id => id !== productId);
+      }
+
+      setWishlist(ids);
+        await updateWishlistServer(productId, isAdding);
+    });
+  });
+});
+
+</script>
 
 
 <%- include('../../views/partials/user/footer') %>

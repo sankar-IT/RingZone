@@ -85,30 +85,30 @@ res.redirect('/pageerror')
   }
 }
 
-const deleteBrand = async (req, res) => {
-  try {
-    const { id } = req.params;
+// const deleteBrand = async (req, res) => {
+//   try {
+//     const { id } = req.params;
 
-    if (!id) {
-      console.error('Invalid brand ID');
-      return res.status(400).json({ success: false, message: 'Invalid brand id.' });
-    }
+//     if (!id) {
+//       console.error('Invalid brand ID');
+//       return res.status(400).json({ success: false, message: 'Invalid brand id.' });
+//     }
 
-    const deleted = await Brand.findByIdAndDelete(id);
+//     const deleted = await Brand.findByIdAndDelete(id);
 
-    if (!deleted) {
-      console.error('Brand not found');
-      return res.status(404).json({ success: false, message: 'Brand not found.' });
-    }
+//     if (!deleted) {
+//       console.error('Brand not found');
+//       return res.status(404).json({ success: false, message: 'Brand not found.' });
+//     }
 
-    console.log('Brand deleted:', id);
-    return res.json({ success: true, message: 'Brand deleted successfully.' });
+//     console.log('Brand deleted:', id);
+//     return res.json({ success: true, message: 'Brand deleted successfully.' });
 
-  } catch (error) {
-    console.error('Error deleting brand:', error);
-    return res.status(500).json({ success: false, message: 'Server error deleting brand.' });
-  }
-};
+//   } catch (error) {
+//     console.error('Error deleting brand:', error);
+//     return res.status(500).json({ success: false, message: 'Server error deleting brand.' });
+//   }
+// };
 
 module.exports={
 
@@ -116,5 +116,4 @@ module.exports={
   addBrand,
   blockBrand,
   unBlockBrand,
-  deleteBrand
 }

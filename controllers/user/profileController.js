@@ -3,6 +3,8 @@ const Address=require('../../models/addressSchema');
 const Order=require('../../models/orderSchema');
 const Cart=require('../../models/cartSchema')
 const Wallet=require('../../models/walletSchema');
+const Product=require('../../models/productsSchema')
+const Wishlist=require('../../models/wishlistSchema')
 const PDFDocument = require('pdfkit');
 const { addTable } = require('pdfkit-table');
 const nodemailer = require('nodemailer');
@@ -13,7 +15,6 @@ require('dotenv').config();
 const session = require('express-session');
 const { default: mongoose } = require('mongoose');
 
-// Generate 6-digit OTP
 function generateOtp() {
   const digits = '1234567890';
   let otp = '';
@@ -22,8 +23,6 @@ function generateOtp() {
   }
   return otp;
 }
-
-// Send verification email
 const sendVerificationEmail = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -58,12 +57,12 @@ const sendVerificationEmail = async (email, otp) => {
   }
 };
 
-// Password hashing
+
 const securePassword = async (password) => {
   return await bcrypt.hash(password, 10);
 };
 
-// Controller functions
+
 const forgetpasspage = async (req, res) => {
   try {
     res.render('forget-password');
@@ -87,7 +86,7 @@ const forgetEmailValid = async (req, res) => {
     const otp = generateOtp();
     req.session.otp = otp;
     req.session.email = email;
-    req.session.otpExpires = Date.now() + 600000; // 10 minutes
+    req.session.otpExpires = Date.now() + 600000; 
     
     const emailSent = await sendVerificationEmail(email, otp);
     
@@ -215,7 +214,7 @@ const resendOtp = async (req, res) => {
     });
   }
 };
-//profile page
+
 
 const userProfile=async(req,res)=>{
   try {
@@ -238,7 +237,7 @@ const userProfile=async(req,res)=>{
   }
 }
 
-//user Address
+
 const userAddress = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user;
@@ -304,7 +303,7 @@ const userAddress = async (req, res) => {
 };
 
 
-//add address
+
 const addAddress = async (req, res) => {
   try {
     const userId=req.session.user._id;
@@ -378,7 +377,7 @@ const addressAdd = async (req, res) => {
 };
 
 
-// In your profileController.js
+
 const editProfile = async (req, res) => {
   try {
     const userId = req.session.user._id;
@@ -405,11 +404,11 @@ const editProfile = async (req, res) => {
 };
 
 
-//delete address
+
 
 const addressDlt = async (req, res) => {
   try {
-    const { addressId } = req.body; // Changed from req.query to req.body
+    const { addressId } = req.body; 
     const userId = req.session.user?._id || req.session.user;
 
     if (!addressId || !userId) {
@@ -422,19 +421,19 @@ const addressDlt = async (req, res) => {
       return res.status(404).redirect('/pageerror');
     }
 
-    // Remove the address by ID
+    
     addressDoc.addresses = addressDoc.addresses.filter(
       addr => addr._id.toString() !== addressId
     );
 
-    // Set new default if needed
+   
     if (addressDoc.addresses.length > 0 && 
         !addressDoc.addresses.some(addr => addr.isDefault)) {
       addressDoc.addresses[0].isDefault = true;
     }
 
     await addressDoc.save();
-    res.redirect('/user-address'); // Fixed redirect path
+    res.redirect('/user-address'); 
 
   } catch (error) {
     console.error('Error deleting address:', error);
@@ -446,24 +445,20 @@ const setDefaultAddress = async (req, res) => {
     const userId = req.session.user._id;
     const addressIndex = parseInt(req.params.index);
     
-    // Find the user's address document
+   
     const userAddress = await Address.findOne({ userId });
     
-    // Validate address index
+   
     if (!userAddress || addressIndex < 0 || addressIndex >= userAddress.addresses.length) {
     
       return res.redirect('/user-address');
     }
     
-    // Reset all addresses to non-default
+   
     userAddress.addresses.forEach(addr => {
       addr.isDefault = false;
     });
-    
-    // Set the selected address as default
-    userAddress.addresses[addressIndex].isDefault = true;
-    
-    // Save the changes
+    userAddress.addresses[addressIndex].isDefault = true; 
     await userAddress.save();
   
     res.redirect('/user-address');
@@ -519,14 +514,14 @@ const updateAddress = async (req, res) => {
       isDefault
     } = req.body;
 
-    // Find the user's address document
+    
     const addressDoc = await Address.findOne({ userId });
 
     if (!addressDoc || addressIndex < 0 || addressIndex >= addressDoc.addresses.length) {
       return res.redirect('/user-address');
     }
 
-    // Update the address fields
+    
     addressDoc.addresses[addressIndex] = {
       firstName,
       lastName,
@@ -536,7 +531,7 @@ const updateAddress = async (req, res) => {
       city,
       state,
       addressType,
-      isDefault: isDefault === 'true', // Convert string to boolean
+      isDefault: isDefault === 'true',
       updatedAt: Date.now()
     };
 
@@ -736,7 +731,7 @@ async function sendVerificationEmails(email, code) {
   });
 }
 
-//add cart
+
 
 const addCart = async (req, res) => {
   const session = await mongoose.startSession();
@@ -746,7 +741,7 @@ const addCart = async (req, res) => {
     const { productId, variant, quantity = 1 } = req.body;
     const userId = req.user._id;
 
-    // 1. Validate product and variant
+    
     const product = await Product.findById(productId).session(session);
     if (!product || product.isBlocked) {
       await session.abortTransaction();
@@ -904,72 +899,73 @@ const orderCancel=async(req,res)=>{
   }
 }
 
+
 const cancelItem = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
-
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
+    const order = await Order.findById(orderId).populate('coupon');
+    if (!order) return res.status(404).json({ message: 'Order not found' });
 
     const item = order.orderedItems.id(itemId);
-    if (!item) {
-      return res.status(404).json({ message: 'Item not found in order' });
-    }
+    if (!item) return res.status(404).json({ message: 'Item not found in order' });
 
-    if (item.status === 'Cancelled') {
+    if (item.status === 'Cancelled')
       return res.status(400).json({ message: 'Item is already cancelled' });
-    }
-    if (!['Pending', 'Processing', 'Confirmed'].includes(order.status)) {
-      return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
-    }
-    item.status = 'Cancelled';
-    const refundAmount = item.price * item.quantity;
-    const userId = order.user;
-    let wallet = await Wallet.findOne({ user: userId });
 
-    if (!wallet) {
-      wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
+    if (!['Pending', 'Processing', 'Confirmed'].includes(order.status))
+      return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
+
+    item.status = 'Cancelled';
+    const allActiveItems = order.orderedItems.filter(i => i.status !== 'Cancelled');
+    const originalAllItems = order.orderedItems; 
+    
+    if(order.orderedItems.every(itm => itm.status == 'Cancelled')){
+      order.status = 'Cancelled'
     }
+    await order.save();
+    
+    const totalItemsPrice = originalAllItems.reduce(
+      (sum, itm) => sum + itm.price * itm.quantity, 0);
+
+    const itemPrice = item.price * item.quantity;
+
+    let refundAmount = itemPrice;
+    let couponDiscount = 0;
+    if (order.coupon && order.coupon.discountAmount > 0) {
+      const totalCoupon = order.coupon.discountAmount;
+      const itemShare = (itemPrice / totalItemsPrice) * totalCoupon;
+      refundAmount = Math.floor(itemPrice - itemShare);
+      
+    }
+    let wallet = await Wallet.findOne({ user: order.user });
+    if (!wallet) wallet = new Wallet({ user: order.user, balance: 0, transactions: [] });
 
     wallet.balance += refundAmount;
     wallet.transactions.push({
       type: 'credit',
       amount: refundAmount,
-      description: `Refund for cancelled item in Order ${orderId}`
+      description: `Refund for cancelled item in Order  ORD${( order._id).toString().substring(0,8).toUpperCase()} `
     });
-
     await wallet.save();
-    const activeItems = order.orderedItems.filter(itm => itm.status !== 'Cancelled');
-
-    if (activeItems.length === 0) {
-      order.totalPrice = 0;
-      order.finalAmount = 0;
-      order.shipping = 0;
-      if (order.coupon) {
-        order.coupon.discountAmount = 0;
-      }
-      order.status = 'Cancelled';
-    } else {
-      order.totalPrice = activeItems.reduce((sum, itm) => sum + (itm.price * itm.quantity), 0);
-      const discount = order.coupon ? order.coupon.discountAmount : 0;
-      order.finalAmount = order.totalPrice - discount + order.shipping;
-    }
-
     await order.save();
 
+  await Product.updateOne(
+  {
+    _id: item.product,
+    'variants.color': item.variant.color,
+    'variants.storage': item.variant.storage
+  },
+  {
+    $inc: { 'variants.$.quantity': item.quantity }
+  }
+);
     return res.status(200).json({
-      message: 'Item cancelled and amount credited to wallet',
-      status: order.status,
+      message: 'Item cancelled and net amount credited to wallet',
       itemStatus: item.status,
       refundAmount,
       walletBalance: wallet.balance,
-      totalPrice: order.totalPrice,
-      discount: order.coupon ? order.coupon.discountAmount : 0,
-      shipping: order.shipping,
-      finalAmount: order.finalAmount
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error' });
@@ -989,13 +985,11 @@ const downloadInvoice = async (req, res) => {
 
     const doc = new PDFDocument({ margin: 50 });
 
-    
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}.pdf`);
 
     doc.pipe(res);
 
-    
     doc
       .fontSize(24)
       .fillColor('#ff7f50')
@@ -1008,7 +1002,6 @@ const downloadInvoice = async (req, res) => {
       .text('INVOICE', { align: 'center' })
       .moveDown();
 
-   
     doc
       .fontSize(12)
       .fillColor('#000')
@@ -1018,7 +1011,6 @@ const downloadInvoice = async (req, res) => {
       .text(`Status: ${order.status}`)
       .moveDown();
 
-    
     const tableTop = doc.y;
     const itemX = 50;
     const columns = {
@@ -1042,9 +1034,12 @@ const downloadInvoice = async (req, res) => {
 
     doc.moveDown(0.5).font('Helvetica');
 
-   
+    const invoiceItems = order.orderedItems.filter(
+      item => ['Delivered', 'Confirmed'].includes(item.status)
+    );
+
     let y = doc.y;
-    order.orderedItems.forEach((item, index) => {
+    invoiceItems.forEach((item, index) => {
       const totalItemPrice = item.quantity * item.price;
       doc
         .text(index + 1, columns.sn, y)
@@ -1056,10 +1051,8 @@ const downloadInvoice = async (req, res) => {
       y += 20;
     });
 
-   
     doc.moveTo(50, y + 10).lineTo(550, y + 10).stroke();
 
-    
     const labelX = 400;
     const valueX = 520;
     const lineHeight = 20;
@@ -1082,13 +1075,11 @@ const downloadInvoice = async (req, res) => {
     doc.text('Total Amount Paid:', labelX, summaryY);
     doc.text(`₹${order.finalAmount}`, valueX, summaryY, { align: 'right' });
 
-   
     doc
       .moveDown(2)
       .fontSize(10)
       .fillColor('gray')
-     
-
+   
     doc.end();
   } catch (err) {
     console.error(err);
@@ -1169,6 +1160,52 @@ const verifyWalletPayment = async (req, res) => {
   }
 };
 
+const toggleWishlist = async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const { productId, action } = req.body;
+
+    let wishlist = await Wishlist.findOne({ userId });
+
+    if (!wishlist) {
+      wishlist = new Wishlist({ userId, products: [] });
+    }
+
+    if (action === 'add') {
+      const exists = wishlist.products.some(p => p.productId.toString() === productId);
+      if (!exists) {
+        wishlist.products.push({ productId });
+      }
+    } else {
+      wishlist.products = wishlist.products.filter(p => p.productId.toString() !== productId);
+    }
+
+    await wishlist.save();
+
+    res.status(200).json({
+      message: 'Wishlist updated',
+      count: wishlist.products.length
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const loadWishListPage = async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+     const cart = await Cart.findOne({ user: userId });
+     const cartCount=cart?.items?.length || 0
+    const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
+
+    res.render('wishlist', { cartCount,  wishlistItems: wishlist?.products || [] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error loading wishlist');
+  }
+};
+
 
 module.exports = {
   forgetpasspage,
@@ -1200,5 +1237,7 @@ module.exports = {
  returnOrder,
  userWallet,
  createWalletOrder,
- verifyWalletPayment
+ verifyWalletPayment,
+ toggleWishlist,
+ loadWishListPage
 };

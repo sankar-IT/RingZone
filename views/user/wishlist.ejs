@@ -1,0 +1,161 @@
+<%- include('../../views/partials/user/header') %>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f9f9f9;
+  }
+
+  .wishlist-container {
+    margin-top: 180px;
+    margin-left: 50px;
+    max-width: 1100px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .wishlist-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: #333;
+  }
+
+  .wishlist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .product-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 20px;
+  }
+
+  .item-info {
+    flex-grow: 1;
+  }
+
+  .item-info h2 {
+    font-size: 1.2rem;
+    margin: 0 0 5px;
+  }
+
+  .item-info p {
+    margin: 4px 0;
+    color: #555;
+  }
+
+  .price {
+    color: #ff7f50;
+    font-weight: bold;
+  }
+
+  .item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .add-cart,
+  .remove-item {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .add-cart {
+    background-color: #28a745;
+    color: #fff;
+  }
+
+  .remove-item {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  .remove-item i {
+    margin-right: 5px;
+  }
+</style>
+
+<div class="wishlist-container">
+ 
+
+  <% if (wishlistItems.length === 0) { %>
+    <p style="text-align: center;">Your wishlist is empty.</p>
+  <% } else { %>
+    <% wishlistItems.forEach(item => { 
+      const product = item.productId;
+      const variant = product.variants[0];
+    %>
+      <div class="wishlist-item">
+        <img src="/<%= product.images[0] %>" alt="<%= product.productName %>" class="product-image" />
+        <div class="item-info">
+          <h2><%= product.productName %></h2>
+          <p style="color: blue;">₹ <%= variant.discountPrice %> <span style="text-decoration: line-through; color: gray;">₹ <%= variant.regularPrice %></span></p>
+        </div>
+
+     <a href='/products/<%= product._id %>'> <button class="add-cart" style="margin-top: 10px;" >Add to Cart</button></a>
+        <div class="item-actions">
+          <form method="get" action="/products/product._id">
+            <input type="hidden" name="productId" value="<%= product._id %>" />
+            <input type="hidden" name="variantId" value="<%= variant._id %>" />
+            
+          </form>
+          <button style="margin-left: 10px;" class="remove-item" onclick="removeFromWishlist('<%= product._id %>')">
+            <i class="fas fa-trash-alt"></i> Remove
+          </button>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<script>
+  function removeFromWishlist(productId) {
+  fetch('/wishlist/toggle', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ productId, action: 'remove' })
+  }).then(() => {
+
+    fetch('/wishlist/toggle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ productId, action: 'remove' })
+    }).then(() => {
+
+          const storageKey = 'wishlistProductIds';
+    let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    ids = ids.filter(id => id !== productId);
+    localStorage.setItem(storageKey, JSON.stringify(ids));    
+
+    
+      location.reload();
+    }).catch(() => alert('Failed to remove'));
+  
+
+    location.reload();
+  }).catch(() => alert('Failed to remove'));
+}
+
+</script>
+
+<%- include('../../views/partials/user/footer') %>

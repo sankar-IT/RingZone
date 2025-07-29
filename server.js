@@ -9,6 +9,7 @@ const passport=require('./config/passport')
 const session=require('express-session')
 const adminRouter=require('./routes/adminRouter')
 const injectCartCount = require('./middleware/cartMiddleware');
+const wishlistCountMiddleware = require('./middleware/wishlistCountMiddleware');
 connectDB()
 
 
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 
 app.use(noCache());
 app.use(injectCartCount);
+app.use(wishlistCountMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());

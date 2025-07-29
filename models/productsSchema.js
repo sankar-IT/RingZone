@@ -31,6 +31,12 @@ const productSchema = new mongoose.Schema({
   },
   images: [{ type: String }],
   variants: [variantSchema],
+  
+    offer: {
+    type: Number,
+    default: 0 
+  },
+
   isBlocked: {
     type: Boolean,
     default: false

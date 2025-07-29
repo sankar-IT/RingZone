@@ -207,9 +207,6 @@
     <a href="/admin/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales</a>
     <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Categories</a>
-    <a href="/admin/Banner" class="nav-link"><i class="fas fa-image"></i> Banners</a>
-    <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
-    <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
   </div>
 
   <!-- Main Content Area -->
@@ -295,7 +292,7 @@
     </div>
   </div>
 
-  <!-- Image Cropping Modal -->
+ 
   <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
@@ -316,7 +313,7 @@
     </div>
   </div>
 
-  <!-- Loading Overlay -->
+  
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
   </div>
@@ -419,7 +416,7 @@ function gatherVariantData() {
       color: accordion.querySelector('[name="color"]').value,
       storage: accordion.querySelector('[name="storage"]').value,
       regularPrice: parseFloat(accordion.querySelector('[name="regularPrice"]').value),
-      discountPrice: parseFloat(accordion.querySelector('[name="discountPrice"]').value),
+      // discountPrice: parseFloat(accordion.querySelector('[name="discountPrice"]').value),
       quantity: parseInt(accordion.querySelector('[name="quantity"]').value),
       images: uploadedImages.variant[variantId] || []
     };
@@ -637,10 +634,7 @@ function gatherVariantData() {
                   <label class="form-label">Regular Price (₹)</label>
                   <input type="number" class="form-control" name="regularPrice" min="0" step="0.01" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                  <label class="form-label">Discount Price (₹)</label>
-                  <input type="number" class="form-control" name="discountPrice" min="0" step="0.01">
-                </div>
+             
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Quantity</label>
                   <input type="number" class="form-control" name="quantity" min="0" required>

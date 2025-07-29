@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-  :root {
+:root {
     --brand: #ff4646;
     --brand-light: #ffecec;
   }
@@ -257,7 +257,6 @@
             <%= order.status %>
           </div>
         </div>
-        
         <div class="order-meta">
           <div class="meta-item">
             <span class="meta-label"><i class="far fa-calendar-alt"></i> Date:</span>
@@ -265,7 +264,7 @@
           </div>
         </div>
       </div>
-      
+  
       <div class="products-list">
         <% if (order.orderedItems.length > 0) { %>
           <% order.orderedItems.forEach(item => { %>
@@ -279,229 +278,216 @@
               <div class="order-status status-<%= item.status ? item.status.toLowerCase() : order.status.toLowerCase() %>">
                 <%= item.status || order.status %>
               </div>
-            <div class="action-col">
-  <% if (item.status === 'Delivered') { %>
-      <button class="return-btn" 
-        data-order-id="<%= order._id %>" 
-        data-item-id="<%= item._id %>">
-        Return Order
-      </button>
-  <% } else if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
-      <% if (item.status === 'Return Requested') { %>
-          <span class="badge bg-warning">Return Requested</span>
-      <% } else if (item.status === 'Return Approved') { %>
-          <span class="badge bg-success">Return Approved</span>
-      <% } else if (item.status === 'Return Rejected') { %>
-          <span class="badge bg-danger">Return Rejected</span>
-      <% } else if (item.status === 'Returned') { %>
-          <span class="badge bg-primary">Returned</span>
-      <% } %>
-  <% } else if (item.status === 'Cancelled' || order.status === 'Cancelled') { %>
-      <button class="cancel-btn" disabled>Cancelled</button>
-  <% } else if (['Pending', 'Processing', 'Confirmed'].includes(order.status) && !['Returned', 'Return Requested'].includes(item.status)) { %>
-      <button class="cancel-btn" 
-        data-order-id="<%= order._id %>" 
-        data-item-id="<%= item._id %>">
-        Cancel
-      </button>
-  <% } else { %>
-      <button class="cancel-btn" disabled>Cannot Cancel</button>
-  <% } %>
-</div>
-
+              <div class="action-col">
+                <% if (item.status === 'Delivered') { %>
+                  <button class="return-btn" 
+                    data-order-id="<%= order._id %>" 
+                    data-item-id="<%= item._id %>">
+                    Return Order
+                  </button>
+                <% } else if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
+                  <% if (item.status === 'Return Requested') { %>
+                      <span class="badge bg-warning">Return Requested</span>
+                  <% } else if (item.status === 'Return Approved') { %>
+                      <span class="badge bg-success">Return Approved</span>
+                  <% } else if (item.status === 'Return Rejected') { %>
+                      <span class="badge bg-danger">Return Rejected</span>
+                  <% } else if (item.status === 'Returned') { %>
+                      <span class="badge bg-primary">Returned</span>
+                  <% } %>
+                <% } else if (item.status === 'Cancelled' || order.status === 'Cancelled') { %>
+                  <button class="cancel-btn" disabled>Cancelled</button>
+                <% } else if (['Pending', 'Processing', 'Confirmed'].includes(order.status) && !['Returned', 'Return Requested'].includes(item.status)) { %>
+                  <button class="cancel-btn" 
+                    data-order-id="<%= order._id %>" 
+                    data-item-id="<%= item._id %>">
+                    Cancel
+                  </button>
+                <% } else { %>
+                  <button class="cancel-btn" disabled>Cannot Cancel</button>
+                <% } %>
+              </div>
             </div>
           <% }) %>
         <% } %>
       </div>
 
-     <% 
-  // Check if any item in the order is Delivered, Pending, Processing, Confirmed, or Shipped
-  const showPriceSummary = order.orderedItems.some(item => 
-    ['Delivered', 'Pending', 'Processing', 'Confirmed', 'Shipped'].includes(item.status)
-  );
-%>
-
-<% if (showPriceSummary) { %>
-  <div class="price-summary">
-    <div class="price-row">
-      <span>Subtotal:</span>
-      <span>₹<%= order.totalPrice %></span>
-    </div>
-    <div class="price-row">
-      <span>Discount:</span>
-      <span>- ₹<%= order.coupon.discountAmount %></span>
-    </div>
-    <div class="price-row">
-      <span>Shipping:</span>
-      <span>₹<%= order.shipping %></span>
-    </div>
-    <div class="price-row price-total fw-bold border-top pt-2 mt-2">
-      <span>Total:</span>
-      <span>₹<%= order.finalAmount %></span>
-    </div>
-  </div>
+      <div class="price-summary">
+        <div class="price-row">
+          <span>Subtotal:</span>
+          <span>₹<%= order.totalPrice %></span>
+        </div>
+        <% if (order.coupon && order.coupon.discountAmount > 0) { %>
+          <div class="price-row">
+            <% if(order.totalPrice >=10000){ %>
+            <span>Discount:</span>
+            <span>- ₹<%= order.coupon.discountAmount %></span>
+            <% } else { %>
+            <span>Discount:</span>
+            <span>0</span>
+            <% } %>
+          </div>
+         <div class="price-row">
+  <span>Shipping:</span>
+  <span><%= order.shipping %></span>
+</div>
 
 
-
-
+        <% } %>
+        <div class="price-row price-total fw-bold border-top pt-2 mt-2">
+          <span>Total:</span>
+          <span>₹<%= order.finalAmount %></span>
+        </div>
+      </div>
+  
       <div class="action-buttons">
         <button class="back-btn" onclick="window.history.back()">
           <i class="fas fa-arrow-left me-1"></i> Back
         </button>
-       <button class="invoice-btn" 
-  onclick="window.location.href='/download-invoice/<%= order._id %>'" 
-  <%= order.status === 'Cancelled' ? 'disabled' : '' %>>
-  <i class="fas fa-file-invoice me-1"></i> Invoice
-</button>
+<% if (
+  order.status && 
+  (order.status.toLowerCase() === 'confirmed' || order.status.toLowerCase() === 'delivered')
+) { %>
+  <button class="invoice-btn btn-danger"
+    onclick="window.location.href='/download-invoice/<%= order._id %>'">
+    <i class="fas fa-file-invoice me-1"></i> Invoice
+  </button>
+<% } %>
 
       </div>
     </div>
   </div>
-  <% } %>
+
+  <!-- Return Modal -->
   <div class="modal fade" id="returnModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Return Request</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="returnForm">
-          <input type="hidden" id="returnOrderId">
-          <input type="hidden" id="returnItemId">
-          <div class="mb-3">
-            <label class="form-label">Reason for return</label>
-            <textarea class="form-control" id="returnReason" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">Submit Request</button>
-        </form>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Return Request</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="returnForm">
+            <input type="hidden" id="returnOrderId">
+            <input type="hidden" id="returnItemId">
+            <div class="mb-3">
+              <label class="form-label">Reason for return</label>
+              <textarea class="form-control" id="returnReason" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     document.querySelector('.invoice-btn')?.addEventListener('click', function() {
-      alert('Invoice download would start here');
     });
 
     document.querySelectorAll('.cancel-btn:not(:disabled)').forEach(button => {
-  button.addEventListener('click', async function() {
-    const productName = this.closest('.product-item').querySelector('.product-name').textContent;
-    const orderId = this.dataset.orderId;
-    const itemId = this.dataset.itemId;
+      button.addEventListener('click', async function() {
+        const productName = this.closest('.product-item').querySelector('.product-name').textContent;
+        const orderId = this.dataset.orderId;
+        const itemId = this.dataset.itemId;
 
-    // Replace confirm() with SweetAlert2
-    const result = await Swal.fire({
-      title: `Cancel ${productName}?`,
-      text: "Are you sure you want to cancel this item?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, cancel it!'
-    });
-
-    if (result.isConfirmed) {
-      try {
-        this.disabled = true;
-        this.textContent = 'Confirmed';
-
-        const response = await fetch(`/cancel-item/${orderId}/${itemId}`, {
-          method: 'get',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+        const result = await Swal.fire({
+          title: `Cancel ${productName}?`,
+          text: "Are you sure you want to cancel this item?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Yes, cancel it!'
         });
 
-        const data = await response.json();
+        if (result.isConfirmed) {
+          try {
+            this.disabled = true;
+            this.textContent = 'Cancelled';
+
+            const response = await fetch(`/cancel-item/${orderId}/${itemId}`, {
+              method: 'get',
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              await Swal.fire({
+                icon: 'success',
+                title: 'Cancelled!',
+                text: data.message || 'Item cancelled successfully',
+                timer: 2000,
+                showConfirmButton: false
+              });
+              window.location.reload();
+            } else {
+              throw new Error(data.message || 'Failed to cancel item');
+            }
+          } catch (error) {
+            await Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: error.message,
+            });
+            this.disabled = false;
+            this.textContent = 'Cancel';
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll('.return-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const orderId = this.dataset.orderId;
+        const itemId = this.dataset.itemId;
+
+        document.getElementById('returnOrderId').value = orderId;
+        document.getElementById('returnItemId').value = itemId;
+
+        const modal = new bootstrap.Modal(document.getElementById('returnModal'));
+        modal.show();
+      });
+    });
+
+    document.getElementById('returnForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const orderId = document.getElementById('returnOrderId').value;
+      const itemId = document.getElementById('returnItemId').value;
+      const reason = document.getElementById('returnReason').value;
+
+      try {
+        const response = await fetch('/request-return', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, itemId, reason })
+        });
+
+        const result = await response.json();
 
         if (response.ok) {
-          await Swal.fire({
+          Swal.fire({
             icon: 'success',
-            title: 'Cancelled!',
-            text: data.message || 'Item cancelled successfully',
-            timer: 2000,
-            showConfirmButton: false
+            title: 'Return Requested!',
+            text: 'Your return request has been submitted',
+            timer: 2000
+          }).then(() => {
+            window.location.reload();
           });
-          window.location.reload();
         } else {
-          throw new Error(data.message || 'Failed to cancel item');
+          throw new Error(result.message);
         }
       } catch (error) {
-        await Swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.message,
+          text: error.message
         });
-        this.disabled = false;
-        this.textContent = 'Cancel';
       }
-    }
-  });
-});
-// Return button click handler
-document.querySelectorAll('.return-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const orderId = this.dataset.orderId;
-    const itemId = this.dataset.itemId;
-    
-    // Set the hidden fields
-    document.getElementById('returnOrderId').value = orderId;
-    document.getElementById('returnItemId').value = itemId;
-    
-    // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('returnModal'));
-    modal.show();
-  });
-});
-
-// Form submission handler
-document.getElementById('returnForm').addEventListener('submit', async function(e) {
-  
-  e.preventDefault();
-  
-  const orderId = document.getElementById('returnOrderId').value;
-  const itemId = document.getElementById('returnItemId').value;
-  const reason = document.getElementById('returnReason').value;
-  
-  try {
-    const response = await fetch('/request-return', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        orderId,
-        itemId, 
-        reason
-      })
     });
-    
-    const result = await response.json();
-    
-    if (response.ok) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Return Requested!',
-        text: 'Your return request has been submitted',
-        timer: 2000
-      }).then(() => {
-        window.location.reload();
-      });
-    } else {
-      throw new Error(result.message);
-    }
-  } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message
-    });
-  }
-});
-
   </script>
 </body>
 <%- include('../../views/partials/user/footer') %>

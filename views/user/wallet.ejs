@@ -293,7 +293,7 @@
   
     <div class="wallet-container">
 
-    <!-- Wallet Balance Card -->
+    
     <div class="wallet-balance-card">
         <div class="wallet-balance-left">
             <div class="wallet-balance-icon">
@@ -315,43 +315,32 @@
         </div>
     </div>
 
-    <!-- Transactions -->
-    <div class="transaction-list">
-        <h5>Transactions</h5>
-        <div class="transaction-item">
-            <div class="transaction-left icon-credit">
-                <i class="fa-solid fa-circle-arrow-down"></i>
-                <div>
-                    <div class="transaction-text">Refund for cancelled order</div>
-                    <div class="transaction-time">16/07/2025, 09:07 AM</div>
-                </div>
+   
+   <div class="transaction-list">
+  <h5>Transactions</h5>
+  <% if (wallet && wallet.transactions && wallet.transactions.length > 0) { %>
+    <% wallet.transactions.slice().reverse().forEach(function(tx) { %>
+      <div class="transaction-item">
+        <div class="transaction-left icon-<%= tx.type %>">
+          <i class="fa-solid <%= tx.type === 'credit' ? 'fa-circle-arrow-down' : 'fa-circle-arrow-up' %>"></i>
+          <div>
+            <div class="transaction-text"><%= tx.description %></div>
+            <div class="transaction-time">
+              <%= new Date(tx.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) %>
             </div>
-            <div class="amount-credit">+₹1,929.00</div>
+          </div>
         </div>
-        <div class="transaction-item">
-            <div class="transaction-left icon-debit">
-                <i class="fa-solid fa-circle-arrow-up"></i>
-                <div>
-                    <div class="transaction-text">Order: ORD-1752657004452</div>
-                    <div class="transaction-time">16/07/2025, 09:10 AM</div>
-                </div>
-            </div>
-            <div class="amount-debit">-₹150.00</div>
+        <div class="amount-<%= tx.type %>">
+          <%= tx.type === 'credit' ? '+' : '-' %>₹<%= Number(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
         </div>
-        <div class="transaction-item">
-            <div class="transaction-left icon-credit">
-                <i class="fa-solid fa-wallet"></i>
-                <div>
-                    <div class="transaction-text">Wallet top-up via Razorpay</div>
-                    <div class="transaction-time">18/07/2025, 04:31 AM</div>
-                </div>
-            </div>
-            <div class="amount-credit">+₹500.00</div>
-        </div>
-    </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>No transactions yet.</p>
+  <% } %>
 </div>
 
-<!-- Add Funds Modal -->
+
 <div class="modal fade" id="addFundsModal" tabindex="-1" aria-labelledby="addFundsModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">

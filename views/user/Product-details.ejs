@@ -359,6 +359,28 @@ text-decoration:line-through;
       text-align: center;
       padding: 40px 0;
     }
+
+    .wishlist-icon {
+  position: absolute;
+  top: 10px;
+  right: 580px;
+  z-index: 10;
+  background: #fff;
+  padding: 6px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.wishlist-icon.active i {
+  color: #ff4646;
+}
+
+.wishlist-icon:hover i {
+  color: #ff4646;
+}
+
     .magnifier-glass {
   position: absolute;
   border: 2px solid #1e918b;
@@ -412,9 +434,14 @@ text-decoration:line-through;
   <div style="height: 100px; background-color: white;"></div>
   
   <div class="container">
+    
     <% if (product && product._id) { %>
       <div class="product-main">
-        <!-- Image Gallery -->
+     
+        <div class="wishlist-icon" data-product-id="<%= product._id %>">
+  <i class="fa fa-heart-o"></i>
+</div>
+
         <div class="gallery">
           <div class="thumbnails" id="thumbnailsContainer">
             <% if (product.variants[0] && product.variants[0].images.length > 0) { %>
@@ -444,7 +471,6 @@ text-decoration:line-through;
           </div>
         </div>
 
-        <!-- Product Details -->
         <div class="details">
           <h1><%= product.productName %></h1>
           <p class="short-desc"><%= product.description %></p>
@@ -458,17 +484,16 @@ text-decoration:line-through;
 
 <div class="price-row">
   <p class="price" id="dynamicPrice" data-regular="<%= firstVariant.regularPrice %>" data-discount="<%= hasValidDiscount ? firstVariant.discountPrice : '' %>">
-    ₹<%= (hasValidDiscount ? firstVariant.discountPrice : firstVariant.regularPrice).toLocaleString('en-IN') %>
+    ₹₹<%= firstVariant.finalPrice.toLocaleString('en-IN') %>
   </p>
-  <% if (hasValidDiscount) { %>
-    <span class="old-price" id="dynamicOldPrice">
-      ₹<%= firstVariant.regularPrice.toLocaleString('en-IN') %>
-    </span>
-  <% } %>
+  <% if (firstVariant.appliedOffer > 0 && firstVariant.finalPrice < firstVariant.regularPrice) { %>
+  <span class="old-price">
+    ₹<%= firstVariant.regularPrice.toLocaleString('en-IN') %>
+  </span>
+<% } %>
+
 </div>
-
-
-          <!-- Stock Info -->
+        
           <div id="stockMessageContainer">
             <% if (firstVariant.quantity <= 0) { %>
               <p class="out-of-stock">Currently out of stock</p>
@@ -477,7 +502,7 @@ text-decoration:line-through;
             <% } %>
           </div>
 
-          <!-- Variant Selection -->
+          
           <% if (product.variants.some(v => v.color)) { %>
             <div class="variant-group">
               <label>Colour</label>
@@ -518,7 +543,7 @@ text-decoration:line-through;
             </div>
           <% } %>
 
-          <!-- Buttons -->
+        
           <div class="action-buttons">
             <button class="buy-now" <%= firstVariant.quantity <= 0 ? 'disabled' : '' %>>
               Buy Now
@@ -534,7 +559,7 @@ text-decoration:line-through;
         </div>
       </div>
 
-      <!-- Similar Products -->
+      
       <% if (similarProducts && similarProducts.length > 0) { %>
         <div class="similar-products">
           <h2>Similar Products</h2>
@@ -542,15 +567,17 @@ text-decoration:line-through;
             <% similarProducts.forEach(prod => { %>
               <a href="/products/<%= prod._id %>" class="product-link">
                 <div class="product-card">
+                  
                   <img src="/<%= prod.images[0] || 'images/default-product.jpg' %>" alt="<%= prod.productName %>">
                   <h3 class="name"><%= prod.productName %></h3>
                   <p class="price">
-                    ₹<%= prod.variants[0].discountPrice.toLocaleString('en-IN') %>
-                    <% if (prod.variants[0].discountPrice < prod.variants[0].regularPrice) { %>
-                      <span class="old-price">
-                        ₹<%= prod.variants[0].regularPrice.toLocaleString('en-IN') %>
-                      </span>
-                    <% } %>
+                    ₹<%= prod.variants[0].finalPrice.toLocaleString('en-IN') %>
+<% if (prod.variants[0].appliedOffer > 0 && prod.variants[0].finalPrice < prod.variants[0].regularPrice) { %>
+  <span class="old-price">
+    ₹<%= prod.variants[0].regularPrice.toLocaleString('en-IN') %>
+  </span>
+<% } %>
+
                   </p>
                 </div>
               </a>
@@ -594,10 +621,10 @@ text-decoration:line-through;
   function updateVariantDetails(variant) {
     const priceDisplay = document.getElementById('dynamicPrice');
     const oldPriceElement = document.querySelector('.old-price');
-    priceDisplay.textContent = '₹' + variant.discountPrice.toLocaleString('en-IN');
-    
-    if (oldPriceElement) oldPriceElement.remove();
-    if (variant.discountPrice < variant.regularPrice) {
+    priceDisplay.textContent = '₹' + variant.finalPrice.toLocaleString('en-IN');
+if (oldPriceElement) oldPriceElement.remove();
+if (variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice) {
+
       const oldPrice = document.createElement('span');
       oldPrice.className = 'old-price';
       oldPrice.textContent = '₹' + variant.regularPrice.toLocaleString('en-IN');
@@ -671,6 +698,8 @@ text-decoration:line-through;
     this.disabled = true;
     this.textContent = 'Adding...';
 
+    const productId = '<%= product._id %>';
+
     try {
       const response = await fetch('/user-cart', {
         method: 'POST',
@@ -684,6 +713,13 @@ text-decoration:line-through;
 
       const result = await response.json();
       if (result.success) {
+
+            const storageKey = 'wishlistProductIds';
+    let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    ids = ids.filter(id => id !== productId);
+    localStorage.setItem(storageKey, JSON.stringify(ids));  
+
+
         const cartCountElement = document.querySelector('.fa-shopping-cart + .cart-count');
         if (cartCountElement) cartCountElement.textContent = result.cartCount;
 
@@ -698,6 +734,66 @@ text-decoration:line-through;
       this.textContent = 'Add to Basket';
     }
   });
+
+document.addEventListener('DOMContentLoaded', function () {
+  const storageKey = 'wishlistProductIds';
+
+  function getWishlist() {
+    return JSON.parse(localStorage.getItem(storageKey) || '[]');
+  }
+
+  function setWishlist(ids) {
+    localStorage.setItem(storageKey, JSON.stringify(ids));
+  }
+
+  async function updateWishlistServer(productId, isAdding) {
+    try {
+      await fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId, action: isAdding ? 'add' : 'remove' })
+      });
+    } catch (err) {
+      console.error('Wishlist update failed', err);
+    }
+  }
+
+  const wishlist = getWishlist();
+  const icon = document.querySelector('.wishlist-icon');
+  if (icon) {
+    const productId = icon.dataset.productId;
+    const heartIcon = icon.querySelector('i');
+
+    if (wishlist.includes(productId)) {
+      icon.classList.add('active');
+      heartIcon.classList.remove('fa-heart-o');
+      heartIcon.classList.add('fa-heart');
+    }
+
+    icon.addEventListener('click', async function (event) {
+      event.preventDefault();
+      icon.classList.toggle('active');
+      let ids = getWishlist();
+      const isAdding = icon.classList.contains('active');
+
+      if (isAdding) {
+        heartIcon.classList.remove('fa-heart-o');
+        heartIcon.classList.add('fa-heart');
+        if (!ids.includes(productId)) ids.push(productId);
+      } else {
+        heartIcon.classList.remove('fa-heart');
+        heartIcon.classList.add('fa-heart-o');
+        ids = ids.filter(id => id !== productId);
+      }
+
+      setWishlist(ids);
+      await updateWishlistServer(productId, isAdding);
+    });
+  }
+});
+
 </script>
 
 <%- include('../../views/partials/user/footer') %>

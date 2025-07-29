@@ -10,18 +10,19 @@
   .cart-box { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
   .product-img { width: 80px; border-radius: 10px; height: 94px; }
   .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
+  #emptyCartMsg { display: none; }
 </style>
 <body>
 
 <div class="container my-5">
   <div class="mb-4 text-center step-nav">
     <a href="/user-cart"><span class="active">Cart</span></a>
-    <a href=""><span>Checkout</span></a>
-   <a href=""><span>Payment</span></a>
+    <a href="#"><span>Checkout</span></a>
+    <a href="#"><span>Payment</span></a>
   </div>
 
   <div class="row">
-    <!-- Cart Items -->
+
     <div class="col-md-8" id="cartItemsContainer">
       <% if(cartProducts && cartProducts.items.length > 0) { %>
         <% cartProducts.items.forEach((item) => { %>
@@ -33,178 +34,175 @@
             <div class="d-flex align-items-start">
               <img src="/<%= item.variant.selectedImage %>" class="product-img me-3" alt="<%= item.product.productName %>">
               <div class="flex-grow-1">
-                    <h6><%= item.product.productName || 'Unnamed Product' %></h6>
+                <h6><%= item.product.productName || 'Unnamed Product' %></h6>
                 <p class="mb-1 text-muted">Storage: <%= item.variant.storage %> | Color: <%= item.variant.color %></p>
                 <p class="mb-1 text-success">In stock</p>
                 <div class="d-flex align-items-center">
                   <button class="btn btn-sm btn-outline-secondary minus-btn">-</button>
                   <input type="text" value="<%= item.quantity %>" readonly class="form-control form-control-sm mx-2 text-center quantity-input" style="width: 50px;">
                   <button class="btn btn-sm btn-outline-secondary plus-btn">+</button>
-                  <span class="ms-auto fw-semibold item-total">₹<%= ((item.discountPrice || item.price) * item.quantity).toLocaleString('en-IN') %></span>
+                  <span class="ms-auto fw-semibold item-total">₹<%= ((item.discountPrice) * item.quantity).toLocaleString('en-IN') %></span>
                   <button class="btn btn-sm btn-outline-danger ms-3 delete-btn"
-        data-product-id="<%= item.product._id %>"
-        data-color="<%= item.variant.color %>"
-        data-storage="<%= item.variant.storage %>">
-  <i class="fas fa-trash"></i>
-</button>
-
+                    data-product-id="<%= item.product._id %>"
+                    data-color="<%= item.variant.color %>"
+                    data-storage="<%= item.variant.storage %>">
+                    <i class="fas fa-trash"></i>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         <% }) %>
-      <% } else { %>
-        <p class="text-center">Your cart is empty.</p>
       <% } %>
+
+      <div id="emptyCartMsg" class="text-center" style="font-size: 2rem; color: #888; margin-top:80px; margin-bottom:60px;">
+        <i class="fa fa-shopping-cart" style="font-size: 4rem; color:#bbb; margin-left: 500px;" aria-hidden="true"></i>
+        <br>
+        <span style="font-size: 1.2rem; color: #666; margin-left: 500px;">Your cart is empty.</span>
+      </div>
 
       <div class="error-msg" id="errorMsg"></div>
     </div>
 
-    <!-- Summary -->
-    <div class="col-md-4">
+    <% if(cartProducts && cartProducts.items.length>0){%>
+    <div class="col-md-4" id="summaryCardCol">
       <div class="cart-box">
         <h5 class="mb-3">Order summary</h5>
-
         <div class="d-flex justify-content-between mb-2">
           <span>Subtotal</span><span id="subtotal">₹0.00</span>
         </div>
-        
         <div class="d-flex justify-content-between mb-2">
           <span>Shipment Cost</span><span id="shipment">₹0.00</span>
         </div>
         <hr>
-
         <div class="d-flex justify-content-between fw-bold mb-3">
           <span>Grand Total</span><span id="grandTotal">₹0.00</span>
         </div>
-
         <button id="checkoutBtn" class="btn btn-success">
-  <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="checkoutSpinner"></span>
-  <span id="checkoutText">Proceed to Checkout</span>
-</button>
-
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="checkoutSpinner"></span>
+          <span id="checkoutText">Proceed to Checkout</span>
+        </button>
       </div>
     </div>
+    <% } %>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  let shipment = 0;
-  let discount = 0;
+let shipment = 0;
+let discount = 0;
 
-  const errorMsg = document.getElementById('errorMsg');
-  const checkoutBtn = document.getElementById('checkoutBtn');
-  const subtotalEl = document.getElementById('subtotal');
-  const discountValue = document.getElementById('discountValue');
-  const grandTotalEl = document.getElementById('grandTotal');
-  
-  function formatRupee(value) {
-    return `₹${value.toLocaleString('en-IN')}.00`;
-  }
+const errorMsg = document.getElementById('errorMsg');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const subtotalEl = document.getElementById('subtotal');
+const grandTotalEl = document.getElementById('grandTotal');
+const emptyCartMsg = document.getElementById('emptyCartMsg');
+const summaryCol = document.getElementById('summaryCardCol');
 
-  function updateTotals() {
-    const cartItems = document.querySelectorAll('.cart-item');
-    let subtotal = 0;
-
-    cartItems.forEach(item => {
-      const unitPrice = parseFloat(item.getAttribute('data-price'));
-      const qty = parseInt(item.querySelector('.quantity-input').value);
-      const itemTotal = unitPrice * qty;
-      subtotal += itemTotal;
-      item.querySelector('.item-total').textContent = formatRupee(itemTotal);
-    });
-
-   subtotalEl.textContent = formatRupee(subtotal);
-   shipment = subtotal < 10000 ? 100 : 0;
-    const shipmentEl = document.getElementById('shipment');
-  if (shipmentEl) {
-    shipmentEl.textContent = shipment === 0 ? 'Free' : formatRupee(shipment);
-  }
-
-
-  const grandTotal = subtotal - discount + shipment;
-  grandTotalEl.textContent = formatRupee(grandTotal);
+function formatRupee(value) {
+  return `₹${value.toLocaleString('en-IN')}.00`;
 }
 
-
-  function validateCart() {
-    const cartItems = document.querySelectorAll('.cart-item');
-    let valid = true;
-    let error = "";
-
-    cartItems.forEach(item => {
-      const qty = parseInt(item.querySelector('.quantity-input').value);
-      if (qty > 3) {
-        valid = false;
-        error = " You can only purchase up to 3 quantities per product.";
-      }
-    });
-
-    if (!valid) {
-      errorMsg.style.display = 'block';
-      errorMsg.textContent = error;
-      checkoutBtn.classList.add('disabled');
-      checkoutBtn.style.pointerEvents = 'none';
-    } else {
-      errorMsg.style.display = 'none';
-      checkoutBtn.classList.remove('disabled');
-      checkoutBtn.style.pointerEvents = 'auto';
-    }
-
-    updateTotals();
-  }
-
-  document.querySelectorAll('.plus-btn, .minus-btn').forEach(button => {
-    button.addEventListener('click', async function () {
-      const cartItem = this.closest('.cart-item');
-      const input = cartItem.querySelector('.quantity-input');
-      let quantity = parseInt(input.value);
-
-      if (this.classList.contains('plus-btn')) {
-        if (quantity >= 3) {
-          return Swal.fire({
-            icon: 'warning',
-            title: 'Limit Exceeded',
-            text: 'You can only add up to 3 quantities.',
-            confirmButtonColor: '#ff4646'
-          });
-        }
-        quantity++;
-      } else {
-        if (quantity > 1) quantity--;
-      }
-
-      
-      const productId = cartItem.dataset.productId;
-      const color = cartItem.dataset.color;
-      const storage = cartItem.dataset.storage;
-
-      try {
-        const res = await fetch('/update-quantity', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, color, storage, quantity })
-        });
-        
-        const data = await res.json();
-        if (data.success) {
-          input.value = quantity;
-          cartItem.querySelector('.item-total').textContent = `₹${data.itemTotal.toLocaleString('en-IN')}`;
-          validateCart();
-        } else {
-          return Swal.fire({
-            icon: 'warning',
-            title: 'error occured',
-            text: data.message,
-            confirmButtonColor: '#ff4646'
-          });
-        }
-      } catch (err) {
-        alert('Error updating quantity');
-      }
-    });
+function updateTotals() {
+  const cartItems = document.querySelectorAll('.cart-item');
+  let subtotal = 0;
+  cartItems.forEach(item => {
+    const unitPrice = parseFloat(item.getAttribute('data-price'));
+    const qty = parseInt(item.querySelector('.quantity-input').value);
+    const itemTotal = unitPrice * qty;
+    subtotal += itemTotal;
+    item.querySelector('.item-total').textContent = formatRupee(itemTotal);
   });
+  if (subtotalEl) subtotalEl.textContent = formatRupee(subtotal);
+  shipment = subtotal < 10000 ? 100 : 0;
+  const shipmentEl = document.getElementById('shipment');
+  if (shipmentEl) shipmentEl.textContent = shipment === 0 ? 'Free' : formatRupee(shipment);
+  const grandTotal = subtotal - discount + shipment;
+  if (grandTotalEl) grandTotalEl.textContent = formatRupee(grandTotal);
+}
+
+function validateCart() {
+  const cartItems = document.querySelectorAll('.cart-item');
+  let valid = true;
+  let error = "";
+
+  cartItems.forEach(item => {
+    const qty = parseInt(item.querySelector('.quantity-input').value);
+    if (qty > 3) {
+      valid = false;
+      error = " You can only purchase up to 3 quantities per product.";
+    }
+  });
+
+  if (!valid) {
+    errorMsg.style.display = 'block';
+    errorMsg.textContent = error;
+    checkoutBtn.classList.add('disabled');
+    checkoutBtn.style.pointerEvents = 'none';
+  } else {
+    errorMsg.style.display = 'none';
+    checkoutBtn.classList.remove('disabled');
+    checkoutBtn.style.pointerEvents = 'auto';
+  }
+  updateTotals();
+}
+
+// Show/hide summary card and empty cart message
+function checkEmptyCartAndToggleSummary() {
+  const cartItems = document.querySelectorAll('.cart-item');
+  if (summaryCol)  summaryCol.style.display = cartItems.length === 0 ? 'none' : '';
+  if (emptyCartMsg) emptyCartMsg.style.display = cartItems.length === 0 ? 'block' : 'none';
+}
+
+document.querySelectorAll('.plus-btn, .minus-btn').forEach(button => {
+  button.addEventListener('click', async function () {
+    const cartItem = this.closest('.cart-item');
+    const input = cartItem.querySelector('.quantity-input');
+    let quantity = parseInt(input.value);
+
+    if (this.classList.contains('plus-btn')) {
+      if (quantity >= 3) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Limit Exceeded',
+          text: 'You can only add up to 3 quantities.',
+          confirmButtonColor: '#ff4646'
+        });
+      }
+      quantity++;
+    } else {
+      if (quantity > 1) quantity--;
+    }
+    const productId = cartItem.dataset.productId;
+    const color = cartItem.dataset.color;
+    const storage = cartItem.dataset.storage;
+
+    try {
+      const res = await fetch('/update-quantity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, color, storage, quantity })
+      });
+      const data = await res.json();
+      if (data.success) {
+        input.value = quantity;
+        cartItem.querySelector('.item-total').textContent = `₹${data.itemTotal.toLocaleString('en-IN')}`;
+        validateCart();
+      } else {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'error occured',
+          text: data.message,
+          confirmButtonColor: '#ff4646'
+        });
+      }
+    } catch (err) {
+      alert('Error updating quantity');
+    }
+    checkEmptyCartAndToggleSummary();
+  });
+});
 
 document.querySelectorAll('.delete-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
@@ -230,13 +228,12 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productId, color, storage })
         });
-
         const data = await res.json();
         if (data.success) {
           cartItem.remove();
-          validateCart(); 
+          validateCart();
 
-
+          // Update cart count badge
           const cartCountElem = document.querySelector('#cart-count');
           if (cartCountElem) {
             let currentCount = parseInt(cartCountElem.textContent);
@@ -245,6 +242,7 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
             }
           }
 
+          checkEmptyCartAndToggleSummary();
         } else {
           Swal.fire('Error', data.error || 'Failed to delete item', 'error');
         }
@@ -255,15 +253,13 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
   });
 });
 
+validateCart(); 
+checkEmptyCartAndToggleSummary(); 
 
-
-  validateCart();
-
-  document.getElementById('checkoutBtn').addEventListener('click', async () => {
+document.getElementById('checkoutBtn')?.addEventListener('click', async () => {
   const spinner = document.getElementById('checkoutSpinner');
   const btnText = document.getElementById('checkoutText');
   const btn = document.getElementById('checkoutBtn');
-
   spinner.classList.remove('d-none');
   btnText.textContent = 'Processing...';
   btn.disabled = true;
@@ -273,11 +269,8 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
-
     const result = await response.json();
-    
     if (response.ok) {
-
       if(result.success){ 
         window.location.href = '/checkout'; 
       }
@@ -296,16 +289,14 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: error.message || 'smothing went wroong',
+      text: error.message || 'smothing went wrong',
       confirmButtonColor: '#ff7f50'
     });
-
     spinner.classList.add('d-none');
     btnText.textContent = 'Proceed to Checkout';
     btn.disabled = false;
   }
 });
-
 </script>
 </body>
 <%- include('../../views/partials/user/footer') %>

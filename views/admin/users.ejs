@@ -186,7 +186,7 @@
   border: 1px solid #ff4646;
   cursor: default;
 }
-/* Table Container */
+
 .content {
   background-color: #fff;
   border-radius: 12px;
@@ -195,8 +195,7 @@
   margin-top: 20px;
 }
 
-/* Table Styling */
-/* Table Container */
+
 .content {
   background-color: #fff;
   border-radius: 12px;
@@ -206,7 +205,7 @@
   overflow-x: auto;
 }
 
-/* Light & Clean Table */
+
 .table {
   width: 100%;
   border-collapse: separate;
@@ -214,9 +213,9 @@
   font-size: 15px;
 }
 
-/* Header with light theme */
+
 .table thead tr {
-  background-color: #eaf4ff; /* Soft light blue */
+  background-color: #eaf4ff; 
   color: #333;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -231,7 +230,6 @@
   border-top-right-radius: 8px;
 }
 
-/* Table rows */
 .table tbody tr {
   background-color: #ffffff;
   transition: all 0.3s ease;
@@ -240,15 +238,13 @@
 }
 
 .table tbody tr:nth-child(even) {
-  background-color: #f9fcff; /* very light blue alternate row */
+  background-color: #f9fcff; 
 }
 
 .table tbody tr:hover {
-  background-color: #f1f8ff; /* light hover effect */
+  background-color: #f1f8ff; 
   transform: scale(1.01);
 }
-
-/* Table cells */
 .table td {
   padding: 12px 15px;
   color: #333;
@@ -256,7 +252,6 @@
   font-size: 14px;
 }
 
-/* Buttons inside table */
 .table button {
   font-size: 13px;
   font-weight: 500;
@@ -265,7 +260,6 @@
   padding: 6px 12px;
 }
 
-/* Red & Green Buttons */
 .table .btn-danger {
   background-color: #ff6b6b;
   border: none;
@@ -291,7 +285,6 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar - Structure unchanged, styling enhanced -->
   <div class="sidebar">
     <h2>RingZone</h2>
     <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -302,14 +295,10 @@
     <a href="/admin/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Report</a>
     <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
-    <a href="/admin/Banner" class="nav-link"><i class="fas fa-image"></i> Banner</a>
-    <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
-    <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
   </div>
 
-  <!-- Main Content - Structure unchanged, styling enhanced -->
+ 
   <div class="main">
-    <!-- Topbar -->
     <div class="topbar">
       <h1 class="m-0 fs-4 text-dark">User Management</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
@@ -322,8 +311,6 @@
     <button type="button" id="clearButton" class="btn btn-outline-danger btn-sm me-2">Clear</button>
   </form>
 </div>
-
-    <!-- User Table -->
     <div class="content">
       <table class="table table-striped">
         <thead>
@@ -353,8 +340,7 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Pagination -->
+    
 <div class="pagination-container">
   <div class="pagination">
     <% if (currentPage > 1) { %>
@@ -374,9 +360,6 @@
     <% } %>
   </div>
 </div>
-
-
-  <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   
 <script>
@@ -387,9 +370,7 @@
     
     if (clearButton && searchInput && searchForm) {
       clearButton.addEventListener('click', function() {
-        // Clear the input
         searchInput.value = '';
-        // Remove search parameter from URL and reload
         const url = new URL(window.location.href);
         url.searchParams.delete('search');
         window.location.href = url.toString();
@@ -427,7 +408,6 @@ function confirmUnblock(userId) {
     }
   });
 }
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

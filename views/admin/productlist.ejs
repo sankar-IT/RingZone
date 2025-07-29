@@ -215,9 +215,6 @@
     <a href="/admin/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Report</a>
     <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
-    <a href="/admin/Banner" class="nav-link"><i class="fas fa-image"></i> Banner</a>
-    <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
-    <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
   </div>
 
   <div class="main">
@@ -257,11 +254,13 @@
             <th>#</th>
             <th>Image</th>
             <th>Product Name</th>
-            <th>Brand</th>
+            <th>quantity</th>
+            <th>Offer</th>
             <th>Category</th>
             <th>Price</th>
             <th>Status</th>
             <th style="width: 180px;">Actions</th>
+             
           </tr>
         </thead>
        <tbody>
@@ -286,7 +285,35 @@
           <% } %>
         </td>
         <td><%= product.productName %></td>
-        <td><%= product.brand ? product.brand.brandName : 'N/A' %></td>
+        <td>
+  <% if (product.variants && product.variants.length > 0) { %>
+    <% product.variants.forEach((variant, vIndex) => { %>
+      <div>
+        <%= variant.storage %>: <%= variant.quantity %>
+      </div>
+    <% }) %>
+  <% } else { %>
+    N/A
+  <% } %>
+</td>
+       <td>
+  <% if (product.offer && product.offer > 0) { %>
+    <div class="d-flex flex-column">
+      <span class="badge bg-danger mb-2"><%= product.offer %>% OFF</span>
+      <button class="btn btn-sm btn-warning" onclick="removeOffer('<%= product._id %>')">
+        Remove Offer
+      </button>
+    </div>
+  <% } else { %>
+    <div class="d-flex flex-column">
+      <button class="btn btn-sm btn-success" onclick="openOfferModal('<%= product._id %>')">
+        Add Offer
+      </button>
+    </div>
+  <% } %>
+</td>
+
+
         <td><%= product.category ? product.category.name : 'N/A' %></td>
         <td>
           <% if (product.variants && product.variants.length > 0) { %>
@@ -316,6 +343,8 @@
             </button>
           <% } %>
         </td>
+
+
       </tr>
     <% }) %>
   <% } %>
@@ -323,7 +352,31 @@
 
       </table>
 
-      <!-- Pagination -->
+<!-- Add Offer Modal -->
+<div class="modal fade" id="offerModal" tabindex="-1" aria-labelledby="offerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="offerModalLabel">Add Offer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="offerProductId" />
+        <div class="mb-3">
+          <label for="offerPercentage" class="form-label">Offer Percentage (%)</label>
+          <input type="number" id="offerPercentage" class="form-control" min="1" max="90" placeholder="Enter discount percentage" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveOffer()">Save Offer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     <div class="pagination-container">
   <div class="pagination">
     <% if (currentPage > 1) { %>
@@ -376,6 +429,57 @@
         }
       });
     }
+let currentOfferProductId = null;
+
+function openOfferModal(productId) {
+  currentOfferProductId = productId;
+  document.getElementById('offerProductId').value = productId;
+  document.getElementById('offerPercentage').value = '';
+  const modal = new bootstrap.Modal(document.getElementById('offerModal'));
+  modal.show();
+}
+
+async function saveOffer() {
+  const offerPercentage = parseInt(document.getElementById('offerPercentage').value);
+  if (!offerPercentage || offerPercentage < 1) {
+    return Swal.fire('Invalid Input', 'Please enter a valid offer percentage.', 'warning');
+  }
+
+  try {
+   const res = await fetch(`/admin/addProductOffer/${currentOfferProductId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offer: offerPercentage })
+    });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire('Success', 'Offer added successfully.', 'success').then(() => location.reload());
+    } else {
+      Swal.fire('Error', data.message || 'Failed to add offer.', 'error');
+    }
+  } catch (err) {
+    console.error('Offer Error:', err);
+    Swal.fire('Error', 'Something went wrong while adding the offer.', 'error');
+  }
+}
+
+async function removeOffer(productId) {
+  try {
+    const res = await fetch(`/admin/removeProductOffer/${productId}`, { method: 'POST' });
+    const data = await res.json()
+    if (data.success) {
+      Swal.fire('Success', 'Offer removed successfully.', 'success').then(() => location.reload());
+    } else {
+      Swal.fire('Error', data.message || 'Failed to remove offer.', 'error');
+    }
+  } catch (err) {
+    console.log('Remove Offer Error:', err);
+    Swal.fire('Error', 'Something went wrong while removing the offer.', 'error');
+  }
+}
+
+
+
   </script>
 </body>
 </html>

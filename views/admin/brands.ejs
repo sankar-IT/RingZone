@@ -179,7 +179,7 @@
       transform: translateY(-1px);
     }
         .search-bar {
-  max-width: 350px; /* Reduce full width */
+  max-width: 350px;
   margin-bottom: 20px;
 }
 
@@ -210,7 +210,7 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar - Structure unchanged, styling enhanced -->
+ 
   <div class="sidebar">
     <h2>RingZone</h2>
     <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -221,14 +221,11 @@
     <a href="/admin/sales" class="nav-link"><i class="fas fa-chart-line"></i> Sales Report</a>
     <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
-    <a href="/admin/Banner" class="nav-link"><i class="fas fa-image"></i> Banner</a>
-    <a href="/admin/Offers" class="nav-link"><i class="fas fa-gift"></i> Offers</a>
-    <a href="/admin/Settings" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
   </div>
 
-  <!-- Main Content - Structure unchanged, styling enhanced -->
+ 
   <div class="main">
-    <!-- Topbar -->
+   
     <div class="topbar">
       <h1 class="m-0 fs-4 text-dark">Brands Management</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
@@ -283,7 +280,7 @@
                   <th>Brand</th>
                   <th>Logo</th>
                   <th>Status</th>
-                  <th>Block/Unblock/Delete</th>
+                  <th>Block/Unblock</th>
                 </tr>
               </thead>
              <tbody>
@@ -310,11 +307,11 @@
   <% } else { %>
     <a href="/admin/unBlockBrand?id=<%=brand._id%>" class="btn btn-danger btn-sm" style="width: 90px">Unblock</a>
   <% } %>
-  <button class="btn btn-outline-danger btn-sm delete-brand" 
+  <!-- <button class="btn btn-outline-danger btn-sm delete-brand" 
           style="width: 90px" 
           data-brand-id="<%=brand._id%>">
     Delete
-  </button>
+  </button> -->
 </td>
   </tr>
   <% }); %>
