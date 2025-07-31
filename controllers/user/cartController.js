@@ -193,26 +193,25 @@ const deleteCartItem=async(req,res)=>{
   }
 
  
- const postCartToCheckout = async (req, res) => {
+const postCartToCheckout = async (req, res) => {
   try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+    }
 
+    const userId = req.session.user._id;
+    const cart = await Cart.findOne({ user: userId });
+    const addressDoc = await Address.findOne({ userId });
 
-    if (req.session.user) {
+    if (!cart || cart.items.length <= 0) {
+      return res.status(404).json({ success: false, message: 'Cart is empty' });
+    }
 
+    if (!addressDoc || !addressDoc.addresses || addressDoc.addresses.length === 0) {
+      return res.status(404).json({ success: false, message: 'Address is empty' });
+    }
 
-      const userId = req.session.user._id;
-      const cart = await Cart.findOne({ user: userId });
-      const addressDoc = await Address.findOne({ userId });
-
-      if (!cart || cart.items.length <= 0) {
-        return res.status(404).json({ success: false, message: 'Cart is empty' });
-      }
-
-      if (!addressDoc || !addressDoc.addresses || addressDoc.addresses.length === 0) {
-        return res.status(404).json({ success: false, message: 'Address is empty' });
-      }
-
-      const cartItemIds = cart.items.map(item => item.product);
+    const cartItemIds = cart.items.map(item => item.product);
     const dbProducts = await Product.find({ _id: { $in: cartItemIds } });
 
     let activeItems = [];
@@ -220,53 +219,61 @@ const deleteCartItem=async(req,res)=>{
 
     for (const dbProduct of dbProducts) {
       const cartProducts = cart.items.filter(itm => itm.product.equals(dbProduct._id));
+
       for (const cartProduct of cartProducts) {
-        if (!dbProduct.isBlocked) {
-          const matchedVariant = dbProduct.variants.find(
-            v => v.color === cartProduct.variant.color && 
-                 v.storage === cartProduct.variant.storage
-          );
-          if (!matchedVariant) {
-            return res.status(400).json({ success: false, message: 'Product variant not found' });
-          }
-          if (matchedVariant.quantity < cartProduct.quantity) {
-            return res.status(400).json({ success: false, message: 'Product out of stock' });
-          }
-
-          if(dbProduct.variants[0].discountPrice!== cart.items[0].discountPrice){
-            return res.status(400).json({success:false,message:'Product price has been updated. Please review your cart.'
-              })
-          }
-          
-          const itemPrice = matchedVariant.discountPrice || matchedVariant.regularPrice;
-          const itemTotal = itemPrice * cartProduct.quantity;
-          totalPrice += itemTotal;
-          activeItems.push({
-            product: dbProduct._id,
-            quantity: cartProduct.quantity,
-            price: itemPrice,
-            variant: {
-              color: matchedVariant.color,
-              storage: matchedVariant.storage,
-              selectedImage: matchedVariant.images[0]
-
-            }
-          });
-        } else {
+        if (dbProduct.isBlocked) {
           return res.status(400).json({ success: false, message: 'Product unavailable' });
         }
+
+        const matchedVariant = dbProduct.variants.find(
+          v => v.color === cartProduct.variant.color &&
+               v.storage === cartProduct.variant.storage
+        );
+
+        if (!matchedVariant) {
+          return res.status(400).json({ success: false, message: 'Product variant not found' });
+        }
+
+        if (matchedVariant.quantity < cartProduct.quantity) {
+          return res.status(400).json({ success: false, message: 'Product out of stock' });
+        }
+
+        const currentDiscountPrice = matchedVariant.discountPrice;
+        const cartDiscountPrice = cartProduct.discountPrice;
+
+        if (Number(currentDiscountPrice) !== Number(cartDiscountPrice)) {
+          return res.status(400).json({
+            success: false,
+            message: `Price for '${dbProduct.productName}' has been updated. Please review your cart.`,
+          });
+        }
+
+        const itemPrice = currentDiscountPrice || matchedVariant.regularPrice;
+        const itemTotal = itemPrice * cartProduct.quantity;
+        totalPrice += itemTotal;
+
+        activeItems.push({
+          product: dbProduct._id,
+          quantity: cartProduct.quantity,
+          price: itemPrice,
+          variant: {
+            color: matchedVariant.color,
+            storage: matchedVariant.storage,
+            selectedImage: matchedVariant.images[0]
+          }
+        });
       }
     }
 
-      res.locals.cartCount = cart.items.length;
-      return res.status(200).json({ success: true, redirectUrl: '/checkout' });
-    } else {
-      return res.status(401).json({ success: false, message: 'User not logged in' });
-    }
+    res.locals.cartCount = cart.items.length;
+    return res.status(200).json({ success: true, redirectUrl: '/checkout' });
+
   } catch (error) {
+    console.error('Checkout Error:', error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 const getCheckoutPage = async (req, res) => {
   try {
@@ -656,7 +663,7 @@ const postPaymentToOrder = async (req, res) => {
           const itemPrice = matchedVariant.discountPrice || matchedVariant.regularPrice;
           const itemTotal = itemPrice * cartProduct.quantity;
           totalPrice += itemTotal;
-          if(totalPrice<=1000){
+          if(totalPrice>=1000){
      return res.status(400).json({ success: false, message: 'Cash on Delivery is not available for orders above ₹1000. Please choose a different payment method.' });
           }
           activeItems.push({

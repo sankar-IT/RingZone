@@ -8,10 +8,10 @@
   <style>
     :root {
       --sidebar-bg: #2c3e50;
-      --sidebar-hover: #34495e;
+      --sidebar-hover: #2c3e50;
       --topbar-bg: #ffffff;
       --content-bg: #f8f9fa;
-      --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+      --card-shadow: 0 0.5rem 1rem#2c3e50;
     }
     body {
       margin: 0;
@@ -28,7 +28,7 @@
       display: flex;
       flex-direction: column;
       padding: 20px 0;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 2px 0 10px#2c3e50;
       position: fixed;
       z-index: 1000;
     }
@@ -37,7 +37,7 @@
       font-size: 1.5rem;
       padding: 0 20px 20px;
       margin: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid #2c3e50;
     }
     .sidebar .nav-link {
       color: rgba(255, 255, 255, 0.8);
@@ -541,45 +541,36 @@
     
        <div class="main-content">
             
-            <div class="stats-cards">
-                <div class="card stat-card">
-                    <div class="stat-icon icon-total-users">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 style="margin-left: 22px; margin-top: 5px;"><%=userCount%></h3>
-                        <p>Total Users</p>
-                    </div>
-                </div>
-                <div class="card stat-card">
-                    <div class="stat-icon icon-total-profit">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 style="margin-right: 18px; margin-top: 5px;">₹ <%=totalAmount%></h3>
-                        <p>Total Profit</p>
-                    </div>
-                </div>
-                <div class="card stat-card">
-                    <div class="stat-icon" style="background-color: rgba(76, 201, 240, 0.1); color: var(--success-color);">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 style="margin-left: 22px; margin-top: 5px;"><%=totalsales%></h3>
-                        <p>Total Orders</p>
-                    </div>
-                </div>
-                <div class="card stat-card">
-                    <div class="stat-icon" style="background-color: rgba(248, 150, 30, 0.1); color: var(--warning-color);">
-                        <i class="fas fa-box-open"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 style="margin-left: 33px; margin-top: 5px;" ><%=productCount%></h3>
-                        <p>Total Products</p>
-                    </div>
-                </div>
-            </div>
-            
+           <div class="stats-cards">
+  <div  class="card stat-card">
+    <div class="stat-icon icon-total-users">
+      <i class="fas fa-users"></i>
+    </div>
+    <div class="stat-info">
+      <h3 style="margin-left: 22px; margin-top: 5px;"><%= userCount %></h3>
+      <p>Total Users</p>
+    </div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-icon icon-total-profit">
+      <i class="fas fa-dollar-sign"></i>
+    </div>
+    <div class="stat-info">
+      <h3 style="margin-right: 18px; margin-top: 5px;">₹ <%= totalAmount.toLocaleString() %></h3>
+      <p>Total Revenue</p>
+    </div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-icon" style="background-color: rgba(76, 201, 240, 0.1); color: var(--success-color);">
+      <i class="fas fa-shopping-cart"></i>
+    </div>
+    <div class="stat-info">
+      <h3 style="margin-left: 22px; margin-top: 5px;"><%= totalsales %></h3>
+      <p>Total Orders</p>
+    </div>
+  </div>
+ 
+</div>
        
             <div class="charts-section">
                 <div class="chart-container">
@@ -672,122 +663,111 @@
                 </div>
         </div>
     </div>
- <script>
-        
-        document.getElementById('time-period').addEventListener('change', function() {
-            const customDateRange = document.getElementById('custom-date-range');
-            if (this.value === 'custom') {
-                customDateRange.style.display = 'block';
-            } else {
-                customDateRange.style.display = 'none';
-            }
-        });
-        
-        
-        const salesCtx = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(salesCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                    label: 'Sales',
-                    data: [12000, 19000, 15000, 18000, 22000, 25000, 28000, 26000, 30000, 32000, 35000, 40000],
-                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                    borderColor: 'rgba(67, 97, 238, 1)',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true
-                }]
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  
+    const timePeriodSelect = document.getElementById('time-period');
+    const customDateRangeDiv = document.getElementById('custom-date-range');
+    const dateFromInput = document.getElementById('date-from');
+    const dateToInput = document.getElementById('date-to');
+    const applyFilterBtn = document.getElementById('apply-filter');
+    
+    
+    const today = new Date();
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    dateFromInput.valueAsDate = oneWeekAgo;
+    dateToInput.valueAsDate = today;
+    
+    
+    timePeriodSelect.addEventListener('change', function() {
+      customDateRangeDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+    });
+    
+   
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(salesCtx, {
+      type: 'line',
+      data: {
+        labels: <%- JSON.stringify(chartData.labels) %>,
+        datasets: [{
+          label: 'Sales',
+          data: <%- JSON.stringify(chartData.data) %>,
+          backgroundColor: 'rgba(67, 97, 238, 0.1)',
+          borderColor: 'rgba(67, 97, 238, 1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              drawBorder: false
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            drawBorder: false
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
+            ticks: {
+              callback: function(value) {
+                return '₹' + value.toLocaleString();
+              }
             }
-        });
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+    
+    
+    applyFilterBtn.addEventListener('click', function() {
+      const period = timePeriodSelect.value;
+      let startDate, endDate;
+      
+      if (period === 'custom') {
+        startDate = dateFromInput.value;
+        endDate = dateToInput.value;
         
-        document.getElementById('apply-filter').addEventListener('click', function() {
-            const timePeriod = document.getElementById('time-period').value;
-            let newLabels, newData;
-            
-            if (timePeriod === 'daily') {
-                
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                const today = new Date();
-                newLabels = [];
-                for (let i = 6; i >= 0; i--) {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() - i);
-                    newLabels.push(days[date.getDay()]);
-                }
-                newData = [3500, 4200, 3800, 4500, 5100, 4800, 5500];
-            } 
-            else if (timePeriod === 'weekly') {
-              
-                newLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-                newData = [18000, 22000, 19500, 24000];
-            }
-            else if (timePeriod === 'monthly') {
-                newLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-                newData = [8000, 12000, 9000, 11000];
-            } 
-            else if (timePeriod === 'yearly') {
-                newLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                newData = [12000, 19000, 15000, 18000, 22000, 25000, 28000, 26000, 30000, 32000, 35000, 40000];
-            }
-            else if (timePeriod === 'custom') {
-                const fromDate = document.getElementById('date-from').value;
-                const toDate = document.getElementById('date-to').value;
-                
-                if (!fromDate || !toDate) {
-                    alert('Please select both dates');
-                    return;
-                }
-                
-                
-                const startDate = new Date(fromDate);
-                const endDate = new Date(toDate);
-                const diffTime = Math.abs(endDate - startDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                
-           
-                newLabels = [];
-                newData = [];
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                
-                for (let i = 0; i <= diffDays; i++) {
-                    const date = new Date(startDate);
-                    date.setDate(date.getDate() + i);
-                    newLabels.push(days[date.getDay()] + ' ' + (date.getMonth()+1) + '/' + date.getDate());
-                    newData.push(Math.floor(Math.random() * 5000) + 2000);
-                }
-            }
-            
-            salesChart.data.labels = newLabels;
-            salesChart.data.datasets[0].data = newData;
-            salesChart.update();
-        });
-    </script>
+        if (!startDate || !endDate) {
+          alert('Please select both dates for custom range');
+          return;
+        }
+      }
+      
+      
+      const params = new URLSearchParams();
+      params.append('period', period);
+      if (period === 'custom') {
+        params.append('startDate', startDate);
+        params.append('endDate', endDate);
+      }
+      
+      
+      window.location.href = `/admin/Dashboard?${params.toString()}`;
+    });
+    
+   
+    const urlParams = new URLSearchParams(window.location.search);
+    const periodParam = urlParams.get('period');
+    if (periodParam) {
+      timePeriodSelect.value = periodParam;
+      if (periodParam === 'custom') {
+        customDateRangeDiv.style.display = 'block';
+        dateFromInput.value = urlParams.get('startDate') || '';
+        dateToInput.value = urlParams.get('endDate') || '';
+      }
+    }
+  });
+</script>
   
 </body>

@@ -40,14 +40,9 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
 router.get('/login',userController.loadLogin);
 router.post('/login',userController.login)
 router.get('/logout',userController.logout)
-router.get('/shopping-pageList',userController.loadShoppingPage);
-router.get('/products/:id', userController.loadProductDetails);
-router.get('/check-product-status/:id', userController.checkProductStatus);
-
-// router.get('/filter',userAuth,userController.filterProduct);
-// router.get('/filterPrice',userAuth,userController.filterByPrice)
-
-
+router.get('/shopping-pageList',userAuth,userController.loadShoppingPage);
+router.get('/products/:id', userAuth,userController.loadProductDetails);
+router.get('/check-product-status/:id',userAuth, userController.checkProductStatus);
 
 
 //profile management
