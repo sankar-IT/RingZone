@@ -10,6 +10,7 @@ const session=require('express-session')
 const adminRouter=require('./routes/adminRouter')
 const injectCartCount = require('./middleware/cartMiddleware');
 const wishlistCountMiddleware = require('./middleware/wishlistCountMiddleware');
+
 connectDB()
 
 
@@ -37,7 +38,6 @@ app.use((req, res, next) => {
 app.use(noCache());
 app.use(injectCartCount);
 app.use(wishlistCountMiddleware);
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -50,6 +50,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/',userRouter);
 app.use('/admin',adminRouter);
 
+const errorHandler = require('./middleware/errorHandlingMiddleware');
+app.use(errorHandler);
 
 app.listen(process.env.PORT,()=>{console.log(`server Running on ${process.env.PORT}`)})
 

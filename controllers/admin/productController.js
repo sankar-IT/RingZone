@@ -144,7 +144,7 @@ const productBlock = async (req, res) => {
   }
 };
 
-// Edit product 
+
 const editProduct = async (req, res) => {
   try {
     const productId = req.params.id;

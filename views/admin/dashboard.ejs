@@ -437,7 +437,6 @@
             background-color: var(--secondary-color);
         }
         
-        /* Top Lists */
         .top-lists {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -494,7 +493,7 @@
             font-weight: bold;
         }
         
-        /* Responsive */
+        
         @media (max-width: 1200px) {
             .stats-cards {
                 grid-template-columns: repeat(2, 1fr);
@@ -530,7 +529,7 @@
     <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a>
     <a href="/admin/brands" class="nav-link"><i class="fas fa-briefcase"></i> Brands</a>
     <a href="/admin/sales-report" class="nav-link"><i class="fas fa-chart-line"></i> Sales Report</a>
-    <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
+    <a href="/admin/coupon-page" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
   </div>
   <div class="main">
@@ -541,8 +540,18 @@
     
        <div class="main-content">
             
-           <div class="stats-cards">
-  <div  class="card stat-card">
+
+<div class="chart-heading mb-4">
+  <h2 class="text-center">
+    <span class="badge bg-primary fs-4">
+      <i class="fas fa-chart-line me-2"></i>
+      <span id="report-period-text">Sales Report - <%= periodDisplay %></span>
+    </span>
+  </h2>
+</div>
+
+<div class="stats-cards">
+  <div class="card stat-card">
     <div class="stat-icon icon-total-users">
       <i class="fas fa-users"></i>
     </div>
@@ -569,7 +578,6 @@
       <p>Total Orders</p>
     </div>
   </div>
- 
 </div>
        
             <div class="charts-section">
@@ -578,12 +586,13 @@
                         <h3>Sales Analytics</h3>
                         <div class="filter-controls">
                             <select id="time-period">
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
-                                <option value="custom">Custom Date</option>
-                            </select>
+                       <option value="yearly">Yearly</option>
+                     <option value="monthly">Monthly</option>
+                      <option value="weekly">Weekly</option>
+                       <option value="daily">Daily</option>
+                       <option value="custom">Custom Date</option>
+                           </select>
+
                             <div id="custom-date-range" style="display: none;">
                                 <input type="date" id="date-from">
                                 <span>to</span>
@@ -665,14 +674,15 @@
     </div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-  
+
     const timePeriodSelect = document.getElementById('time-period');
     const customDateRangeDiv = document.getElementById('custom-date-range');
     const dateFromInput = document.getElementById('date-from');
     const dateToInput = document.getElementById('date-to');
     const applyFilterBtn = document.getElementById('apply-filter');
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
     
-    
+
     const today = new Date();
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -680,13 +690,6 @@
     dateFromInput.valueAsDate = oneWeekAgo;
     dateToInput.valueAsDate = today;
     
-    
-    timePeriodSelect.addEventListener('change', function() {
-      customDateRangeDiv.style.display = this.value === 'custom' ? 'block' : 'none';
-    });
-    
-   
-    const salesCtx = document.getElementById('salesChart').getContext('2d');
     const salesChart = new Chart(salesCtx, {
       type: 'line',
       data: {
@@ -728,35 +731,68 @@
         }
       }
     });
+
+function updateReportHeading() {
+  const period = timePeriodSelect.value;
+  let periodText = '';
+  
+  switch(period) {
+    case 'daily':
+      periodText = 'Daily Sales Report';
+      break;
+    case 'weekly':
+      periodText = 'Weekly Sales Report';
+      break;
+    case 'monthly':
+      periodText = 'Monthly Sales Report';
+      break;
+    case 'yearly':
+      periodText = 'Yearly Sales Report';
+      break;
+    case 'custom':
+      const fromDate = dateFromInput.value ? new Date(dateFromInput.value).toLocaleDateString() : '';
+      const toDate = dateToInput.value ? new Date(dateToInput.value).toLocaleDateString() : '';
+      periodText = `Custom Report (${fromDate} to ${toDate})`;
+      break;
+    default:
+      periodText = 'Sales Report';
+  }
+  
+  document.getElementById('report-period-text').textContent = periodText;
+}
+
+timePeriodSelect.addEventListener('change', function() {
+  customDateRangeDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+  updateReportHeading();
+});
+
+dateFromInput.addEventListener('change', updateReportHeading);
+dateToInput.addEventListener('change', updateReportHeading);
+
+applyFilterBtn.addEventListener('click', function() {
+  const period = timePeriodSelect.value;
+  let startDate, endDate;
+  
+  if (period === 'custom') {
+    startDate = dateFromInput.value;
+    endDate = dateToInput.value;
     
-    
-    applyFilterBtn.addEventListener('click', function() {
-      const period = timePeriodSelect.value;
-      let startDate, endDate;
-      
-      if (period === 'custom') {
-        startDate = dateFromInput.value;
-        endDate = dateToInput.value;
-        
-        if (!startDate || !endDate) {
-          alert('Please select both dates for custom range');
-          return;
-        }
-      }
-      
-      
-      const params = new URLSearchParams();
-      params.append('period', period);
-      if (period === 'custom') {
-        params.append('startDate', startDate);
-        params.append('endDate', endDate);
-      }
-      
-      
-      window.location.href = `/admin/Dashboard?${params.toString()}`;
-    });
-    
-   
+    if (!startDate || !endDate) {
+      alert('Please select both dates for custom range');
+      return;
+    }
+  }
+  
+  const params = new URLSearchParams();
+  params.append('period', period);
+  if (period === 'custom') {
+    params.append('startDate', startDate);
+    params.append('endDate', endDate);
+  }
+  
+  window.location.href = `/admin/Dashboard?${params.toString()}`;
+});
+ 
     const urlParams = new URLSearchParams(window.location.search);
     const periodParam = urlParams.get('period');
     if (periodParam) {
@@ -767,6 +803,8 @@
         dateToInput.value = urlParams.get('endDate') || '';
       }
     }
+    
+    updateReportHeading();
   });
 </script>
   

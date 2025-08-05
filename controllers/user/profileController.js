@@ -904,16 +904,16 @@ const cancelItem = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
     const order = await Order.findById(orderId).populate('coupon');
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
     const item = order.orderedItems.id(itemId);
-    if (!item) return res.status(404).json({ message: 'Item not found in order' });
+    if (!item) return res.status(404).json({ success: false, message: 'Item not found in order' });
 
     if (item.status === 'Cancelled')
-      return res.status(400).json({ message: 'Item is already cancelled' });
+      return res.status(400).json({ success: false, message: 'Item is already cancelled' });
 
     if (!['Pending', 'Processing', 'Confirmed'].includes(order.status))
-      return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
+      return res.status(400).json({ success: false, message: 'Order cannot be cancelled at this stage' });
 
     item.status = 'Cancelled';
     const allActiveItems = order.orderedItems.filter(i => i.status !== 'Cancelled');
@@ -960,6 +960,7 @@ const cancelItem = async (req, res) => {
   }
 );
     return res.status(200).json({
+      success: true,
       message: 'Item cancelled and net amount credited to wallet',
       itemStatus: item.status,
       refundAmount,
@@ -968,7 +969,7 @@ const cancelItem = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -1106,7 +1107,7 @@ const returnOrder=async(req,res)=>{
     
     res.json({ success: true });
   } catch (error) {
-     res.status(500).json({ message: error.message });
+     res.status(500).json({ success: false, message: error.message });
   }
 }
 

@@ -23,6 +23,7 @@
     "nocache": "^4.0.0",
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",
+    "openai": "^5.11.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.17.1",

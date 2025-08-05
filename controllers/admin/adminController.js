@@ -49,11 +49,7 @@ const loadDashboard = async (req, res) => {
 
   try {
     res.locals.admin = req.session.admin;
-    
-    // Get filter parameters from query
     const { period, startDate, endDate } = req.query;
-    
-    // Create date filters based on period
     let dateFilter = {};
     if (period === 'daily') {
       const today = new Date();
@@ -65,12 +61,16 @@ const loadDashboard = async (req, res) => {
       };
     } else if (period === 'weekly') {
       const today = new Date();
-      const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-      const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
       dateFilter = {
         createdOn: {
-          $gte: new Date(startOfWeek.setHours(0, 0, 0, 0)),
-          $lte: new Date(endOfWeek.setHours(23, 59, 59, 999))
+          $gte: startOfWeek,
+          $lte: endOfWeek
         }
       };
     } else if (period === 'monthly') {
@@ -90,24 +90,21 @@ const loadDashboard = async (req, res) => {
         }
       };
     } else if (period === 'custom' && startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // Include the full end date
       dateFilter = {
         createdOn: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
+          $gte: start,
+          $lte: end
         }
       };
     }
-
-    // Apply filters to all queries
     const userCount = await User.countDocuments({ isAdmin: false, ...(period && { createdAt: dateFilter.createdOn }) });
     const orders = await Order.find(dateFilter).populate('user').populate('orderedItems.product').sort({ createdOn: -1 });
     const totalAmount = orders.reduce((sum, order) => sum + Number(order.finalAmount || 0), 0);
     const totalsales = orders.length;
-    
-    // Get product count (not filtered by date as it's inventory)
     const productCount = await Product.countDocuments();
-    
-    // Product sales aggregation with date filter
     const productSales = await Order.aggregate([
       { $match: dateFilter },
       { $unwind: '$orderedItems' },
@@ -133,7 +130,7 @@ const loadDashboard = async (req, res) => {
       { $limit: 10 }
     ]);
 
-    // Category sales aggregation with date filter
+   
     const categorySales = await Order.aggregate([
       { $match: dateFilter },
       { $unwind: '$orderedItems' },
@@ -173,7 +170,6 @@ const loadDashboard = async (req, res) => {
       { $limit: 10 }
     ]);
 
-    // Brand sales aggregation with date filter
     const brandSales = await Order.aggregate([
       { $match: dateFilter },
       { $unwind: '$orderedItems' },
@@ -213,10 +209,10 @@ const loadDashboard = async (req, res) => {
       { $limit: 10 }
     ]);
 
-    // Get data for chart based on period
+   
     let chartData = {};
     if (period === 'daily') {
-      // Generate daily data for the current week
+     
       const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const today = new Date();
       const dailyData = await Promise.all(days.map(async (day, index) => {
@@ -240,28 +236,47 @@ const loadDashboard = async (req, res) => {
         data: dailyData.map(d => d.value)
       };
     } else if (period === 'weekly') {
-      // Generate weekly data for the current month
-      const weeklyData = await Promise.all([0, 1, 2, 3].map(async (weekIndex) => {
-        const today = new Date();
-        const start = new Date(today.getFullYear(), today.getMonth(), weekIndex * 7 + 1);
-        const end = new Date(today.getFullYear(), today.getMonth(), (weekIndex + 1) * 7, 23, 59, 59, 999);
-        
+     
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+     
+      const firstDayOfMonth = new Date(year, month, 1);
+    
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      
+      let startOfWeek = new Date(firstDayOfMonth);
+      startOfWeek.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
+      let weekLabels = [];
+      let weekRanges = [];
+      let weekIndex = 1;
+      while (startOfWeek <= lastDayOfMonth) {
+        let endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        weekLabels.push(`Week ${weekIndex}`);
+        weekRanges.push({ start: new Date(startOfWeek), end: new Date(endOfWeek) });
+        startOfWeek.setDate(startOfWeek.getDate() + 7);
+        weekIndex++;
+      }
+      const weeklyData = await Promise.all(weekRanges.map(async (range, idx) => {
+       
+        const start = range.start < firstDayOfMonth ? firstDayOfMonth : range.start;
+        const end = range.end > lastDayOfMonth ? lastDayOfMonth : range.end;
+        end.setHours(23, 59, 59, 999);
         const weeklyOrders = await Order.find({
           createdOn: { $gte: start, $lte: end }
         });
-        
         return {
-          label: `Week ${weekIndex + 1}`,
+          label: weekLabels[idx],
           value: weeklyOrders.reduce((sum, order) => sum + Number(order.finalAmount || 0), 0)
         };
       }));
-      
       chartData = {
         labels: weeklyData.map(d => d.label),
         data: weeklyData.map(d => d.value)
       };
     } else if (period === 'monthly') {
-      // Generate monthly data for the current year
+     
       const monthlyData = await Promise.all(Array.from({ length: 12 }, async (_, monthIndex) => {
         const today = new Date();
         const start = new Date(today.getFullYear(), monthIndex, 1);
@@ -282,7 +297,7 @@ const loadDashboard = async (req, res) => {
         data: monthlyData.map(d => d.value)
       };
     } else if (period === 'yearly') {
-      // Generate yearly data for the last 5 years
+      
       const yearlyData = await Promise.all([4, 3, 2, 1, 0].map(async (yearOffset) => {
         const year = new Date().getFullYear() - yearOffset;
         const start = new Date(year, 0, 1);
@@ -303,7 +318,7 @@ const loadDashboard = async (req, res) => {
         data: yearlyData.map(d => d.value)
       };
     } else if (period === 'custom' && startDate && endDate) {
-      // For custom date range, we'll just show daily data within the range
+     
       const start = new Date(startDate);
       const end = new Date(endDate);
       const diffTime = Math.abs(end - start);
@@ -330,7 +345,7 @@ const loadDashboard = async (req, res) => {
         data: customData.map(d => d.value)
       };
     } else {
-      // Default view (last 12 months)
+     
       const monthlyData = await Promise.all([11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map(async (monthOffset) => {
         const today = new Date();
         const month = new Date(today.getFullYear(), today.getMonth() - monthOffset, 1);
@@ -352,6 +367,9 @@ const loadDashboard = async (req, res) => {
         data: monthlyData.map(d => d.value)
       };
     }
+const periodDisplay = req.query.period ? 
+  `${req.query.period.charAt(0).toUpperCase() + req.query.period.slice(1)} Report` : 
+  'Sales Report';
 
     res.render('dashboard', { 
       productSales, 
@@ -361,7 +379,8 @@ const loadDashboard = async (req, res) => {
       totalAmount,
       totalsales,
       productCount,
-      chartData
+      chartData,
+      periodDisplay
     });
   } catch (error) {
     console.error(error);

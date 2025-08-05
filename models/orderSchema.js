@@ -83,12 +83,12 @@ const orderSchema = new Schema({
     type: Date,
     default: new Date()
   },
-  status: {
-    type: String,
-    required: true,
-    enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
-    default: 'Confirmed'
-  },
+status: {
+  type: String,
+  required: true,
+  enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Failed'],
+  default: 'Confirmed'
+},
   createdOn: {
     type: Date,
     default: Date.now,

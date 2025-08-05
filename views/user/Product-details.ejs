@@ -132,7 +132,6 @@
     .thumbnails {
       display: flex;
       flex-direction: column;
-      gap: 12px;
     }
 
     .thumbnail {
@@ -164,7 +163,7 @@
       min-width: 320px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      /* gap: 16px; */
     }
 
     .details h1 {
@@ -174,7 +173,7 @@
 
     .short-desc {
       color: #555;
-      line-height: 1.5;
+      /* line-height: 1.5; */
     }
 
     .price {
@@ -381,22 +380,23 @@ text-decoration:line-through;
   color: #ff4646;
 }
 
-    .magnifier-glass {
+.magnifier-glass {
   position: absolute;
-  border: 2px solid #1e918b;
+  border: 3px solid #1e918b;
   border-radius: 50%;
   cursor: none;
-  /* Size of magnifier glass: */
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   opacity: 0;
   pointer-events: none;
-  box-shadow: 0 2px 8px rgba(30,145,139,0.15);
+  box-shadow: 0 4px 8px rgba(30,145,139,0.3);
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 200%; 
   z-index: 10;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease-in-out;
 }
+
 .main-image-box {
   position: relative;
 }
@@ -486,6 +486,11 @@ text-decoration:line-through;
   <p class="price" id="dynamicPrice" data-regular="<%= firstVariant.regularPrice %>" data-discount="<%= hasValidDiscount ? firstVariant.discountPrice : '' %>">
     ₹₹<%= firstVariant.finalPrice.toLocaleString('en-IN') %>
   </p>
+  <% if (firstVariant.regularPrice > firstVariant.finalPrice) { %>
+    <p class="text-success" style="font-weight:600;">
+      You save ₹<%= (firstVariant.regularPrice - firstVariant.finalPrice).toLocaleString('en-IN') %>
+    </p>
+  <% } %>
   <% if (firstVariant.appliedOffer > 0 && firstVariant.finalPrice < firstVariant.regularPrice) { %>
   <span class="old-price">
     ₹<%= firstVariant.regularPrice.toLocaleString('en-IN') %>
@@ -596,78 +601,162 @@ text-decoration:line-through;
 </main>
 
 <script>
-  const variants = <%- JSON.stringify(product.variants) %>;
+const variants = <%- JSON.stringify(product.variants) %>;
+let currentMagnifier = null;
+function waitForImageLoad(img) {
+  return new Promise(resolve => {
+    if (img.complete) resolve();
+    else img.onload = resolve;
+  });
+}
 
-  function updateGallery(images) {
-    const thumbnailsContainer = document.getElementById('thumbnailsContainer');
-    const mainImage = document.getElementById('mainImage');
-    thumbnailsContainer.innerHTML = '';
-    images.forEach((img, idx) => {
-      const thumb = document.createElement('img');
-      thumb.src = '/' + img;
-      thumb.className = 'thumbnail' + (idx === 0 ? ' active' : '');
-      thumb.onclick = function() { changeImage(this, '/' + img); };
-      thumbnailsContainer.appendChild(thumb);
-    });
-    mainImage.src = '/' + images[0];
-  }
+async function updateGallery(images) {
+  const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+  const mainImage = document.getElementById('mainImage');
+  thumbnailsContainer.innerHTML = '';
+  images.forEach((img, idx) => {
+    const thumb = document.createElement('img');
+    thumb.src = '/' + img;
+    thumb.className = 'thumbnail' + (idx === 0 ? ' active' : '');
+    thumb.onclick = function() { changeImage(this, '/' + img); };
+    thumb.alt = `Product Thumbnail ${idx+1}`;
+    thumbnailsContainer.appendChild(thumb);
+  });
+  mainImage.src = '/' + images[0];
+  await waitForImageLoad(mainImage);
 
-  function changeImage(el, src) {
-    document.getElementById('mainImage').src = src;
+  if (currentMagnifier) currentMagnifier.destroy();
+  currentMagnifier = new Magnifier(mainImage, 2);
+}
+
+function changeImage(el, src) {
+  const mainImage = document.getElementById('mainImage');
+  mainImage.src = src;
+  waitForImageLoad(mainImage).then(() => {
+    if (currentMagnifier) currentMagnifier.destroy();
+    currentMagnifier = new Magnifier(mainImage, 2);
     document.querySelectorAll('.thumbnail').forEach(img => img.classList.remove('active'));
     el.classList.add('active');
+  });
+}
+
+class Magnifier {
+  constructor(img, zoom) {
+    this.img = img;
+    this.zoom = zoom;
+    this.container = img.parentElement;
+    this.glass = null;
+    this.moveHandler = this.moveMagnifier.bind(this);
+    this.leaveHandler = this.hideMagnifier.bind(this);
+    this.init();
   }
+  init() {
+    const existingGlass = this.container.querySelector('.magnifier-glass');
+    if (existingGlass) existingGlass.remove();
 
-  function updateVariantDetails(variant) {
-    const priceDisplay = document.getElementById('dynamicPrice');
-    const oldPriceElement = document.querySelector('.old-price');
-    priceDisplay.textContent = '₹' + variant.finalPrice.toLocaleString('en-IN');
-if (oldPriceElement) oldPriceElement.remove();
-if (variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice) {
+    this.glass = document.createElement('DIV');
+    this.glass.setAttribute('class', 'magnifier-glass');
+    this.glass.style.left = 0;
+    this.glass.style.top = 0;
+    this.glass.style.opacity = 0;
+    this.glass.style.backgroundImage = `url('${this.img.src}')`;
+    this.glass.style.backgroundSize = `${this.img.width * this.zoom}px ${this.img.height * this.zoom}px`;
+    this.container.appendChild(this.glass);
+  
+    this.container.addEventListener('mousemove', this.moveHandler);
+    this.container.addEventListener('mouseleave', this.leaveHandler);
 
-      const oldPrice = document.createElement('span');
-      oldPrice.className = 'old-price';
-      oldPrice.textContent = '₹' + variant.regularPrice.toLocaleString('en-IN');
-      priceDisplay.parentNode.appendChild(oldPrice);
+    this.container.addEventListener('touchmove', this.moveHandler);
+    this.container.addEventListener('touchend', this.leaveHandler);
+  }
+  moveMagnifier(e) {
+    e.preventDefault();
+    let clientX, clientY;
+    if (e.touches) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
     }
+    const bounding = this.img.getBoundingClientRect();
+    let x = clientX - bounding.left;
+    let y = clientY - bounding.top;
+    x -= window.pageXOffset;
+    y -= window.pageYOffset;
 
-    updateGallery(variant.images);
-    checkStockStatus(variant._id, variant.quantity);
+    const glassW = this.glass.offsetWidth / 2;
+    const glassH = this.glass.offsetHeight / 2;
+    if (x > this.img.width - (glassW/this.zoom)) x = this.img.width - (glassW / this.zoom);
+    if (x < glassW / this.zoom) x = glassW / this.zoom;
+    if (y > this.img.height - (glassH/this.zoom)) y = this.img.height - (glassH/this.zoom);
+    if (y < glassH/this.zoom) y = glassH/this.zoom;
+    this.glass.style.left = (x - glassW) + 'px';
+    this.glass.style.top  = (y - glassH) + 'px';
+    this.glass.style.opacity = 1;
+    this.glass.style.backgroundPosition = `-${(x*this.zoom - glassW)}px -${(y*this.zoom - glassH)}px`;
   }
+  hideMagnifier() {
+    this.glass.style.opacity = 0;
+  }
+  destroy() {
+    this.container.removeEventListener('mousemove', this.moveHandler);
+    this.container.removeEventListener('mouseleave', this.leaveHandler);
+    this.container.removeEventListener('touchmove', this.moveHandler);
+    this.container.removeEventListener('touchend', this.leaveHandler);
+    if (this.glass) this.glass.remove();
+  }
+}
 
-  function getSelectedVariant() {
-    const storageSelect = document.getElementById('storageSelect');
-    if (storageSelect) {
-      try {
-        return JSON.parse(storageSelect.value);
-      } catch {
-        return variants[0];
-      }
+function updateVariantDetails(variant) {
+  const priceDisplay = document.getElementById('dynamicPrice');
+  const oldPriceElement = document.querySelector('.old-price');
+  priceDisplay.textContent = '₹' + variant.finalPrice.toLocaleString('en-IN');
+  if (oldPriceElement) oldPriceElement.remove();
+  if (variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice) {
+    const oldPrice = document.createElement('span');
+    oldPrice.className = 'old-price';
+    oldPrice.textContent = '₹' + variant.regularPrice.toLocaleString('en-IN');
+    priceDisplay.parentNode.appendChild(oldPrice);
+  }
+  updateGallery(variant.images);
+  checkStockStatus(variant._id, variant.quantity);
+}
+
+function getSelectedVariant() {
+  const storageSelect = document.getElementById('storageSelect');
+  if (storageSelect) {
+    try {
+      return JSON.parse(storageSelect.value);
+    } catch {
+      return variants[0];
     }
-    return variants[0];
   }
+  return variants[0];
+}
 
-  function checkStockStatus(variantId, quantity) {
-    const buyNowBtn = document.querySelector('.buy-now');
-    const addToBasketBtn = document.querySelector('.add-to-basket');
-    const stockMessageContainer = document.getElementById('stockMessageContainer');
-    const isOutOfStock = quantity <= 0;
+function checkStockStatus(variantId, quantity) {
+  const buyNowBtn = document.querySelector('.buy-now');
+  const addToBasketBtn = document.querySelector('.add-to-basket');
+  const stockMessageContainer = document.getElementById('stockMessageContainer');
+  const isOutOfStock = quantity <= 0;
 
-    buyNowBtn.disabled = isOutOfStock;
-    addToBasketBtn.disabled = isOutOfStock;
-    stockMessageContainer.innerHTML = isOutOfStock 
-      ? '<p class="out-of-stock">Currently out of stock</p>' 
-      : '<p class="in-stock">In stock</p>';
-  }
+  buyNowBtn.disabled = isOutOfStock;
+  addToBasketBtn.disabled = isOutOfStock;
+  stockMessageContainer.innerHTML = isOutOfStock 
+    ? '<p class="out-of-stock">Currently out of stock</p>' 
+    : '<p class="in-stock">In stock</p>';
+}
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const storageSelect = document.getElementById('storageSelect');
-    const colorRadios = document.querySelectorAll('input[name="color"]');
+document.addEventListener('DOMContentLoaded', async function() {
+  const storageSelect = document.getElementById('storageSelect');
+  const colorRadios = document.querySelectorAll('input[name="color"]');
 
-    colorRadios.forEach(radio => {
-      radio.addEventListener('change', function() {
-        const selectedColor = this.value;
-        const filteredVariants = variants.filter(v => v.color === selectedColor);
+  colorRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      const selectedColor = this.value;
+      const filteredVariants = variants.filter(v => v.color === selectedColor);
+      if (storageSelect) {
         storageSelect.innerHTML = '';
         filteredVariants.forEach(variant => {
           const option = document.createElement('option');
@@ -676,108 +765,103 @@ if (variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice) {
           if (variant.quantity <= 0) option.disabled = true;
           storageSelect.appendChild(option);
         });
-        updateVariantDetails(filteredVariants[0]);
-      });
+      }
+      updateVariantDetails(filteredVariants[0]);
+    });
+  });
+
+  if (storageSelect) {
+    storageSelect.addEventListener('change', function() {
+      const variant = getSelectedVariant();
+      updateVariantDetails(variant);
+    });
+  }
+
+  const mainImage = document.getElementById('mainImage');
+  await waitForImageLoad(mainImage);
+  if (currentMagnifier) currentMagnifier.destroy();
+  currentMagnifier = new Magnifier(mainImage, 2);
+
+
+  updateVariantDetails(variants[0]);
+});
+
+
+document.querySelector('.add-to-basket').addEventListener('click', async function() {
+  const selectedVariant = getSelectedVariant();
+  const quantity = 1;
+
+  this.disabled = true;
+  this.textContent = 'Adding...';
+  const productId = '<%= product._id %>';
+
+  try {
+    const response = await fetch('/user-cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: '<%= product._id %>',
+        variantId: selectedVariant._id,
+        quantity: quantity
+      })
     });
 
-    if (storageSelect) {
-      storageSelect.addEventListener('change', function() {
-        const variant = getSelectedVariant();
-        updateVariantDetails(variant);
-      });
+    const result = await response.json();
+    if (result.success) {
+ 
+      const storageKey = 'wishlistProductIds';
+      let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      ids = ids.filter(id => id !== productId);
+      localStorage.setItem(storageKey, JSON.stringify(ids));  
+      const cartCountElement = document.querySelector('.fa-shopping-cart + .cart-count');
+      if (cartCountElement) cartCountElement.textContent = result.cartCount;
+      Swal.fire({ icon: 'success', title: result.message || 'Added to Cart', timer: 1500 });
+    } else {
+      Swal.fire({ icon: 'error', title: result.message || 'Error occurred', timer: 1500 });
     }
+  } catch (error) {
+    Swal.fire({ icon: 'error', title: 'Failed to Add', text: 'Error adding to cart' });
+  } finally {
+    this.disabled = false;
+    this.textContent = 'Add to Basket';
+  }
+});
 
-    updateVariantDetails(variants[0]);
-  });
-
-  // Add to Basket
-  document.querySelector('.add-to-basket').addEventListener('click', async function() {
-    const selectedVariant = getSelectedVariant();
-    const quantity = 1;
-
-    this.disabled = true;
-    this.textContent = 'Adding...';
-
-    const productId = '<%= product._id %>';
-
-    try {
-      const response = await fetch('/user-cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productId: '<%= product._id %>',
-          variantId: selectedVariant._id,
-          quantity: quantity
-        })
-      });
-
-      const result = await response.json();
-      if (result.success) {
-
-            const storageKey = 'wishlistProductIds';
-    let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    ids = ids.filter(id => id !== productId);
-    localStorage.setItem(storageKey, JSON.stringify(ids));  
-
-
-        const cartCountElement = document.querySelector('.fa-shopping-cart + .cart-count');
-        if (cartCountElement) cartCountElement.textContent = result.cartCount;
-
-        Swal.fire({ icon: 'success', title: result.message || 'Added to Cart', timer: 1500 });
-      } else {
-        Swal.fire({ icon: 'error', title: result.message || 'Error occurred', timer: 1500 });
-      }
-    } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Failed to Add', text: 'Error adding to cart' });
-    } finally {
-      this.disabled = false;
-      this.textContent = 'Add to Basket';
-    }
-  });
 
 document.addEventListener('DOMContentLoaded', function () {
   const storageKey = 'wishlistProductIds';
-
   function getWishlist() {
     return JSON.parse(localStorage.getItem(storageKey) || '[]');
   }
-
   function setWishlist(ids) {
     localStorage.setItem(storageKey, JSON.stringify(ids));
   }
-
   async function updateWishlistServer(productId, isAdding) {
     try {
       await fetch('/wishlist/toggle', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, action: isAdding ? 'add' : 'remove' })
       });
     } catch (err) {
       console.error('Wishlist update failed', err);
     }
   }
-
   const wishlist = getWishlist();
   const icon = document.querySelector('.wishlist-icon');
   if (icon) {
     const productId = icon.dataset.productId;
     const heartIcon = icon.querySelector('i');
-
     if (wishlist.includes(productId)) {
       icon.classList.add('active');
       heartIcon.classList.remove('fa-heart-o');
       heartIcon.classList.add('fa-heart');
     }
-
     icon.addEventListener('click', async function (event) {
       event.preventDefault();
       icon.classList.toggle('active');
       let ids = getWishlist();
       const isAdding = icon.classList.contains('active');
-
       if (isAdding) {
         heartIcon.classList.remove('fa-heart-o');
         heartIcon.classList.add('fa-heart');
@@ -787,13 +871,11 @@ document.addEventListener('DOMContentLoaded', function () {
         heartIcon.classList.add('fa-heart-o');
         ids = ids.filter(id => id !== productId);
       }
-
       setWishlist(ids);
       await updateWishlistServer(productId, isAdding);
     });
   }
 });
-
 </script>
 
 <%- include('../../views/partials/user/footer') %>

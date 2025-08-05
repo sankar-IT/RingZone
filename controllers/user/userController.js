@@ -748,15 +748,15 @@ const checkProductStatus = async (req, res) => {
 
       return res.status(400).json({ error: "Product ID is required", active: false });
     }
-
-    const product = await Product.findById(req.params.id).lean();
+    
+    const products = await product.findById(req.params.id).lean();
 
     
-    if (!product) {
+    if (!products) {
       return res.json({ active: false, message: "Product not found" });
     }
     
-    if (product.isBlocked) {
+    if (products.isBlocked) {
       return res.json({ active: false, message: "Product is blocked" });
     }
     
@@ -769,6 +769,8 @@ const checkProductStatus = async (req, res) => {
     });
   }
 };
+
+
 
 
 
@@ -788,5 +790,6 @@ module.exports = {
   filterProduct,
   filterByPrice,
   loadProductDetails,
-  checkProductStatus
+  checkProductStatus,
+
 };

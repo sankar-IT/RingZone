@@ -113,6 +113,8 @@ router.post('/create-razorpay-order',userAuth, cartController.createRazorpayOrde
 router.post('/verify-razorpay-payment',userAuth, cartController.verifyRazorPayOrder);
 router.get('/payment-success/:orderId' ,userAuth, cartController.paymentSuccessPage );
 router.get('/payment-failure/:orderId',userAuth,cartController.paymentFailurePage);
+router.post('/retry-payment', userAuth, cartController.retryRazorpayOrder);
+
 
 
 

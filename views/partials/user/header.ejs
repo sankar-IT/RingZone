@@ -322,7 +322,7 @@
          
           <div class="col-auto">
             <div class="logo_container">
-              <a href="/">Ring<span>Zone</span></a>
+               <img src="/images/logoicon.png" alt="Phone" class="w-2/3" style="width: 100px;">
             </div>
           </div>
 
@@ -376,11 +376,9 @@
               <li class="me-3">
 <a href="/wishlist" class="wishlist-navbar-icon position-relative" id="navbarWishlistIcon">
   <i class="fa fa-heart-o" aria-hidden="true"></i>
-  <% if (wishlistLength > 0) { %>
-    <span id="wishlist-count" class="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-      <%= wishlistLength %>
-    </span>
-  <% } %>
+  <span id="wishlist-count" class="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="<%= wishlistLength > 0 ? '' : 'display:none;' %>">
+    <%= wishlistLength %>
+  </span>
 </a>
 
 </li>
@@ -444,34 +442,28 @@
   document.addEventListener('DOMContentLoaded', updateWishlistCount);
   
 
-  document.querySelectorAll('.wishlist-btn').forEach(btn => {
-    btn.addEventListener('click', async function () {
-      const productId = this.dataset.productId;
-
-      try {
-        const response = await fetch('/wishlist/toggle', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ productId })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-         
-          updateWishlistCount();
-
-          
-          this.classList.toggle('active');
-        } else {
-          alert(result.message || 'Could not update wishlist');
-        }
-      } catch (err) {
-        console.error('Error updating wishlist:', err);
+  document.body.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.wishlist-btn');
+    if (!btn) return;
+    const productId = btn.dataset.productId;
+    try {
+      const response = await fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId })
+      });
+      const result = await response.json();
+      if (result.success) {
+        updateWishlistCount();
+        btn.classList.toggle('active');
+      } else {
+        alert(result.message || 'Could not update wishlist');
       }
-    });
+    } catch (err) {
+      console.error('Error updating wishlist:', err);
+    }
   });
 </script>
 </body>

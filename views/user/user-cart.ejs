@@ -8,21 +8,57 @@
   .btn-red { background-color: #ff4646; color: #fff; border: none; }
   .btn-red:hover { background-color: #e63e3e; }
   .cart-box { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-  .product-img { width: 80px; border-radius: 10px; height: 94px; }
+  .product-img { width: 80px; border-radius: 10px; height: 94px; object-fit: cover; }
   .error-msg { color: red; font-size: 14px; margin-top: 10px; display: none; }
   #emptyCartMsg { display: none; }
+  .empty-cart-container { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    min-height: 400px;
+    text-align: center;
+    margin-left: 400px;
+  }
+  .empty-cart-icon { 
+    font-size: 5rem; 
+    color: #bbb; 
+    margin-bottom: 20px;
+  }
+  .empty-cart-text {
+    font-size: 1.5rem;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  .empty-cart-subtext {
+    font-size: 1rem;
+    color: #888;
+  }
+  .shop-now-btn {
+    margin-top: 20px;
+    background-color: #ff4646;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+  .shop-now-btn:hover {
+    background-color: #e63e3e;
+    color: white;
+  }
 </style>
 <body>
 
 <div class="container my-5">
+   <% if(cartProducts && cartProducts.items.length > 0) { %>
   <div class="mb-4 text-center step-nav">
     <a href="/user-cart"><span class="active">Cart</span></a>
     <a href="#"><span>Checkout</span></a>
     <a href="#"><span>Payment</span></a>
   </div>
+  <% } %>
 
   <div class="row">
-
     <div class="col-md-8" id="cartItemsContainer">
       <% if(cartProducts && cartProducts.items.length > 0) { %>
         <% cartProducts.items.forEach((item) => { %>
@@ -41,7 +77,7 @@
                   <button class="btn btn-sm btn-outline-secondary minus-btn">-</button>
                   <input type="text" value="<%= item.quantity %>" readonly class="form-control form-control-sm mx-2 text-center quantity-input" style="width: 50px;">
                   <button class="btn btn-sm btn-outline-secondary plus-btn">+</button>
-                  <span class="ms-auto fw-semibold item-total">₹<%= ((item.discountPrice) * item.quantity).toLocaleString('en-IN') %></span>
+                  <span class="ms-auto fw-semibold item-total">₹<%= ((item.discountPrice || item.price) * item.quantity).toLocaleString('en-IN') %></span>
                   <button class="btn btn-sm btn-outline-danger ms-3 delete-btn"
                     data-product-id="<%= item.product._id %>"
                     data-color="<%= item.variant.color %>"
@@ -55,16 +91,17 @@
         <% }) %>
       <% } %>
 
-      <div id="emptyCartMsg" class="text-center" style="font-size: 2rem; color: #888; margin-top:80px; margin-bottom:60px;">
-        <i class="fa fa-shopping-cart" style="font-size: 4rem; color:#bbb; margin-left: 500px;" aria-hidden="true"></i>
-        <br>
-        <span style="font-size: 1.2rem; color: #666; margin-left: 500px;">Your cart is empty.</span>
+      <div id="emptyCartMsg" class="empty-cart-container">
+        <i class="fas fa-shopping-cart empty-cart-icon"></i>
+        <h3 class="empty-cart-text">Your cart is empty</h3>
+        <p class="empty-cart-subtext">Looks like you haven't added anything to your cart yet</p>
+        <a href="/shopping-pageList" class="shop-now-btn">Shop Now</a>
       </div>
 
       <div class="error-msg" id="errorMsg"></div>
     </div>
 
-    <% if(cartProducts && cartProducts.items.length>0){%>
+    <% if(cartProducts && cartProducts.items.length>0){ %>
     <div class="col-md-4" id="summaryCardCol">
       <div class="cart-box">
         <h5 class="mb-3">Order summary</h5>
@@ -78,7 +115,7 @@
         <div class="d-flex justify-content-between fw-bold mb-3">
           <span>Grand Total</span><span id="grandTotal">₹0.00</span>
         </div>
-        <button id="checkoutBtn" class="btn btn-success">
+        <button id="checkoutBtn" class="btn btn-success w-100">
           <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="checkoutSpinner"></span>
           <span id="checkoutText">Proceed to Checkout</span>
         </button>
@@ -101,7 +138,7 @@ const emptyCartMsg = document.getElementById('emptyCartMsg');
 const summaryCol = document.getElementById('summaryCardCol');
 
 function formatRupee(value) {
-  return `₹${value.toLocaleString('en-IN')}.00`;
+  return `₹${value.toLocaleString('en-IN')}`;
 }
 
 function updateTotals() {
@@ -131,37 +168,46 @@ function validateCart() {
     const qty = parseInt(item.querySelector('.quantity-input').value);
     if (qty > 3) {
       valid = false;
-      error = " You can only purchase up to 3 quantities per product.";
+      error = "You can only purchase up to 3 quantities per product.";
     }
   });
 
   if (!valid) {
     errorMsg.style.display = 'block';
     errorMsg.textContent = error;
-    checkoutBtn.classList.add('disabled');
-    checkoutBtn.style.pointerEvents = 'none';
+    if (checkoutBtn) {
+      checkoutBtn.classList.add('disabled');
+      checkoutBtn.style.pointerEvents = 'none';
+    }
   } else {
     errorMsg.style.display = 'none';
-    checkoutBtn.classList.remove('disabled');
-    checkoutBtn.style.pointerEvents = 'auto';
+    if (checkoutBtn) {
+      checkoutBtn.classList.remove('disabled');
+      checkoutBtn.style.pointerEvents = 'auto';
+    }
   }
   updateTotals();
 }
 
-// Show/hide summary card and empty cart message
 function checkEmptyCartAndToggleSummary() {
   const cartItems = document.querySelectorAll('.cart-item');
-  if (summaryCol)  summaryCol.style.display = cartItems.length === 0 ? 'none' : '';
-  if (emptyCartMsg) emptyCartMsg.style.display = cartItems.length === 0 ? 'block' : 'none';
+  if (cartItems.length === 0) {
+    if (emptyCartMsg) emptyCartMsg.style.display = 'flex';
+    if (summaryCol) summaryCol.style.display = 'none';
+  } else {
+    if (emptyCartMsg) emptyCartMsg.style.display = 'none';
+    if (summaryCol) summaryCol.style.display = 'block';
+  }
 }
 
-document.querySelectorAll('.plus-btn, .minus-btn').forEach(button => {
-  button.addEventListener('click', async function () {
-    const cartItem = this.closest('.cart-item');
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('plus-btn') || e.target.classList.contains('minus-btn')) {
+    const btn = e.target;
+    const cartItem = btn.closest('.cart-item');
     const input = cartItem.querySelector('.quantity-input');
     let quantity = parseInt(input.value);
 
-    if (this.classList.contains('plus-btn')) {
+    if (btn.classList.contains('plus-btn')) {
       if (quantity >= 3) {
         return Swal.fire({
           icon: 'warning',
@@ -174,129 +220,139 @@ document.querySelectorAll('.plus-btn, .minus-btn').forEach(button => {
     } else {
       if (quantity > 1) quantity--;
     }
+    
     const productId = cartItem.dataset.productId;
     const color = cartItem.dataset.color;
     const storage = cartItem.dataset.storage;
 
+    updateCartItem(productId, color, storage, quantity, cartItem, input);
+  }
+
+  if (e.target.classList.contains('delete-btn') || e.target.closest('.delete-btn')) {
+    const btn = e.target.classList.contains('delete-btn') ? e.target : e.target.closest('.delete-btn');
+    deleteCartItem(btn);
+  }
+});
+
+async function updateCartItem(productId, color, storage, quantity, cartItem, input) {
+  try {
+    const res = await fetch('/update-quantity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, color, storage, quantity })
+    });
+    const data = await res.json();
+    if (data.success) {
+      input.value = quantity;
+      cartItem.querySelector('.item-total').textContent = `₹${data.itemTotal.toLocaleString('en-IN')}`;
+      validateCart();
+    } else {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Error occurred',
+        text: data.message,
+        confirmButtonColor: '#ff4646'
+      });
+    }
+  } catch (err) {
+    Swal.fire('Error', 'Failed to update quantity', 'error');
+  }
+  checkEmptyCartAndToggleSummary();
+}
+
+async function deleteCartItem(btn) {
+  const cartItem = btn.closest('.cart-item');
+  const productId = btn.dataset.productId;
+  const color = btn.dataset.color;
+  const storage = btn.dataset.storage;
+
+  const confirmDelete = await Swal.fire({
+    icon: 'warning',
+    title: 'Remove Item?',
+    text: 'This product will be removed from your cart.',
+    showCancelButton: true,
+    confirmButtonColor: '#ff4646',
+    cancelButtonColor: '#999',
+    confirmButtonText: 'Yes, remove it!'
+  });
+
+  if (confirmDelete.isConfirmed) {
     try {
-      const res = await fetch('/update-quantity', {
+      const res = await fetch('/delete-cart-item', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, color, storage, quantity })
+        body: JSON.stringify({ productId, color, storage })
       });
       const data = await res.json();
       if (data.success) {
-        input.value = quantity;
-        cartItem.querySelector('.item-total').textContent = `₹${data.itemTotal.toLocaleString('en-IN')}`;
+        cartItem.remove();
         validateCart();
+
+        // Update cart count badge
+        const cartCountElem = document.querySelector('#cart-count');
+        if (cartCountElem) {
+          let currentCount = parseInt(cartCountElem.textContent);
+          if (!isNaN(currentCount) && currentCount > 0) {
+            cartCountElem.textContent = currentCount - 1;
+          }
+        }
+
+        checkEmptyCartAndToggleSummary();
       } else {
-        return Swal.fire({
-          icon: 'warning',
-          title: 'error occured',
-          text: data.message,
-          confirmButtonColor: '#ff4646'
-        });
+        Swal.fire('Error', data.error || 'Failed to delete item', 'error');
       }
     } catch (err) {
-      alert('Error updating quantity');
+      Swal.fire('Error', 'Server error occurred', 'error');
     }
-    checkEmptyCartAndToggleSummary();
-  });
-});
+  }
+}
 
-document.querySelectorAll('.delete-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const cartItem = btn.closest('.cart-item');
-    const productId = btn.dataset.productId;
-    const color = btn.dataset.color;
-    const storage = btn.dataset.storage;
+if (checkoutBtn) {
+  checkoutBtn.addEventListener('click', async () => {
+    const spinner = document.getElementById('checkoutSpinner');
+    const btnText = document.getElementById('checkoutText');
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Processing...';
+    checkoutBtn.disabled = true;
 
-    const confirmDelete = await Swal.fire({
-      icon: 'warning',
-      title: 'Remove Item?',
-      text: 'This product will be removed from your cart.',
-      showCancelButton: true,
-      confirmButtonColor: '#ff4646',
-      cancelButtonColor: '#999',
-      confirmButtonText: 'Yes, remove it!'
-    });
-
-    if (confirmDelete.isConfirmed) {
-      try {
-        const res = await fetch('/delete-cart-item', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, color, storage })
-        });
-        const data = await res.json();
-        if (data.success) {
-          cartItem.remove();
-          validateCart();
-
-          // Update cart count badge
-          const cartCountElem = document.querySelector('#cart-count');
-          if (cartCountElem) {
-            let currentCount = parseInt(cartCountElem.textContent);
-            if (!isNaN(currentCount) && currentCount > 0) {
-              cartCountElem.textContent = currentCount - 1;
-            }
-          }
-
-          checkEmptyCartAndToggleSummary();
-        } else {
-          Swal.fire('Error', data.error || 'Failed to delete item', 'error');
+    try {
+      const response = await fetch('/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const result = await response.json();
+      if (response.ok) {
+        if(result.success){ 
+          window.location.href = '/checkout'; 
         }
-      } catch (err) {
-        Swal.fire('Error', 'Server error occurred', 'error');
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Oops!',
+          text: result.message || 'Your cart is empty.',
+          confirmButtonColor: '#ff7f50'
+        });
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Proceed to Checkout';
+        checkoutBtn.disabled = false;
       }
-    }
-  });
-});
-
-validateCart(); 
-checkEmptyCartAndToggleSummary(); 
-
-document.getElementById('checkoutBtn')?.addEventListener('click', async () => {
-  const spinner = document.getElementById('checkoutSpinner');
-  const btnText = document.getElementById('checkoutText');
-  const btn = document.getElementById('checkoutBtn');
-  spinner.classList.remove('d-none');
-  btnText.textContent = 'Processing...';
-  btn.disabled = true;
-
-  try {
-    const response = await fetch('/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await response.json();
-    if (response.ok) {
-      if(result.success){ 
-        window.location.href = '/checkout'; 
-      }
-    } else {
+    } catch (error) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Oops!',
-        text: result.message || 'Your cart is empty.',
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Something went wrong',
         confirmButtonColor: '#ff7f50'
       });
       spinner.classList.add('d-none');
       btnText.textContent = 'Proceed to Checkout';
-      btn.disabled = false;
+      checkoutBtn.disabled = false;
     }
-  } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message || 'smothing went wrong',
-      confirmButtonColor: '#ff7f50'
-    });
-    spinner.classList.add('d-none');
-    btnText.textContent = 'Proceed to Checkout';
-    btn.disabled = false;
-  }
-});
+  });
+}
+
+// Initialize on page load
+validateCart(); 
+checkEmptyCartAndToggleSummary();
 </script>
 </body>
 <%- include('../../views/partials/user/footer') %>

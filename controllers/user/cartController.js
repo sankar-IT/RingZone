@@ -701,6 +701,7 @@ const postPaymentToOrder = async (req, res) => {
       shipping: shippingCharge,
       paymentMethod: 'cod',
       paymentStatus: 'Confirmed',
+      status:'Confirmed',
       address: {
         name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
         phone: shippingAddress.phone,
@@ -860,6 +861,7 @@ try {
       shipping: shippingCharge,
       paymentMethod: 'online',
       paymentStatus: 'Pending',
+      status: 'Pending',
       address: {
         name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
         phone: shippingAddress.phone,
@@ -915,11 +917,8 @@ try {
 const verifyRazorPayOrder = async (req, res) => {
   try {
 
-    console.log(req.body);
-    
 
     if (!req.session.user) {
-      console.log('Payment verification failed: User not logged in');
       return res.status(401).json({
         success: false,
         message: 'User not logged in',
@@ -930,16 +929,20 @@ const verifyRazorPayOrder = async (req, res) => {
     const userId = req.session.user._id;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = req.body;
 
-    // Validate Razorpay fields
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      console.log('Payment verification failed: Missing Razorpay fields');
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
+      await Order.findByIdAndUpdate(order_id, {
+        status: 'Failed',
+        paymentStatus: 'Failed',
+        failureReason: 'Missing payment verification fields'
+      });
       return res.status(400).json({
         success: false,
-        message: 'Missing payment verification fields'
+        message: 'Missing required fields',
+        redirectUrl: `/payment-failure/${order_id}`
       });
     }
 
-    // Verify payment signature
+   
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
@@ -947,97 +950,121 @@ const verifyRazorPayOrder = async (req, res) => {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      console.log('Payment verification failed: Invalid signature');
+      await Order.findByIdAndUpdate(order_id, {
+        status: 'Failed',
+        paymentStatus: 'Failed',
+        failureReason: 'Invalid payment signature',
+        $push: {
+          statusHistory: {
+            status: 'Failed',
+            changedAt: new Date(),
+            changedBy: 'system'
+          }
+        }
+      });
       return res.status(400).json({
         success: false,
         message: "Invalid signature",
-        redirectUrl: `/payment-failure/${order_id || ''}`
+        redirectUrl: `/payment-failure/${order_id}`
       });
     }
 
-    // Fetch order
-    let order = await Order.findOne({ _id: order_id, user: userId }).populate('orderedItems.product')
-          .sort({ createdAt: -1 })
-          .populate('orderedItems.product');
-
+    
+    const order = await Order.findOne({ _id: order_id, user: userId });
     if (!order) {
-      console.log(`Order not found for ID: ${order_id}`);
       return res.status(404).json({
         success: false,
-        message: "Order not found.",
-        redirectUrl: `/payment-failure/${order_id || ''}`
+        message: "Order not found",
+        redirectUrl: '/payment-failure'
       });
     }
 
-    // Check valid order items
-    if (!Array.isArray(order.orderedItems) || order.orderedItems.length === 0) {
-      console.log('Invalid items data in order:', order._id);
+   
+    if (order.status !== 'Pending') {
+      const redirectUrl = order.status === 'Confirmed' 
+        ? `/order/${order._id}`
+        : `/payment-failure/${order._id}`;
+      
       return res.status(400).json({
         success: false,
-        message: "Invalid order items data",
-        redirectUrl: `/payment-failure/${order_id || ''}`
+        message: `Order already ${order.status.toLowerCase()}`,
+        redirectUrl
       });
     }
 
-    if (order.paymentStatus !== 'Pending') {
-      console.log(`Order ${order._id} already processed with status: ${order.paymentStatus}`);
-      return res.status(400).json({
-        success: false,
-        message: "Order already processed",
-        redirectUrl: `/order/${order._id}`
-      });
-    }
-
-    // Calculate final amount
-    const subtotal = order.orderedItems.reduce(
-      (sum, item) => sum + (item.price * item.quantity),
-      0
-    );
-    order.shipping = subtotal >= 10000 ? 0 : 100;
-    order.finalAmount = subtotal - (order.discount || 0) + order.shipping;
-
-    // Update order payment details
-    order.paymentStatus = 'Paid';
-    order.status = 'Confirmed';
-    order.paymentDate = new Date();
-    order.razorpayOrderId = razorpay_order_id;
-    order.razorpayPaymentId = razorpay_payment_id;
-    order.razorpaySignature = razorpay_signature;
-    await order.save();
-
-    console.log(`Payment verified successfully for order: ${order._id}`);
-
-    // Update stock for ordered items
+    
     await Promise.all(order.orderedItems.map(item =>
       Product.updateOne(
-        { _id: item.product, 'variants.color': item.variant.color, 'variants.storage': item.variant.storage },
+        { 
+          _id: item.product, 
+          'variants.color': item.variant.color, 
+          'variants.storage': item.variant.storage 
+        },
         { $inc: { 'variants.$.quantity': -item.quantity } }
       )
     ));
+    
+
+
+   const  updatedOrder = await Order.findOneAndUpdate(
+      { _id: order_id, user: userId },
+      {
+        $set: {
+          status: 'Confirmed',
+          paymentStatus: 'Paid',
+          paymentDate: new Date(),
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature
+        },
+        $push: {
+          statusHistory: {
+            status: 'Confirmed',
+            changedAt: new Date(),
+            changedBy: 'system'
+          }
+        }
+      },
+      { new: true }
+    );
 
     return res.status(200).json({
       success: true,
       message: "Payment verified successfully",
-      orderId: order._id,
-      redirectUrl: `/payment-success/${order._id}`,
-      orderDetails: {
-        amount: order.finalAmount,
-        items: order.orderedItems.length,
-        shipping: order.shipping
-      }
+      orderId: updatedOrder._id,
+      redirectUrl: `/payment-success/${updatedOrder._id}`
     });
 
   } catch (err) {
-    console.log("Error in verifyRazorPayOrder:", err);
+    console.error("Payment verification error:", err);
+    
+    if (req.body.order_id) {
+      await Order.findByIdAndUpdate(
+        req.body.order_id,
+        {
+          status: 'Failed',
+          paymentStatus: 'Failed',
+          failureReason: err.message,
+          $push: {
+            statusHistory: {
+              status: 'Failed',
+              changedAt: new Date(),
+              changedBy: 'system'
+            }
+          }
+        }
+      );
+    }
+    
     return res.status(500).json({
       success: false,
       message: "Payment verification failed",
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-      redirectUrl: '/payment-failure'
+      redirectUrl: req.body.order_id 
+        ? `/payment-failure/${req.body.order_id}`
+        : '/payment-failure'
     });
   }
 };
-
 
 const paymentSuccessPage = async (req,res) => {
   try{
@@ -1051,18 +1078,80 @@ const paymentSuccessPage = async (req,res) => {
   }
 }
 
-const paymentFailurePage=async(req,res)=>{
+const paymentFailurePage = async (req, res) => {
   try {
-    const orderId=req.params.orderId;
-    const order = await Order.findOne({_id: orderId , user : req.session.user?._id})
-    if(!order){
-      throw new Error('order not found')
+    const orderId = req.params.orderId;
+    const order = await Order.findOne({ 
+      _id: orderId, 
+      user: req.session.user?._id 
+    });
+
+    if (!order) throw new Error('Order not found');
+
+
+    if (order.status === 'Pending') {
+      await Order.findByIdAndUpdate(orderId, {
+        status: 'Failed',
+        paymentStatus: 'Failed',
+        failureReason: 'Payment failed or was cancelled'
+      });
+      order.status = 'Failed'; 
     }
-    res.render('payment-failure',{order})
+
+    res.render('payment-failure', { order });
   } catch (error) {
-    
+    console.error('Payment failure error:', error);
+    res.render('payment-failure', { order: null });
   }
 }
+
+const retryRazorpayOrder = async (req, res) => {
+  try {
+    const { dbOrderId } = req.body;
+
+  
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+    }
+
+    const userId = req.session.user._id;
+
+
+    const existingOrder = await Order.findOne({ _id: dbOrderId, user: userId });
+
+    if (!existingOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (existingOrder.paymentStatus === 'Paid') {
+      return res.status(400).json({ success: false, message: 'Order already paid' });
+    }
+
+    const options = {
+      amount: parseInt(existingOrder.finalAmount) * 100, 
+      currency: 'INR',
+      receipt: 'retry_order_' + Date.now()
+    };
+
+    const razorpayOrder = await razorpay.orders.create(options);
+
+ 
+    res.status(200).json({
+      success: true,
+      orderId: razorpayOrder.id,
+      dbOrderId: existingOrder._id,
+      amount: razorpayOrder.amount,
+      keyId: process.env.RAZORPAY_ID_KEY,
+      currency: razorpayOrder.currency,
+      customer: req.session.user
+    });
+
+  } catch (err) {
+    console.error('Retry Razorpay order failed:', err);
+    res.status(500).json({ success: false, message: 'Retry payment failed' });
+  }
+};
+
 
 const orderPlaced=async(req,res)=>{
   try {
@@ -1089,7 +1178,7 @@ module.exports = {
   createRazorpayOrder,
   paymentSuccessPage,
   verifyRazorPayOrder,
-  paymentFailurePage
-  
+  paymentFailurePage,
+  retryRazorpayOrder
 };
 

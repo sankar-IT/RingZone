@@ -1,6 +1,8 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
+const { getUniqueReferralCode } = require('../helpers/referral');
+const Wallet = require('../models/walletSchema');
 const env = require('dotenv').config();
 
 passport.use(new GoogleStrategy({
@@ -34,14 +36,29 @@ async (req, accessToken, refreshToken, profile, done) => {
         }
 
         
+      
+        const referralCode = await getUniqueReferralCode();
         user = new User({
             firstname: profile.displayName,
             email: profile.emails[0].value,
             googleId: profile.id,
-            isVerified: true 
+            isVerified: true,
+            referralCode
         });
 
         await user.save();
+
+        if (req.session && req.session.referralCode) {
+          await Wallet.create({
+            user: user._id,
+            balance: 100,
+            transactions: [{
+              type: 'credit',
+              amount: 100,
+              description: 'Signup bonus for using referral code during Google registration'
+            }]
+          });
+        }
         return done(null, user);
         
     } catch (error) {

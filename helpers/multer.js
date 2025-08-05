@@ -1,10 +1,10 @@
 const multer = require("multer");
 const path = require("path");
 
-//category image
+
 
 const categoryStorage = multer.diskStorage({
-  destination: function (req, file, cb) { // cb is call back function
+  destination: function (req, file, cb) { 
     cb(null, "public/uploads/re-image");
   },
   filename: function (req, file, cb) {
@@ -14,7 +14,7 @@ const categoryStorage = multer.diskStorage({
   }
 });
 
-//product image
+
 
 const productStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -27,7 +27,7 @@ const productStorage = multer.diskStorage({
   }
 });
 
-//profile image
+
 
 const profileStorage=multer.diskStorage({
   destination:function(req,file,cb){
