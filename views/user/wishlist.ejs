@@ -1,6 +1,8 @@
 <%- include('../../views/partials/user/header') %>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- Add SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <style>
   body {
@@ -9,10 +11,9 @@
   }
 
   .wishlist-container {
-    margin-top: 180px;
-    margin-left: 50px;
+    margin: 180px auto 50px;
     max-width: 1100px;
-    padding: 20px;
+    padding: 30px;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -25,115 +26,198 @@
     color: #333;
   }
 
+  .wishlist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
   .wishlist-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #ddd;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .wishlist-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   .product-image {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
     border-radius: 8px;
-    margin-right: 20px;
+    margin-right: 25px;
   }
 
-  .item-info {
+  .item-details {
     flex-grow: 1;
-  }
-
-  .item-info h2 {
-    font-size: 1.2rem;
-    margin: 0 0 5px;
-  }
-
-  .item-info p {
-    margin: 4px 0;
-    color: #555;
-  }
-
-  .price {
-    color: #ff7f50;
-    font-weight: bold;
-  }
-
-  .item-actions {
     display: flex;
     flex-direction: column;
+    gap: 5px;
+  }
+
+  .item-details h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #333;
+  }
+
+  .price-container {
+    display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .add-cart,
-  .remove-item {
-    padding: 8px 14px;
+  .current-price {
+    color: #ff7f50;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  .original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9rem;
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 15px;
+  }
+
+  .view-product {
+    padding: 8px 20px;
+    background-color: #007bff;
+    color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    text-align: center;
   }
 
-  .add-cart {
-    background-color: #28a745;
-    color: #fff;
+  .view-product:hover {
+    background-color: #0069d9;
   }
 
   .remove-item {
-    background-color: #dc3545;
-    color: #fff;
+    padding: 8px 15px;
+    background-color: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
   }
 
-  .remove-item i {
-    margin-right: 5px;
+  .remove-item:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .empty-wishlist {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 5rem;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+
+  .empty-text {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .shop-btn {
+    padding: 10px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+
+  .shop-btn:hover {
+    background-color: #0069d9;
+    color: white;
   }
 </style>
 
 <div class="wishlist-container">
- 
+  <h1 class="wishlist-title">My Wishlist</h1>
 
   <% if (wishlistItems.length === 0) { %>
-    <p style="text-align: center;">Your wishlist is empty.</p>
-  <% } else { %>
-    <% wishlistItems.forEach(item => { 
-      const product = item.productId;
-      const variant = product.variants[0];
-    %>
-      <div class="wishlist-item">
-        <img src="/<%= product.images[0] %>" alt="<%= product.productName %>" class="product-image" />
-        <div class="item-info">
-          <h2><%= product.productName %></h2>
-          <p style="color: blue;">₹ <%= variant.discountPrice %> <span style="text-decoration: line-through; color: gray;">₹ <%= variant.regularPrice %></span></p>
-        </div>
-
-     <a href='/products/<%= product._id %>'> <button class="add-cart" style="margin-top: 10px;" >Add to Cart</button></a>
-        <div class="item-actions">
-          <form method="get" action="/products/product._id">
-            <input type="hidden" name="productId" value="<%= product._id %>" />
-            <input type="hidden" name="variantId" value="<%= variant._id %>" />
-            
-          </form>
-          <button style="margin-left: 10px;" class="remove-item" onclick="removeFromWishlist('<%= product._id %>')">
-            <i class="fas fa-trash-alt"></i> Remove
-          </button>
-        </div>
+    <div class="empty-wishlist">
+      <div class="empty-icon">
+        <i class="far fa-heart"></i>
       </div>
-    <% }) %>
+      <h3 class="empty-text">Your wishlist is empty</h3>
+      <a href="/shopping-pageList" class="shop-btn">Continue Shopping</a>
+    </div>
+  <% } else { %>
+    <div class="wishlist-items">
+      <% wishlistItems.forEach(item => { 
+        const product = item.productId;
+        const variant = product.variants[0];
+      %>
+        <div class="wishlist-item">
+          <img src="/<%= product.images[0] %>" alt="<%= product.productName %>" class="product-image" />
+          <div class="item-details">
+            <h3><%= product.productName %></h3>
+            <div class="price-container">
+              <span class="current-price">₹<%= variant.discountPrice %></span>
+              <% if (variant.discountPrice < variant.regularPrice) { %>
+                <span class="original-price">₹<%= variant.regularPrice %></span>
+              <% } %>
+            </div>
+          </div>
+          <div class="item-actions">
+            <a href='/products/<%= product._id %>' class="view-product">View Product</a>
+            <button class="remove-item" onclick="confirmRemove('<%= product._id %>')">
+              <i class="fas fa-trash"></i> Remove
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
   <% } %>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function removeFromWishlist(productId) {
-  fetch('/wishlist/toggle', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ productId, action: 'remove' })
-  }).then(() => {
+  function confirmRemove(productId) {
+    Swal.fire({
+      title: 'Remove from wishlist?',
+      text: "Are you sure you want to remove this item from your wishlist?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        removeFromWishlist(productId);
+      }
+    });
+  }
 
+  function removeFromWishlist(productId) {
     fetch('/wishlist/toggle', {
       method: 'POST',
       headers: {
@@ -141,21 +225,26 @@
       },
       body: JSON.stringify({ productId, action: 'remove' })
     }).then(() => {
-
-          const storageKey = 'wishlistProductIds';
-    let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    ids = ids.filter(id => id !== productId);
-    localStorage.setItem(storageKey, JSON.stringify(ids));    
-
-    
-      location.reload();
-    }).catch(() => alert('Failed to remove'));
-  
-
-    location.reload();
-  }).catch(() => alert('Failed to remove'));
-}
-
+      const storageKey = 'wishlistProductIds';
+      let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      ids = ids.filter(id => id !== productId);
+      localStorage.setItem(storageKey, JSON.stringify(ids));
+      
+      Swal.fire(
+        'Removed!',
+        'The item has been removed from your wishlist.',
+        'success'
+      ).then(() => {
+        location.reload();
+      });
+    }).catch(() => {
+      Swal.fire(
+        'Error!',
+        'Failed to remove the item from your wishlist.',
+        'error'
+      );
+    });
+  }
 </script>
 
 <%- include('../../views/partials/user/footer') %>

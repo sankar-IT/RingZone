@@ -31,7 +31,8 @@
 
   .order-summary-card,
   .products-list,
-  .price-summary {
+  .price-summary,
+  .address-section {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -41,6 +42,37 @@
 
   .order-summary-card {
     border-left: 4px solid var(--brand);
+  }
+
+  .address-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .address-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .address-field {
+    margin-bottom: 8px;
+  }
+
+  .address-label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+  .address-value {
+    color: #333;
+    font-size: 0.95rem;
   }
 
   .order-header {
@@ -240,6 +272,10 @@
   }
 
   @media (max-width: 768px) {
+    .address-details {
+      grid-template-columns: 1fr;
+    }
+    
     .product-item {
       grid-template-columns: 1fr;
       text-align: left;
@@ -275,62 +311,99 @@
           </div>
         </div>
       </div>
-  
-      <div class="products-list">
-  <% if (order.orderedItems.length > 0) { %>
-    <% order.orderedItems.forEach(item => { %>
-      <div class="product-item">
-        <img src="/<%= item.product.images[0] %>" class="product-image" alt="Product Image">
-        <div class="product-info">
-          <div class="product-name"><%= item.product.productName %></div>
-          <div class="product-variant"><%= item.variant.color %>, <%= item.variant.storage %></div>
-        </div>
-        <div class="product-price">₹<%= item.price %></div>
-        
-        <% if (order.paymentStatus !== 'Pending') { %>
-        
-          <div class="order-status status-<%= (item.status || order.status).toLowerCase() %>">
-            <%= item.status || order.status %>
-          </div>
-        <% } else { %>
-          <div></div> 
-        <% } %>
-        
-        <div class="action-col">
-          <% if (order.paymentStatus === 'Pending') { %>
-           
-          <% } else if (item.status === 'Delivered') { %>
-            <button class="return-btn" 
-              data-order-id="<%= order._id %>" 
-              data-item-id="<%= item._id %>">
-              Return Order
-            </button>
-          <% } else if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
-            <% if (item.status === 'Return Requested') { %>
-                <span class="badge bg-warning">Return Requested</span>
-            <% } else if (item.status === 'Return Approved') { %>
-                <span class="badge bg-success">Return Approved</span>
-            <% } else if (item.status === 'Return Rejected') { %>
-                <span class="badge bg-danger">Return Rejected</span>
-            <% } else if (item.status === 'Returned') { %>
-                <span class="badge bg-primary">Returned</span>
-            <% } %>
-          <% } else if (item.status === 'Cancelled' || order.status === 'Cancelled') { %>
-            <button class="cancel-btn" disabled>Cancelled</button>
-          <% } else if (['Pending', 'Processing', 'Confirmed'].includes(order.status) && !['Returned', 'Return Requested'].includes(item.status)) { %>
-            <button class="cancel-btn" 
-              data-order-id="<%= order._id %>" 
-              data-item-id="<%= item._id %>">
-              Cancel
-            </button>
-          <% } else { %>
-            <button class="cancel-btn" disabled>Cannot Cancel</button>
-          <% } %>
-        </div>
+    
+<div class="address-section">
+  <div class="address-header">
+    <i class="fas fa-map-marker-alt"></i>
+    <span>Delivery Address</span>
+  </div>
+  <div class="address-details">
+    <div>
+      <div class="address-field">
+        <span class="address-label">Name:</span>
+        <span class="address-value"><%= order.address.name %></span>
       </div>
-    <% }) %>
-  <% } %>
+      <div class="address-field">
+        <span class="address-label">Address:</span>
+        <span class="address-value"><%= order.address.address %></span>
+      </div>
+      <div class="address-field">
+        <span class="address-label">City/Town:</span>
+        <span class="address-value"><%= order.address.place %></span>
+      </div>
+    </div>
+    <div>
+      <div class="address-field">
+        <span class="address-label">State:</span>
+        <span class="address-value"><%= order.address.state %></span>
+      </div>
+      <div class="address-field">
+        <span class="address-label">Pincode:</span>
+        <span class="address-value"><%= order.address.pincode %></span>
+      </div>
+      <div class="address-field">
+        <span class="address-label">Phone:</span>
+        <span class="address-value"><%= order.address.phone %></span>
+      </div>
+    </div>
+  </div>
 </div>
+
+      <div class="products-list">
+        <% if (order.orderedItems.length > 0) { %>
+          <% order.orderedItems.forEach(item => { %>
+            <div class="product-item">
+              <img src="/<%= item.product.images[0] %>" class="product-image" alt="Product Image">
+              <div class="product-info">
+                <div class="product-name"><%= item.product.productName %></div>
+                <div class="product-variant"><%= item.variant.color %>, <%= item.variant.storage %> <span><strong>X<%= item.quantity %></strong></span></div>
+                
+              </div>
+              <div class="product-price">₹<%= item.price %></div>
+              
+              <% if (order.paymentStatus !== 'Pending') { %>
+                <div class="order-status status-<%= (item.status || order.status).toLowerCase() %>">
+                  <%= item.status || order.status %>
+                </div>
+              <% } else { %>
+                <div></div> 
+              <% } %>
+              
+              <div class="action-col">
+                <% if (order.paymentStatus === 'Pending') { %>
+                
+                <% } else if (item.status === 'Delivered') { %>
+                  <button class="return-btn" 
+                    data-order-id="<%= order._id %>" 
+                    data-item-id="<%= item._id %>">
+                    Return Order
+                  </button>
+                <% } else if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
+                  <% if (item.status === 'Return Requested') { %>
+                      <span class="badge bg-warning">Return Requested</span>
+                  <% } else if (item.status === 'Return Approved') { %>
+                      <span class="badge bg-success">Return Approved</span>
+                  <% } else if (item.status === 'Return Rejected') { %>
+                      <span class="badge bg-danger">Return Rejected</span>
+                  <% } else if (item.status === 'Returned') { %>
+                      <span class="badge bg-primary">Returned</span>
+                  <% } %>
+                <% } else if (item.status === 'Cancelled' || order.status === 'Cancelled') { %>
+                  <button class="cancel-btn" disabled>Cancelled</button>
+                <% } else if (['Pending', 'Processing', 'Confirmed'].includes(order.status) && !['Returned', 'Return Requested'].includes(item.status)) { %>
+                  <button class="cancel-btn" 
+                    data-order-id="<%= order._id %>" 
+                    data-item-id="<%= item._id %>">
+                    Cancel
+                  </button>
+                <% } else { %>
+                  <button class="cancel-btn" disabled>Cannot Cancel</button>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
 
       <div class="price-summary">
         <div class="price-row">
@@ -378,7 +451,6 @@
     </div>
   </div>
 
- 
   <div class="modal fade" id="returnModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -464,7 +536,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-
   document.querySelectorAll('.cancel-btn:not(:disabled)').forEach(button => {
     button.addEventListener('click', async function() {
       const productName = this.closest('.product-item').querySelector('.product-name').textContent;
@@ -513,7 +584,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Return button logic
   document.querySelectorAll('.return-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       const orderId = this.dataset.orderId;
@@ -525,7 +595,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Return form submit logic
   document.getElementById('returnForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const orderId = document.getElementById('returnOrderId').value;

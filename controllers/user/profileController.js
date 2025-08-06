@@ -974,11 +974,13 @@ const cancelItem = async (req, res) => {
 };
 
 
-
 const downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const order = await Order.findById(orderId).populate('orderedItems.product');
+
+    const order = await Order.findById(orderId)
+      .populate('orderedItems.product')
+      .populate('address'); 
 
     if (!order) {
       return res.status(404).send('Order not found');
@@ -990,7 +992,6 @@ const downloadInvoice = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}.pdf`);
 
     doc.pipe(res);
-
     doc
       .fontSize(24)
       .fillColor('#ff7f50')
@@ -1011,6 +1012,19 @@ const downloadInvoice = async (req, res) => {
       .text(`Order Date: ${order.createdOn.toLocaleString()}`)
       .text(`Status: ${order.status}`)
       .moveDown();
+
+    const addr = order.address; 
+    if (addr) {
+      doc
+        .fontSize(12)
+        .font('Helvetica-Bold')
+        .text('Shipping Address:', { underline: true })
+        .font('Helvetica')
+        .text(`Name: ${addr.name}`)
+        .text(`Phone: ${addr.phone}`)
+        .text(`Address: ${addr.address}, ${addr.state}`)
+        .moveDown();
+    }
 
     const tableTop = doc.y;
     const itemX = 50;
@@ -1075,12 +1089,12 @@ const downloadInvoice = async (req, res) => {
     doc.fontSize(14).font('Helvetica-Bold');
     doc.text('Total Amount Paid:', labelX, summaryY);
     doc.text(`₹${order.finalAmount}`, valueX, summaryY, { align: 'right' });
-
     doc
       .moveDown(2)
       .fontSize(10)
       .fillColor('gray')
-   
+      .text('Thank you for shopping with us!', { align: 'center' });
+
     doc.end();
   } catch (err) {
     console.error(err);

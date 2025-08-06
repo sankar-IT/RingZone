@@ -62,6 +62,13 @@
       margin-left: 250px;
       padding: 20px;
     }
+    .badge.coupon {
+  background-color: #4a5568;
+  color: white;
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: 4px;
+}
     .topbar {
       height: 60px;
       background-color: var(--topbar-bg);
@@ -270,7 +277,7 @@
         <input type="text" class="search" placeholder="🔍 Search orders..." id="searchInput" />
         <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
       </header>
-      <!-- Filters Row -->
+  
       <div class="filters" style="margin-top: 20px;">
         <label class="filter-btn"><i class="fas fa-filter"></i> Status</label>
         <select id="statusFilter">
@@ -293,38 +300,48 @@
       </div>
       <div class="table-container">
         <table id="orderTable">
-          <thead style="color: white; background-color: #ff4646;">
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Address</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Edit</th>
-            </tr>
-          </thead>
+         <thead style="color: white; background-color: #ff4646;">
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Address</th>
+    <th>Date</th>
+    <th>Coupon code</th>
+    <th>Status</th>
+    <th>Edit</th>
+  </tr>
+</thead>
           <tbody>
             <% if (orders.length === 0) { %>
               <tr><td colspan="7" class="text-center">No orders found</td></tr>
             <% } else { %>
-              <% orders.forEach((order, index) => { %>
-                <tr data-status="<%= order.status.toLowerCase().replace(/\s+/g,'-') %>">
-                  <td><%= order.orderId %></td>
-                  <td>
-                    <%= order.address && order.address.name
-                        ? order.address.name.replace(/\+/g, ' ').split(' ')[0]
-                        : 'N/A' %>
-                  </td>
-                  <td><%= order.address?.address %></td>
-                  <td><%= order.invoiceDate.toISOString().slice(0, 10) %></td>
-                  <td>
-                    <span class="badge <%= order.status.toLowerCase().replace(/\s+/g, '-') %>"><%= order.status %></span>
-                  </td>
-                  <td>
-                    <a href="/admin/update-orders/<%= order._id %>"><button class="edit-btn"><i class="fas fa-pen"></i></button></a>
-                  </td>
-                </tr>
-              <% }); %>
+           <% orders.forEach((order, index) => { %>
+  <tr data-status="<%= order.status.toLowerCase().replace(/\s+/g,'-') %>">
+    <td><%= order.orderId %></td>
+    <td>
+      <%= order.address && order.address.name
+          ? order.address.name.replace(/\+/g, ' ').split(' ')[0]
+          : 'N/A' %>
+    </td>
+    <td><%= order.address?.address %></td>
+    <td><%= order.invoiceDate.toISOString().slice(0, 10) %></td>
+    <td>
+      <% if (order.coupon && order.coupon.couponCode) { %>
+        <span class="badge coupon" title="Discount: <%= order.coupon.discountAmount %>">
+          <%= order.coupon.couponCode %>
+        </span>
+      <% } else { %>
+        <span class="text-muted">-</span>
+      <% } %>
+    </td>
+    <td>
+      <span class="badge <%= order.status.toLowerCase().replace(/\s+/g, '-') %>"><%= order.status %></span>
+    </td>
+    <td>
+      <a href="/admin/update-orders/<%= order._id %>"><button class="edit-btn"><i class="fas fa-pen"></i></button></a>
+    </td>
+  </tr>
+<% }); %>
             <% } %>
           </tbody>
         </table>
@@ -369,16 +386,14 @@ function renderTable(page = 1, items = allRows) {
 
 function renderPagination(items = allRows) {
   const pageCount = Math.ceil(items.length / rowsPerPage) || 1;
-  pagination.innerHTML = ''; // pagination is the container div in your HTML
-
-  // Create wrapper container
+  pagination.innerHTML = ''; 
+ 
   const paginationWrapper = document.createElement('div');
   paginationWrapper.className = 'pagination-container';
 
   const paginationDiv = document.createElement('div');
   paginationDiv.className = 'pagination';
 
-  // Prev Button
   if (currentPage > 1) {
     const prevLink = document.createElement('a');
     prevLink.href = '#';
@@ -392,7 +407,7 @@ function renderPagination(items = allRows) {
     paginationDiv.appendChild(prevLink);
   }
 
-  // Page Numbers
+ 
   for (let i = 1; i <= pageCount; i++) {
     if (i === currentPage) {
       const span = document.createElement('span');
@@ -413,7 +428,7 @@ function renderPagination(items = allRows) {
     }
   }
 
-  // Next Button
+
   if (currentPage < pageCount) {
     const nextLink = document.createElement('a');
     nextLink.href = '#';
@@ -432,40 +447,45 @@ function renderPagination(items = allRows) {
 }
 
 
-    function sortRows(value, rows = []) {
-      const sorted = [...rows];
-      switch (value) {
-        case 'az':
-          return sorted.sort((a, b) => a.children[1].innerText.localeCompare(b.children[1].innerText));
-        case 'za':
-          return sorted.sort((a, b) => b.children[1].innerText.localeCompare(a.children[1].innerText));
-        case 'latest':
-          return sorted.sort((a, b) => new Date(b.children[3].innerText) - new Date(a.children[3].innerText));
-        case 'oldest':
-          return sorted.sort((a, b) => new Date(a.children[3].innerText) - new Date(b.children[3].innerText));
-        default:
-          return sorted; 
-      }
-    }
+ function sortRows(value, rows = []) {
+  const sorted = [...rows];
+  switch (value) {
+    case 'az':
+      return sorted.sort((a, b) => a.children[1].innerText.localeCompare(b.children[1].innerText));
+    case 'za':
+      return sorted.sort((a, b) => b.children[1].innerText.localeCompare(a.children[1].innerText));
+    case 'latest':
+      return sorted.sort((a, b) => new Date(b.children[3].innerText) - new Date(a.children[3].innerText));
+    case 'oldest':
+      return sorted.sort((a, b) => new Date(a.children[3].innerText) - new Date(b.children[3].innerText));
+    default:
+      return sorted; 
+  }
+}
 
-    function filterRows(searchTerm, statusValue) {
-      const s = (searchTerm || '').toLowerCase();
-      const st = (statusValue || 'all');
-      return allRows.filter(row => {
-        // search match
-        const orderId = row.children[0].innerText.toLowerCase();
-        const name = row.children[1].innerText.toLowerCase();
-        const date = row.children[3].innerText.toLowerCase();
-        const rowStatus = (row.dataset.status || '').toLowerCase();
-        const matchesSearch = !s || orderId.includes(s) || name.includes(s) || date.includes(s);
-        const matchesStatus = st === 'all' || rowStatus === st;
-        return matchesSearch && matchesStatus;
-      });
-    }
-
+function filterRows(searchTerm, statusValue) {
+  const s = (searchTerm || '').toLowerCase();
+  const st = (statusValue || 'all');
+  return allRows.filter(row => {
+    const orderId = row.children[0].innerText.toLowerCase();
+    const name = row.children[1].innerText.toLowerCase();
+    const date = row.children[3].innerText.toLowerCase();
+    const couponCode = row.children[4].innerText.toLowerCase(); 
+    const rowStatus = (row.dataset.status || '').toLowerCase();
+    
+    const matchesSearch = !s || 
+      orderId.includes(s) || 
+      name.includes(s) || 
+      date.includes(s) ||
+      couponCode.includes(s); 
+      
+    const matchesStatus = st === 'all' || rowStatus === st;
+    return matchesSearch && matchesStatus;
+  });
+}
     function applyFiltersAndRender() {
       const searchTerm = searchInput.value.trim();
-      const statusValue = statusFilter.value; // e.g. 'delivered'
+      const statusValue = statusFilter.value; 
       const filteredRows = filterRows(searchTerm, statusValue);
       const sortedRows = sortRows(sortSelect.value, filteredRows);
       currentPage = 1;
@@ -473,7 +493,6 @@ function renderPagination(items = allRows) {
       renderPagination(sortedRows);
     }
 
-    // Event Listeners
     searchInput.addEventListener('input', applyFiltersAndRender);
     sortSelect.addEventListener('change', applyFiltersAndRender);
     statusFilter.addEventListener('change', applyFiltersAndRender);
@@ -485,7 +504,6 @@ function renderPagination(items = allRows) {
       applyFiltersAndRender();
     });
 
-    // Initial render
     applyFiltersAndRender();
   </script>
 </body>

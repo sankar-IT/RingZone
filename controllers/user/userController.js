@@ -28,8 +28,8 @@ const loadHomepage = async (req, res) => {
     const categories = await Category.find({ islisted: true });
 
     const productData = await product.find({ isBlocked: false })
-                                     .sort({ createdAt: -1 })
-                                     .limit(8);
+     .sort({ createdAt: -1 })
+     .limit(8);
 
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
@@ -66,7 +66,7 @@ const loadHomepage = async (req, res) => {
 };
 
 
-// Signup page
+
 const loadSignup = async (req, res) => {
   try {
     res.render('signup');

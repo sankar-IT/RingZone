@@ -42,7 +42,24 @@ const orderSchema = new Schema({
       selectedImage: { type: String }
     },
     returnReason: { type: String },
-    returnRequestDate: { type: Date }
+    returnRequestDate: { type: Date },
+    cancellationReason: { 
+      type: String,
+      enum: [
+        'Out of Stock',
+        'Payment Issue',
+        'Suspicious Activity',
+        'Customer Request',
+        'Shipping Restrictions',
+        'Pricing Error',
+        'Other'
+      ]
+    },
+    cancelledBy: {
+      type: String,
+      enum: ['Customer', 'Admin', 'System']
+    },
+    cancellationDate: { type: Date }
   }],
   totalPrice: {
     type: Number,
@@ -76,19 +93,19 @@ const orderSchema = new Schema({
    paymentStatus: {
      type: String,
      required: true,
-     enum: ['Paid', 'Pending','Processing','Confirmed'],
+     enum: ['Paid', 'Pending','Processing','Confirmed', 'Refunded', 'Refund Pending'],
      default: 'Confirmed'
    },
   invoiceDate: {
     type: Date,
     default: new Date()
   },
-status: {
-  type: String,
-  required: true,
-  enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Failed'],
-  default: 'Confirmed'
-},
+  status: {
+    type: String,
+    required: true,
+    enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Failed'],
+    default: 'Confirmed'
+  },
   createdOn: {
     type: Date,
     default: Date.now,
@@ -97,6 +114,26 @@ status: {
   couponApplied: {
     type: Boolean,
     default: false
+  },
+  adminCancellation: {
+    reason: {
+      type: String,
+      enum: [
+        'Out of Stock',
+        'Payment Issue',
+        'Suspicious Activity',
+        'Customer Request',
+        'Shipping Restrictions',
+        'Pricing Error',
+        'Other'
+      ]
+    },
+    notes: { type: String },
+    cancelledBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    cancellationDate: { type: Date }
   }
 }, { timestamps: true });
 

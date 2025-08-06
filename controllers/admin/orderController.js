@@ -4,13 +4,12 @@ const Product=require('../../models/productsSchema')
 const Category = require('../../models/categorySchema');
 const Wallet=require('../../models/walletSchema');
 
-
 const ordersList = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate('user', 'name') 
-      .populate('orderedItems.product', 'brand') 
-      .sort({ createdOn: -1 }); 
+      .populate('orderedItems.product', 'brand')
+      .sort({ createdOn: -1 });
 
     res.render('orders-list', { orders });
   } catch (error) {
@@ -18,7 +17,6 @@ const ordersList = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
-
 
 const updateOrders=async(req,res)=>{
   try {
@@ -39,61 +37,52 @@ const updateOrders=async(req,res)=>{
   }
 }
 const updateOrdersStatus = async (req, res) => {
-  const { orderId } = req.params;
-  const { status } = req.body;
+  const { orderId, itemIdx } = req.params;
+  const { status, cancellationReason, cancelledBy } = req.body;
 
   try {
-    const order = await Order.findById(orderId).populate('orderedItems.product');
+    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).send('Order not found');
     }
 
-    const hasReturnedItems = order.orderedItems.some(item =>
-      ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status)
-    );
-    if (hasReturnedItems && ['Shipped', 'Delivered'].includes(status)) {
-      return res.status(400).json({
-        message: 'Cannot set order to Shipped/Delivered when it has returned/cancelled items'
-      });
+    if (itemIdx >= order.orderedItems.length) {
+      return res.status(400).send('Invalid item index');
     }
-    const allItemsReturnedOrCancelled = order.orderedItems.every(item =>
-      ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status)
+
+    const item = order.orderedItems[itemIdx];
+    
+    if (status === 'Cancelled' && cancellationReason) {
+      item.cancellationReason = cancellationReason;
+      item.cancelledBy = cancelledBy || 'Admin';
+      item.cancellationDate = new Date();
+    }
+
+    item.status = status;
+    
+   
+    const allItemsCancelledOrReturned = order.orderedItems.every(item =>
+      ['Cancelled', 'Returned', 'Return Approved', 'Return Rejected'].includes(item.status)
     );
 
-    if (allItemsReturnedOrCancelled) {
+    if (allItemsCancelledOrReturned) {
       order.status = 'Cancelled';
-      await order.save();
-      return res.redirect('/admin/orders-list');
-    }
-    const validStatusTransitions = {
-      'Pending': ['Confirmed', 'Cancelled'],
-      'Confirmed': ['Shipped', 'Cancelled'],
-      'Shipped': ['Delivered', 'Cancelled'],
-      'Delivered': ['Return Requested', 'Completed'],
-    };
-
-    if (validStatusTransitions[order.status] &&
-        !validStatusTransitions[order.status].includes(status)) {
-      return res.status(400).json({
-        message: `Invalid status transition from ${order.status} to ${status}`
-      });
-    }
-    order.status = status;
-    order.orderedItems.forEach(item => {
-      if (!['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status)) {
-        item.status = status;
+      if (cancellationReason) {
+        order.adminCancellation = {
+          reason: cancellationReason,
+          cancelledBy: cancelledBy || 'Admin',
+          cancellationDate: new Date()
+        };
       }
-    });
+    }
 
     await order.save();
-
-    res.redirect('/admin/orders-list');
+    res.redirect(`/admin/orders-list/${orderId}`);
   } catch (err) {
     console.error('Update Error:', err);
     res.status(500).send('Internal Server Error');
   }
 };
-
 
 const approveReturn = async (req, res) => {
   try {

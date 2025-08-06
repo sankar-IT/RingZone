@@ -92,7 +92,7 @@ const loadDashboard = async (req, res) => {
     } else if (period === 'custom' && startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999); // Include the full end date
+      end.setHours(23, 59, 59, 999);
       dateFilter = {
         createdOn: {
           $gte: start,
@@ -102,7 +102,15 @@ const loadDashboard = async (req, res) => {
     }
     const userCount = await User.countDocuments({ isAdmin: false, ...(period && { createdAt: dateFilter.createdOn }) });
     const orders = await Order.find(dateFilter).populate('user').populate('orderedItems.product').sort({ createdOn: -1 });
-    const totalAmount = orders.reduce((sum, order) => sum + Number(order.finalAmount || 0), 0);
+    const totalAmount = orders.reduce((sum, order) => {
+      if (order.status === 'Confirmed' || order.status === 'Delivered') {
+        return sum + Number(order.finalAmount || 0);
+      }
+      return sum;
+    }, 0);
+
+console.log("Total Confirmed/Delivered Amount:", totalAmount);
+
     const totalsales = orders.length;
     const productCount = await Product.countDocuments();
     const productSales = await Order.aggregate([

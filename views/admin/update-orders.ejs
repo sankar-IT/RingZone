@@ -204,6 +204,23 @@
       cursor: not-allowed;
     }
 
+    /* New styles */
+    .disabled-control {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .disabled-btn {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .status-pending {
+      color: #ffc107;
+      font-weight: bold;
+    }
+
     @media (max-width: 768px) {
       .product-card .row {
         flex-direction: column;
@@ -271,28 +288,37 @@
               </div>
               <div class="col-md-2">
                 <label for="item-status-<%= idx %>" class="form-label fw-bold">Item Status</label>
-<select 
-  id="item-status-<%= idx %>" 
-  class="form-select mb-2 item-status-select <%= ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) ? 'status-disabled' : '' %>"
-  data-order-id="<%= order._id %>" 
-  data-item-idx="<%= idx %>" 
-  <%= ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) ? 'disabled' : '' %>
->
-  <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-  <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-  <option value="Confirmed" <%= item.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-  <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-  <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-  <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-  <% if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
-    <option value="Return Requested" <%= item.status === 'Return Requested' ? 'selected' : '' %>>Return Requested</option>
-    <option value="Return Approved" <%= item.status === 'Return Approved' ? 'selected' : '' %>>Return Approved</option>
-    <option value="Return Rejected" <%= item.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
-    <option value="Returned" <%= item.status === 'Returned' ? 'selected' : '' %>>Returned</option>
-  <% } %>
-</select>
+                <select 
+                  id="item-status-<%= idx %>" 
+                  class="form-select mb-2 item-status-select 
+                    <%= ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) ? 'status-disabled' : '' %>
+                    <%= order.status === 'Pending' ? 'disabled-control' : '' %>"
+                  data-order-id="<%= order._id %>" 
+                  data-item-idx="<%= idx %>" 
+                  <%= ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) ? 'disabled' : '' %>
+                  <%= order.status === 'Pending' ? 'disabled' : '' %>
+                >
+                  <% if (order.status === 'Pending') { %>
+                    <option value="Pending" selected class="status-pending">Pending</option>
+                  <% } else { %>
+                    <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                    <% if (order.status !== 'Confirmed' && order.status !== 'Shipped' && order.status !== 'Delivered') { %>
+                      <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <% } %>
+                    <option value="Confirmed" <%= item.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <% if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
+                      <option value="Return Requested" <%= item.status === 'Return Requested' ? 'selected' : '' %>>Return Requested</option>
+                      <option value="Return Approved" <%= item.status === 'Return Approved' ? 'selected' : '' %>>Return Approved</option>
+                      <option value="Return Rejected" <%= item.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
+                      <option value="Returned" <%= item.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                    <% } %>
+                  <% } %>
+                </select>
 
-                <% if (!['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status)) { %>
+                <% if (!['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) && order.status !== 'Pending') { %>
                   <button class="btn btn-sm btn-outline-primary update-item-status-btn"
                           data-order-id="<%= order._id %>"
                           data-item-idx="<%= idx %>">
@@ -309,13 +335,15 @@
                       <button class="btn btn-success btn-sm approve-return" 
                               data-order-id="<%= order._id %>"
                               data-item-id="<%= item._id %>"
-                              data-product-name="<%= item.product.productName %>">
+                              data-product-name="<%= item.product.productName %>"
+                              <%= order.status === 'Pending' ? 'disabled' : '' %>>
                         <i class="fas fa-check me-1"></i> Approve
                       </button>
                       <button class="btn btn-danger btn-sm reject-return"
                               data-order-id="<%= order._id %>"
                               data-item-id="<%= item._id %>"
-                              data-product-name="<%= item.product.productName %>">
+                              data-product-name="<%= item.product.productName %>"
+                              <%= order.status === 'Pending' ? 'disabled' : '' %>>
                         <i class="fas fa-times me-1"></i> Reject
                       </button>
                     </div>
@@ -325,24 +353,35 @@
             </div>
           <% }) %>
         <% } %>
-<% if (order.status !== 'Cancelled' && order.status !== 'Returned') { %>
-<div class="row mt-4">
-<div class="col-md-6">
- <label for="order-status" class="form-label fw-bold">Order Status</label>
- <select id="order-status" class="form-select" data-order-id="<%= order._id %>">
- <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
- <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
- <option value="Confirmed" <%= order.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-<option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
- <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
- <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
- </select>
-</div>
-<div class="col-md-6 d-flex align-items-end justify-content-end order-footer">
- <button id="update-order-btn" class="btn btn-primary btn-update" data-order-id="<%= order._id %>">Update Order Status</button>
-</div>
- </div>
-<% } %>
+
+        <% if (order.status !== 'Cancelled' && order.status !== 'Returned') { %>
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <label for="order-status" class="form-label fw-bold">Order Status</label>
+              <select id="order-status" class="form-select <%= order.status === 'Pending' ? 'disabled-control' : '' %>" 
+                      data-order-id="<%= order._id %>" <%= order.status === 'Pending' ? 'disabled' : '' %>>
+                <% if (order.status === 'Pending') { %>
+                  <option value="Pending" selected class="status-pending">Pending</option>
+                <% } else { %>
+                  <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                  <% if (order.status !== 'Confirmed' && order.status !== 'Shipped' && order.status !== 'Delivered') { %>
+                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                  <% } %>
+                  <option value="Confirmed" <%= order.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                  <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                  <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                  <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                <% } %>
+              </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end justify-content-end order-footer">
+              <button id="update-order-btn" class="btn btn-primary btn-update <%= order.status === 'Pending' ? 'disabled-btn' : '' %>" 
+                      data-order-id="<%= order._id %>" <%= order.status === 'Pending' ? 'disabled' : '' %>>
+                Update Order Status
+              </button>
+            </div>
+          </div>
+        <% } %>
       </div>
     </div>
   </div>
@@ -350,60 +389,75 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-   document.getElementById('update-order-btn').addEventListener('click', async function(e) {
-  e.preventDefault();
-  
-  const orderId = this.getAttribute('data-order-id');
-  const status = document.getElementById('order-status').value;
-
-  const result = await Swal.fire({
-    title: 'Update All Items?',
-    text: `Do you want to update all products to "${status}"?`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, update all',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33'
-  });
-
-  if (!result.isConfirmed) return;
-
-  try {
-    const res = await fetch(`/admin/update-order/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
+    document.addEventListener('DOMContentLoaded', function() {
+      // If order status is Pending, disable all update functionality
+      if (document.querySelector('#order-status').value === 'Pending') {
+        document.querySelectorAll('.item-status-select').forEach(select => {
+          select.disabled = true;
+        });
+        
+        document.querySelectorAll('.update-item-status-btn').forEach(btn => {
+          btn.disabled = true;
+        });
+        
+        document.getElementById('update-order-btn').disabled = true;
+      }
     });
 
-    const data = await res.json();
+    document.getElementById('update-order-btn').addEventListener('click', async function(e) {
+      e.preventDefault();
+      
+      const orderId = this.getAttribute('data-order-id');
+      const status = document.getElementById('order-status').value;
 
-    if (res.ok) {
-      Swal.fire({
-        title: 'Success!',
-        text: 'Order and all items updated successfully!',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      }).then(() => {
-        window.location.reload();
+      const result = await Swal.fire({
+        title: 'Update All Items?',
+        text: `Do you want to update all products to "${status}"?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, update all',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
       });
-    } else {
-      Swal.fire({
-        title: 'Error!',
-        text: data.message || 'Failed to update order status.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-    }
-  } catch (err) {
-    Swal.fire({
-      title: 'Error!',
-      text: 'An error occurred. Please try again.',
-      icon: 'error',
-      confirmButtonText: 'OK'
+
+      if (!result.isConfirmed) return;
+
+      try {
+        const res = await fetch(`/admin/update-order/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          Swal.fire({
+            title: 'Success!',
+            text: 'Order and all items updated successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: data.message || 'Failed to update order status.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          title: 'Error!',
+          text: 'An error occurred. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
     });
-  }
-});
 
     document.querySelectorAll('.update-item-status-btn').forEach(btn => {
       btn.addEventListener('click', async function(e) {
@@ -448,6 +502,7 @@
         }
       });
     });
+
     document.querySelectorAll('.approve-return').forEach(btn => {
       btn.addEventListener('click', async function() {
         const orderId = this.dataset.orderId;
@@ -513,6 +568,7 @@
         }
       });
     });
+
     document.querySelectorAll('.reject-return').forEach(btn => {
       btn.addEventListener('click', async function() {
         const orderId = this.dataset.orderId;
@@ -598,37 +654,34 @@
         }
       });
     });
-   
-function updateStatusDropdowns() {
-  const itemSelects = document.querySelectorAll('.item-status-select');
-  const hasReturnedItems = Array.from(itemSelects).some(select =>
-    select.classList.contains('status-disabled')
-  );
-  const orderStatusSelect = document.getElementById('order-status');
-  const updateOrderBtn = document.getElementById('update-order-btn');
 
-  // Disable certain options if returned items exist
-  if (hasReturnedItems) {
-    Array.from(orderStatusSelect.options).forEach(option => {
-      if (['Shipped', 'Delivered'].includes(option.value)) {
-        option.disabled = true;
+    function updateStatusDropdowns() {
+      const itemSelects = document.querySelectorAll('.item-status-select');
+      const hasReturnedItems = Array.from(itemSelects).some(select =>
+        select.classList.contains('status-disabled')
+      );
+      const orderStatusSelect = document.getElementById('order-status');
+      const updateOrderBtn = document.getElementById('update-order-btn');
+
+      if (hasReturnedItems) {
+        Array.from(orderStatusSelect.options).forEach(option => {
+          if (['Shipped', 'Delivered'].includes(option.value)) {
+            option.disabled = true;
+          }
+        });
       }
-    });
-  }
+      const allReturned = Array.from(itemSelects).every(select =>
+        select.classList.contains('status-disabled')
+      );
 
-  // Check if all items are returned/cancelled
-  const allReturned = Array.from(itemSelects).every(select =>
-    select.classList.contains('status-disabled')
-  );
+      if (allReturned) {
+        updateOrderBtn.disabled = true;
+        updateOrderBtn.title = "All items are Returned or Cancelled. Cannot update order.";
+        updateOrderBtn.style.cursor = "not-allowed";
+      }
+    }
 
-  if (allReturned) {
-    updateOrderBtn.disabled = true;
-    updateOrderBtn.title = "All items are Returned or Cancelled. Cannot update order.";
-    updateOrderBtn.style.cursor = "not-allowed";
-  }
-}
-
-document.addEventListener('DOMContentLoaded', updateStatusDropdowns);
+    document.addEventListener('DOMContentLoaded', updateStatusDropdowns);
   </script>
 </body>
 </html>
