@@ -69,6 +69,7 @@ router.get('/sales-report',adminAuth,salesController.loadSalesPage)
 router.get('/orders-list',adminAuth,orderController.ordersList);
 router.get('/update-orders/:orderId',adminAuth,orderController.updateOrders);
 router.post('/update-order/:orderId',adminAuth,orderController.updateOrdersStatus);
+router.post('/update-order-item/:orderId/:itemIdx', adminAuth, orderController.updateItemStatus);
 router.post('/approve-return', adminAuth,orderController.approveReturn);
 router.post('/reject-return', adminAuth,orderController.rejectReturn);
 

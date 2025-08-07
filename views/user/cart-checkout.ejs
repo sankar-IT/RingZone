@@ -82,7 +82,8 @@
 
         <div  id="addressList">
 
-          <%if(addressData || addressData.addresses.length >0){%>
+      <% if(addressData && addressData.addresses && addressData.addresses.length > 0){ %>
+
             <% addressData.addresses.forEach((addr,indx)=>{ %>
               <div class="form-check mb-3">
                 <input class="form-check-input" type="radio" value="<%= addr._id %>"  name="address" id="addr1" <%= selectedAddress && selectedAddress == addr._id ? 'checked' : indx == 0 ? 'checked' : ''   %> >

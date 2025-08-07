@@ -251,7 +251,7 @@
             <div class="stats-card d-flex align-items-center">
               <i class="fas fa-shopping-bag fa-2x me-3 text-primary"></i>
               <div>
-                <h5>Total Orders</h5>
+                <h5>Total Order's</h5>
                 <h3 id="ordersCount"><%= totalOrders %></h3>
               </div>
             </div>
@@ -259,14 +259,14 @@
           <div class="col-md-3">
             <div class="stats-card text-center">
               <i class="fas fa-truck fa-2x mb-2 text-success"></i>
-              <h5>Total Delivered</h5>
+              <h5>Order's Delivered</h5>
               <h3 id="deliveredCount"><%= totalDelivered %></h3>
             </div>
           </div>
           <div class="col-md-3">
             <div class="stats-card text-center">
               <i class="fas fa-times-circle fa-2x mb-2 text-danger"></i>
-              <h5>Total Cancelled</h5>
+              <h5>Order's Cancelled</h5>
               <h3 id="cancelledCount"><%= totalCancelled %></h3>
             </div>
           </div>
@@ -480,9 +480,9 @@
         
         if (type === 'weekly') {
           const startOfWeek = new Date(today);
-          startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+          startOfWeek.setDate(today.getDate() - today.getDay()); 
           const endOfWeek = new Date(startOfWeek);
-          endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+          endOfWeek.setDate(startOfWeek.getDate() + 6); 
           return orderDate >= startOfWeek && orderDate <= endOfWeek;
         }
         

@@ -36,33 +36,127 @@ const updateOrders=async(req,res)=>{
     res.status(500).send('Internal Server Error');
   }
 }
+
+
 const updateOrdersStatus = async (req, res) => {
-  const { orderId, itemIdx } = req.params;
+  const { orderId } = req.params;
   const { status, cancellationReason, cancelledBy } = req.body;
 
   try {
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate('coupon');
     if (!order) {
-      return res.status(404).send('Order not found');
+      return res.status(404).json({ message: 'Order not found' });
     }
 
-    if (itemIdx >= order.orderedItems.length) {
-      return res.status(400).send('Invalid item index');
+    if (status === 'Cancelled') {
+      if (!cancellationReason || cancellationReason.trim() === '') {
+        return res.status(400).json({ message: 'Cancellation reason is required for cancelling the order.' });
+      }
+
+      order.status = 'Cancelled';
+      order.adminCancellation = {
+        reason: cancellationReason,
+        cancelledBy: cancelledBy || 'Admin',
+        cancellationDate: new Date(),
+      };
+
+      order.orderedItems.forEach(item => {
+        if (!['Cancelled', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) {
+          item.status = 'Cancelled';
+          item.cancellationReason = cancellationReason;
+          item.cancelledBy = cancelledBy || 'Admin';
+          item.cancellationDate = new Date();
+        }
+      });
+
+      // Calculate refund with coupon discount share:
+      const originalAllItems = order.orderedItems;
+      const totalItemsPrice = originalAllItems.reduce(
+        (sum, itm) => sum + itm.price * itm.quantity, 0
+      );
+
+      let totalRefundAmount = 0;
+
+      originalAllItems.forEach(item => {
+        if (item.status === 'Cancelled') {
+          const itemPrice = item.price * item.quantity;
+          let refundAmount = itemPrice;
+
+          if (order.coupon && order.coupon.discountAmount > 0) {
+            const totalCoupon = order.coupon.discountAmount;
+            const itemShare = (itemPrice / totalItemsPrice) * totalCoupon;
+            refundAmount = Math.floor(itemPrice - itemShare);
+          }
+          totalRefundAmount += refundAmount;
+        }
+      });
+
+      if (totalRefundAmount > 0 && order.user) {
+        let wallet = await Wallet.findOne({ user: order.user });
+        if (!wallet) wallet = new Wallet({ user: order.user, balance: 0, transactions: [] });
+
+        wallet.balance += totalRefundAmount;
+        wallet.transactions.push({
+          type: 'credit',
+          amount: totalRefundAmount,
+          description: `Refund for cancelled order ORD${order._id.toString().substring(0, 8).toUpperCase()}`
+        });
+
+        await wallet.save();
+      }
+
+    } else {
+      order.status = status;
     }
 
-    const item = order.orderedItems[itemIdx];
-    
-    if (status === 'Cancelled' && cancellationReason) {
+    await order.save();
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Order Update Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
+
+const updateItemStatus = async (req, res) => {
+  const { orderId, itemIdx } = req.params;
+  const { status, cancellationReason, cancelledBy, adminReturnRejectionReason } = req.body;
+
+  try {
+    const order = await Order.findById(orderId).populate('coupon');
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const idx = parseInt(itemIdx, 10);
+    if (isNaN(idx) || idx < 0 || idx >= order.orderedItems.length) {
+      return res.status(400).json({ message: 'Invalid item index' });
+    }
+
+    const item = order.orderedItems[idx];
+
+    if (status === 'Cancelled') {
+      if (!cancellationReason || cancellationReason.trim() === '') {
+        return res.status(400).json({ message: 'Cancellation reason is required for cancelling the item.' });
+      }
       item.cancellationReason = cancellationReason;
       item.cancelledBy = cancelledBy || 'Admin';
       item.cancellationDate = new Date();
     }
 
+    if (status === 'Return Rejected') {
+      if (!adminReturnRejectionReason || adminReturnRejectionReason.trim() === '') {
+        return res.status(400).json({ message: 'Return rejection reason is required.' });
+      }
+      item.adminReturnRejectionReason = adminReturnRejectionReason;
+    }
+
     item.status = status;
-    
-   
-    const allItemsCancelledOrReturned = order.orderedItems.every(item =>
-      ['Cancelled', 'Returned', 'Return Approved', 'Return Rejected'].includes(item.status)
+
+    // Check if all items are cancelled/returned and update order.status
+    const allItemsCancelledOrReturned = order.orderedItems.every(i =>
+      ['Cancelled', 'Returned', 'Return Approved', 'Return Rejected'].includes(i.status)
     );
 
     if (allItemsCancelledOrReturned) {
@@ -71,18 +165,49 @@ const updateOrdersStatus = async (req, res) => {
         order.adminCancellation = {
           reason: cancellationReason,
           cancelledBy: cancelledBy || 'Admin',
-          cancellationDate: new Date()
+          cancellationDate: new Date(),
         };
       }
     }
 
+    // Calculate refund for single cancelled item considering coupon discount:
+    if (status === 'Cancelled' && order.user) {
+      const originalAllItems = order.orderedItems;
+      const totalItemsPrice = originalAllItems.reduce(
+        (sum, itm) => sum + itm.price * itm.quantity, 0
+      );
+
+      const itemPrice = item.price * item.quantity;
+      let refundAmount = itemPrice;
+
+      if (order.coupon && order.coupon.discountAmount > 0) {
+        const totalCoupon = order.coupon.discountAmount;
+        const itemShare = (itemPrice / totalItemsPrice) * totalCoupon;
+        refundAmount = Math.floor(itemPrice - itemShare);
+      }
+
+      let wallet = await Wallet.findOne({ user: order.user });
+      if (!wallet) wallet = new Wallet({ user: order.user, balance: 0, transactions: [] });
+
+      wallet.balance += refundAmount;
+      wallet.transactions.push({
+        type: 'credit',
+        amount: refundAmount,
+        description: `Refund for cancelled item ${item.product.productName} in order ORD${order._id.toString().substring(0, 8).toUpperCase()}`
+      });
+
+      await wallet.save();
+    }
+
     await order.save();
-    res.redirect(`/admin/orders-list/${orderId}`);
-  } catch (err) {
-    console.error('Update Error:', err);
-    res.status(500).send('Internal Server Error');
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Item Update Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 const approveReturn = async (req, res) => {
   try {
@@ -282,6 +407,7 @@ module.exports={
   ordersList,
   updateOrders,
   updateOrdersStatus,
+  updateItemStatus,
   approveReturn,
   rejectReturn
 };

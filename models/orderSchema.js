@@ -43,23 +43,9 @@ const orderSchema = new Schema({
     },
     returnReason: { type: String },
     returnRequestDate: { type: Date },
-    cancellationReason: { 
-      type: String,
-      enum: [
-        'Out of Stock',
-        'Payment Issue',
-        'Suspicious Activity',
-        'Customer Request',
-        'Shipping Restrictions',
-        'Pricing Error',
-        'Other'
-      ]
-    },
-    cancelledBy: {
-      type: String,
-      enum: ['Customer', 'Admin', 'System']
-    },
-    cancellationDate: { type: Date }
+    cancellationReason: String,
+    cancelledBy: String,
+    cancellationDate: Date,
   }],
   totalPrice: {
     type: Number,
@@ -116,26 +102,16 @@ const orderSchema = new Schema({
     default: false
   },
   adminCancellation: {
-    reason: {
-      type: String,
-      enum: [
-        'Out of Stock',
-        'Payment Issue',
-        'Suspicious Activity',
-        'Customer Request',
-        'Shipping Restrictions',
-        'Pricing Error',
-        'Other'
-      ]
-    },
-    notes: { type: String },
-    cancelledBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    cancellationDate: { type: Date }
+    reason: String,
+    notes: String,
+    cancelledBy: String,
+    cancellationDate: Date
   }
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;
+
+
+
+

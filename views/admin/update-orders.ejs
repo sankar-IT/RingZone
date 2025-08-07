@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Orders</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Update Order</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 
   <style>
     :root {
@@ -34,7 +35,7 @@
       display: flex;
       flex-direction: column;
       padding: 20px 0;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
       position: fixed;
       z-index: 1000;
     }
@@ -44,11 +45,11 @@
       font-size: 1.5rem;
       padding: 0 20px 20px;
       margin: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .sidebar .nav-link {
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       padding: 10px 20px;
       margin: 5px 0;
       font-weight: 500;
@@ -82,7 +83,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -121,7 +122,7 @@
       border-radius: 10px;
       padding: 20px;
       margin-bottom: 30px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
     }
 
     .order-header {
@@ -184,7 +185,8 @@
       border-radius: 4px;
     }
 
-    .approve-return, .reject-return {
+    .approve-return,
+    .reject-return {
       font-size: 0.75rem;
       padding: 0.25rem 0.5rem;
     }
@@ -234,7 +236,6 @@
   </style>
 </head>
 <body>
-
   <div class="sidebar">
     <h2>RingZone</h2>
     <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -246,16 +247,18 @@
     <a href="/admin/Coupons" class="nav-link"><i class="fas fa-tags"></i> Coupons</a>
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
   </div>
-  
+
   <div class="main">
     <div class="topbar">
       <h1 class="m-0 fs-4 text-dark">Update Orders</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
     </div>
-    
-    <a href="/admin/orders-list"><button class="btn btn-secondary" style="margin-top: 10px; margin-left: 20px;">Back</button></a>
-    
-    <div class="container mt-4">
+
+    <a href="/admin/orders-list">
+      <button class="btn btn-secondary my-3 ms-3">Back</button>
+    </a>
+
+    <div class="container mt-2">
       <div class="order-card">
         <div class="order-header d-flex justify-content-between align-items-center">
           <div>
@@ -266,13 +269,13 @@
 
         <% if (order.orderedItems.length > 0) { %>
           <% order.orderedItems.forEach((item, idx) => { %>
-            <div class="product-card row align-items-center mb-3">
+            <div class="product-card row align-items-center mb-3 gx-3">
               <div class="col-md-2 text-center">
-                <img src="/<%= item.product.images[0] %>" class="product-img" alt="Product">
+                <img src="/<%= item.product.images[0] %>" class="product-img" alt="Product" />
               </div>
               <div class="col-md-3">
                 <h6 class="mb-1"><%= item.product.productName %></h6>
-                <small class="text-muted"><%= item.variant.color %>, <%= item.variant.storage %></small><br>
+                <small class="text-muted"><%= item.variant.color %>, <%= item.variant.storage %></small><br />
                 <span class="badge bg-secondary">Qty: <%= item.quantity %></span>
               </div>
               <div class="col-md-2">
@@ -288,26 +291,31 @@
               </div>
               <div class="col-md-2">
                 <label for="item-status-<%= idx %>" class="form-label fw-bold">Item Status</label>
-                <select 
-                  id="item-status-<%= idx %>" 
-                  class="form-select mb-2 item-status-select 
+                <select
+                  id="item-status-<%= idx %>"
+                  class="form-select mb-2 item-status-select
                     <%= ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) ? 'status-disabled' : '' %>
                     <%= order.status === 'Pending' ? 'disabled-control' : '' %>"
-                  data-order-id="<%= order._id %>" 
-                  data-item-idx="<%= idx %>" 
+                  data-order-id="<%= order._id %>"
+                  data-item-idx="<%= idx %>"
                   <%= ['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) ? 'disabled' : '' %>
                   <%= order.status === 'Pending' ? 'disabled' : '' %>
                 >
                   <% if (order.status === 'Pending') { %>
                     <option value="Pending" selected class="status-pending">Pending</option>
                   <% } else { %>
-                    <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                    <% if (order.status !== 'Confirmed' && order.status !== 'Shipped' && order.status !== 'Delivered') { %>
-                      <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <% if (!['Confirmed', 'Shipped', 'Delivered', 'Cancelled'].includes(item.status)) { %>
+                      <option value="Processing" <%= item.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                     <% } %>
-                    <option value="Confirmed" <%= item.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-                    <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                    <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <% if (!['Shipped', 'Delivered', 'Cancelled'].includes(item.status)) { %>
+                      <option value="Confirmed" <%= item.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                    <% } %>
+                    <% if (!['Delivered', 'Cancelled'].includes(item.status)) { %>
+                      <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                    <% } %>
+                    <% if (!['Cancelled'].includes(item.status)) { %>
+                      <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <% } %>
                     <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                     <% if (['Return Requested', 'Return Approved', 'Return Rejected', 'Returned'].includes(item.status)) { %>
                       <option value="Return Requested" <%= item.status === 'Return Requested' ? 'selected' : '' %>>Return Requested</option>
@@ -319,31 +327,46 @@
                 </select>
 
                 <% if (!['Returned', 'Cancelled', 'Return Approved', 'Return Rejected'].includes(item.status) && order.status !== 'Pending') { %>
-                  <button class="btn btn-sm btn-outline-primary update-item-status-btn"
-                          data-order-id="<%= order._id %>"
-                          data-item-idx="<%= idx %>">
+                  <button
+                    class="btn btn-sm btn-outline-primary update-item-status-btn"
+                    data-order-id="<%= order._id %>"
+                    data-item-idx="<%= idx %>"
+                  >
                     Update Item
                   </button>
+                <% } %>
+
+                <% if (item.cancellationReason) { %>
+                  <div class="text-danger small mt-1"><strong>Cancelled Reason:</strong> <%= item.cancellationReason %></div>
+                <% } %>
+                <% if (item.adminReturnRejectionReason) { %>
+                  <div class="text-warning small mt-1"><strong>Return Rejection Reason:</strong> <%= item.adminReturnRejectionReason %></div>
                 <% } %>
 
                 <% if (item.status === 'Return Requested') { %>
                   <div class="return-request mt-3">
                     <h6 class="fw-bold">Return Request</h6>
                     <p class="mb-1"><strong>Reason:</strong> <%= item.returnReason %></p>
-                    <p class="mb-2"><small>Requested: <%= item.returnRequestDate.toLocaleString() %></small></p>
+                    <p class="mb-2">
+                      <small>Requested: <%= item.returnRequestDate.toLocaleString() %></small>
+                    </p>
                     <div class="d-flex gap-2">
-                      <button class="btn btn-success btn-sm approve-return" 
-                              data-order-id="<%= order._id %>"
-                              data-item-id="<%= item._id %>"
-                              data-product-name="<%= item.product.productName %>"
-                              <%= order.status === 'Pending' ? 'disabled' : '' %>>
+                      <button
+                        class="btn btn-success btn-sm approve-return"
+                        data-order-id="<%= order._id %>"
+                        data-item-id="<%= item._id %>"
+                        data-product-name="<%= item.product.productName %>"
+                        <%= order.status === 'Pending' ? 'disabled' : '' %>
+                      >
                         <i class="fas fa-check me-1"></i> Approve
                       </button>
-                      <button class="btn btn-danger btn-sm reject-return"
-                              data-order-id="<%= order._id %>"
-                              data-item-id="<%= item._id %>"
-                              data-product-name="<%= item.product.productName %>"
-                              <%= order.status === 'Pending' ? 'disabled' : '' %>>
+                      <button
+                        class="btn btn-danger btn-sm reject-return"
+                        data-order-id="<%= order._id %>"
+                        data-item-id="<%= item._id %>"
+                        data-product-name="<%= item.product.productName %>"
+                        <%= order.status === 'Pending' ? 'disabled' : '' %>
+                      >
                         <i class="fas fa-times me-1"></i> Reject
                       </button>
                     </div>
@@ -358,25 +381,44 @@
           <div class="row mt-4">
             <div class="col-md-6">
               <label for="order-status" class="form-label fw-bold">Order Status</label>
-              <select id="order-status" class="form-select <%= order.status === 'Pending' ? 'disabled-control' : '' %>" 
-                      data-order-id="<%= order._id %>" <%= order.status === 'Pending' ? 'disabled' : '' %>>
+              <select
+                id="order-status"
+                class="form-select <%= order.status === 'Pending' ? 'disabled-control' : '' %>"
+                data-order-id="<%= order._id %>"
+                <%= order.status === 'Pending' ? 'disabled' : '' %>
+              >
                 <% if (order.status === 'Pending') { %>
                   <option value="Pending" selected class="status-pending">Pending</option>
                 <% } else { %>
-                  <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                  <% if (order.status !== 'Confirmed' && order.status !== 'Shipped' && order.status !== 'Delivered') { %>
-                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                  <% if (!['Confirmed', 'Shipped', 'Delivered', 'Cancelled'].includes(order.status)) { %>
+                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                   <% } %>
-                  <option value="Confirmed" <%= order.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-                  <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                  <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                  <% if (!['Shipped', 'Delivered', 'Cancelled'].includes(order.status)) { %>
+                    <option value="Confirmed" <%= order.status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                  <% } %>
+                  <% if (!['Delivered', 'Cancelled'].includes(order.status)) { %>
+                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                  <% } %>
+                  <% if (!['Cancelled'].includes(order.status)) { %>
+                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                  <% } %>
                   <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                 <% } %>
               </select>
+
+              <% if (order.adminCancellation && order.adminCancellation.reason) { %>
+                <small class="text-danger d-block mt-2">
+                  <strong>Order Cancelled Reason:</strong> <%= order.adminCancellation.reason %>
+                </small>
+              <% } %>
             </div>
             <div class="col-md-6 d-flex align-items-end justify-content-end order-footer">
-              <button id="update-order-btn" class="btn btn-primary btn-update <%= order.status === 'Pending' ? 'disabled-btn' : '' %>" 
-                      data-order-id="<%= order._id %>" <%= order.status === 'Pending' ? 'disabled' : '' %>>
+              <button
+                id="update-order-btn"
+                class="btn btn-primary btn-update <%= order.status === 'Pending' ? 'disabled-btn' : '' %>"
+                data-order-id="<%= order._id %>"
+                <%= order.status === 'Pending' ? 'disabled' : '' %>
+              >
                 Update Order Status
               </button>
             </div>
@@ -389,28 +431,42 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // If order status is Pending, disable all update functionality
-      if (document.querySelector('#order-status').value === 'Pending') {
-        document.querySelectorAll('.item-status-select').forEach(select => {
-          select.disabled = true;
-        });
-        
-        document.querySelectorAll('.update-item-status-btn').forEach(btn => {
-          btn.disabled = true;
-        });
-        
+    document.addEventListener('DOMContentLoaded', () => {
+      // Disable controls if order is Pending or Cancelled
+      const orderStatus = document.querySelector('#order-status').value;
+      if (orderStatus === 'Pending' || orderStatus === 'Cancelled') {
+        document.querySelectorAll('.item-status-select').forEach(select => (select.disabled = true));
+        document.querySelectorAll('.update-item-status-btn').forEach(btn => (btn.disabled = true));
         document.getElementById('update-order-btn').disabled = true;
       }
     });
 
-    document.getElementById('update-order-btn').addEventListener('click', async function(e) {
+    // Update order status handler
+    document.getElementById('update-order-btn').addEventListener('click', async (e) => {
       e.preventDefault();
-      
-      const orderId = this.getAttribute('data-order-id');
+
+      const orderId = e.target.getAttribute('data-order-id');
       const status = document.getElementById('order-status').value;
 
-      const result = await Swal.fire({
+      let payload = { status };
+
+      if (status === 'Cancelled') {
+        const { value: reason, isConfirmed } = await Swal.fire({
+          title: 'Order Cancellation Reason',
+          input: 'textarea',
+          inputLabel: 'Please provide the reason for cancelling the order:',
+          inputPlaceholder: 'Type your reason...',
+          showCancelButton: true,
+          confirmButtonText: 'Submit',
+          cancelButtonText: 'Cancel',
+          inputValidator: (value) => (!value ? 'Reason is required!' : null)
+        });
+        if (!isConfirmed || !reason) return;
+        payload.cancellationReason = reason;
+        payload.cancelledBy = 'Admin';
+      }
+
+      const confirmResult = await Swal.fire({
         title: 'Update All Items?',
         text: `Do you want to update all products to "${status}"?`,
         icon: 'question',
@@ -421,267 +477,165 @@
         cancelButtonColor: '#d33'
       });
 
-      if (!result.isConfirmed) return;
+      if (!confirmResult.isConfirmed) return;
 
       try {
         const res = await fetch(`/admin/update-order/${orderId}`, {
-          method: 'PATCH',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
+          body: JSON.stringify(payload),
         });
-
         const data = await res.json();
 
-        if (res.ok) {
-          Swal.fire({
-            title: 'Success!',
-            text: 'Order and all items updated successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            window.location.reload();
-          });
+        if (res.ok && data.success) {
+          await Swal.fire('Success!', 'Order and all items updated successfully.', 'success');
+          window.location.reload();
         } else {
-          Swal.fire({
-            title: 'Error!',
-            text: data.message || 'Failed to update order status.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
+          throw new Error(data.message || 'Failed to update order status.');
         }
-      } catch (err) {
-        Swal.fire({
-          title: 'Error!',
-          text: 'An error occurred. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+      } catch (error) {
+        Swal.fire('Error!', error.message, 'error');
       }
     });
 
-    document.querySelectorAll('.update-item-status-btn').forEach(btn => {
-      btn.addEventListener('click', async function(e) {
+    // Update item status buttons
+    document.querySelectorAll('.update-item-status-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        const orderId = this.getAttribute('data-order-id');
-        const itemIdx = this.getAttribute('data-item-idx');
+
+        const orderId = btn.getAttribute('data-order-id');
+        const itemIdx = btn.getAttribute('data-item-idx');
         const status = document.getElementById(`item-status-${itemIdx}`).value;
-        
+
+        let payload = { status };
+
+        if (status === 'Cancelled') {
+          const { value: reason, isConfirmed } = await Swal.fire({
+            title: 'Item Cancellation Reason',
+            input: 'textarea',
+            inputLabel: 'Please provide the reason for cancelling this item:',
+            inputPlaceholder: 'Type your reason...',
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => (!value ? 'Reason is required!' : null)
+          });
+          if (!isConfirmed || !reason) return;
+          payload.cancellationReason = reason;
+          payload.cancelledBy = 'Admin';
+        }
+
+        if (status === 'Return Rejected') {
+          const { value: rejectionReason, isConfirmed } = await Swal.fire({
+            title: 'Return Rejection Reason',
+            input: 'textarea',
+            inputLabel: 'Please provide the reason for rejecting this return:',
+            inputPlaceholder: 'Type your reason...',
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => (!value ? 'Reason is required!' : null)
+          });
+          if (!isConfirmed || !rejectionReason) return;
+          payload.adminReturnRejectionReason = rejectionReason;
+        }
+
         try {
           const res = await fetch(`/admin/update-order-item/${orderId}/${itemIdx}`, {
-            method: 'PATCH',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status })
+            body: JSON.stringify(payload),
           });
-          
           const data = await res.json();
-          
-          if (res.ok) {
-            Swal.fire({
-              title: 'Success!',
-              text: 'Item status updated successfully!',
-              icon: 'success',
-              confirmButtonText: 'OK'
-            }).then(() => {
-              window.location.reload();
-            });
+
+          if (res.ok && data.success) {
+            await Swal.fire('Success!', 'Item status updated successfully.', 'success');
+            window.location.reload();
           } else {
-            Swal.fire({
-              title: 'Error!',
-              text: data.message || 'Failed to update item status.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
+            throw new Error(data.message || 'Failed to update item status.');
           }
-        } catch (err) {
-          Swal.fire({
-            title: 'Error!',
-            text: 'An error occurred. Please try again.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-        }
-      });
-    });
-
-    document.querySelectorAll('.approve-return').forEach(btn => {
-      btn.addEventListener('click', async function() {
-        const orderId = this.dataset.orderId;
-        const itemId = this.dataset.itemId;
-        const productName = this.dataset.productName;
-        
-        const { isConfirmed } = await Swal.fire({
-          title: 'Approve Return',
-          text: `Are you sure you want to approve return for ${productName}?`,
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, approve it!',
-          cancelButtonText: 'No, cancel!',
-          confirmButtonColor: '#28a745'
-        });
-        
-        if (!isConfirmed) return;
-        
-        try {
-          btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
-
-          const response = await fetch('/admin/approve-return', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ orderId, itemId })
-          });
-
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            throw new Error(`Server returned HTML instead of JSON: ${text.substring(0, 100)}`);
-          }
-
-          const result = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(result.message || `Failed to approve return for ${productName}`);
-          }
-
-          await Swal.fire({
-            title: 'Success!',
-            text: `Return approved successfully for ${productName}`,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          
-          window.location.reload();
-          
         } catch (error) {
-          console.error('Approval error:', error);
-          await Swal.fire({
-            title: 'Error!',
-            text: error.message,
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-check me-1"></i> Approve';
+          Swal.fire('Error!', error.message, 'error');
         }
       });
     });
+    document.querySelectorAll('.approve-return').forEach((btn) => {
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const orderId = btn.getAttribute('data-order-id');
+    const itemId = btn.getAttribute('data-item-id');
+    const productName = btn.getAttribute('data-product-name');
 
-    document.querySelectorAll('.reject-return').forEach(btn => {
-      btn.addEventListener('click', async function() {
-        const orderId = this.dataset.orderId;
-        const itemId = this.dataset.itemId;
-        const productName = this.dataset.productName;
-        
-        const { value: adminReason, isConfirmed: isReasonProvided } = await Swal.fire({
-          title: 'Rejection Reason',
-          input: 'textarea',
-          inputLabel: `Please enter rejection reason for ${productName}:`,
-          inputPlaceholder: 'Type your reason here...',
-          inputAttributes: {
-            'aria-label': 'Type your rejection reason here'
-          },
-          showCancelButton: true,
-          confirmButtonText: 'Submit',
-          cancelButtonText: 'Cancel',
-          inputValidator: (value) => {
-            if (!value) {
-              return 'You need to write something!';
-            }
-          }
-        });
-        
-        if (!isReasonProvided || !adminReason) return;
-        
-        const { isConfirmed } = await Swal.fire({
-          title: 'Confirm Rejection',
-          text: `Are you sure you want to reject this return for ${productName}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, reject it!',
-          cancelButtonText: 'No, cancel!',
-          confirmButtonColor: '#dc3545'
-        });
-        
-        if (!isConfirmed) return;
-        
-        try {
-          btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
-
-          const response = await fetch('/admin/reject-return', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ orderId, itemId, adminReason })
-          });
-
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            throw new Error(`Server returned HTML instead of JSON: ${text.substring(0, 100)}`);
-          }
-
-          const result = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(result.message || `Failed to reject return for ${productName}`);
-          }
-
-          await Swal.fire({
-            title: 'Success!',
-            text: `Return rejected successfully for ${productName}`,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-          
-          window.location.reload();
-          
-        } catch (error) {
-          console.error('Rejection error:', error);
-          await Swal.fire({
-            title: 'Error!',
-            text: error.message,
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-times me-1"></i> Reject';
-        }
-      });
+    const confirmResult = await Swal.fire({
+      title: `Approve return for "${productName}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, approve',
+      cancelButtonText: 'Cancel'
     });
 
-    function updateStatusDropdowns() {
-      const itemSelects = document.querySelectorAll('.item-status-select');
-      const hasReturnedItems = Array.from(itemSelects).some(select =>
-        select.classList.contains('status-disabled')
-      );
-      const orderStatusSelect = document.getElementById('order-status');
-      const updateOrderBtn = document.getElementById('update-order-btn');
+    if (!confirmResult.isConfirmed) return;
 
-      if (hasReturnedItems) {
-        Array.from(orderStatusSelect.options).forEach(option => {
-          if (['Shipped', 'Delivered'].includes(option.value)) {
-            option.disabled = true;
-          }
-        });
-      }
-      const allReturned = Array.from(itemSelects).every(select =>
-        select.classList.contains('status-disabled')
-      );
+    try {
+      const res = await fetch('/admin/approve-return', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, itemId })
+      });
+      const data = await res.json();
 
-      if (allReturned) {
-        updateOrderBtn.disabled = true;
-        updateOrderBtn.title = "All items are Returned or Cancelled. Cannot update order.";
-        updateOrderBtn.style.cursor = "not-allowed";
+      if (res.ok && data.success) {
+        await Swal.fire('Success!', data.message, 'success');
+        window.location.reload();
+      } else {
+        throw new Error(data.message || 'Failed to approve return.');
       }
+    } catch (error) {
+      Swal.fire('Error', error.message, 'error');
     }
+  });
+});
 
-    document.addEventListener('DOMContentLoaded', updateStatusDropdowns);
+document.querySelectorAll('.reject-return').forEach((btn) => {
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const orderId = btn.getAttribute('data-order-id');
+    const itemId = btn.getAttribute('data-item-id');
+    const productName = btn.getAttribute('data-product-name');
+
+    const { value: adminReason, isConfirmed } = await Swal.fire({
+      title: `Reject return for "${productName}"`,
+      input: 'textarea',
+      inputLabel: 'Please provide reason for rejection:',
+      inputPlaceholder: 'Type your reason here...',
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel',
+      inputValidator: (value) => (!value ? 'Reason is required!' : null)
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const res = await fetch('/admin/reject-return', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, itemId, adminReason })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        await Swal.fire('Success!', data.message, 'success');
+        window.location.reload();
+      } else {
+        throw new Error(data.message || 'Failed to reject return.');
+      }
+    } catch (error) {
+      Swal.fire('Error', error.message, 'error');
+    }
+  });
+});
+
   </script>
 </body>
 </html>

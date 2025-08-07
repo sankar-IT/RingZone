@@ -311,6 +311,14 @@
           </div>
         </div>
       </div>
+      <% if(order.status === 'Cancelled' && order.adminCancellation && order.adminCancellation.reason) { %>
+  <div class="alert alert-danger mt-3">
+    <strong>Order Cancelled Reason:</strong> <%= order.adminCancellation.reason %><br>
+    <small>Cancelled by: <%= order.adminCancellation.cancelledBy || 'Admin' %></small><br>
+    <small>Date: <%= new Date(order.adminCancellation.cancellationDate).toLocaleString() %></small>
+  </div>
+<% } %>
+
     
 <div class="address-section">
   <div class="address-header">

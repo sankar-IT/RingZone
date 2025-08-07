@@ -19,45 +19,99 @@ const addProduct = async (req, res) => {
   try {
     const { productName, brand, category, description, variants } = req.body;
 
-    const categoryData = await Category.findById(category);
-    if (!categoryData) {
-      return res.status(400).json({ success: false, message: 'Invalid category' });
+    // Validate required fields
+    if (!productName || !brand || !category || !description || !variants) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'All fields are required' 
+      });
     }
 
-    const categoryOffer = categoryData.categoryOffer || 0; 
+    const categoryData = await Category.findById(category);
+    if (!categoryData) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid category' 
+      });
+    }
 
-   
+    // File validation
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Product images are required' 
+      });
+    }
+
+    // Validate file types
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const invalidFiles = req.files.filter(file => 
+      !allowedMimeTypes.includes(file.mimetype)
+    );
+
+    if (invalidFiles.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file format. Only JPEG, PNG, JPG, and WEBP images are allowed.',
+        invalidFiles: invalidFiles.map(file => file.originalname)
+      });
+    }
+
+    // Process product images
     const productImages = req.files
       .filter(file => file.fieldname === 'productImages')
       .map(file => `uploads/products/${file.filename}`);
 
-    
-    const parsedVariants = JSON.parse(variants).map((variant, index) => {
+    if (productImages.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'At least one product image is required' 
+      });
+    }
+
+    // Process variants
+    let parsedVariants;
+    try {
+      parsedVariants = JSON.parse(variants);
+    } catch (err) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid variants format' 
+      });
+    }
+
+    const processedVariants = parsedVariants.map((variant, index) => {
       const fieldname = `variantImages-variant-${index + 1}`;
       const variantImages = req.files
         .filter(file => file.fieldname === fieldname)
         .map(file => `uploads/products/${file.filename}`);
 
+      // Validate variant images
+      if (variantImages.length === 0) {
+        throw new Error(`Variant ${index + 1} must have at least one image`);
+      }
+
       const regularPrice = parseFloat(variant.regularPrice) || 0;
+      const categoryOffer = categoryData.categoryOffer || 0;
       const discount = (categoryOffer / 100) * regularPrice;
-      const discountPrice = Math.round(regularPrice - discount); 
+      const discountPrice = Math.round(regularPrice - discount);
 
       return {
         ...variant,
         images: variantImages,
         regularPrice,
-        discountPrice 
+        discountPrice
       };
     });
 
-   
+    // Create new product
     const newProduct = new Product({
       productName,
       brand,
       category,
       description,
       images: productImages,
-      variants: parsedVariants
+      variants: processedVariants
     });
 
     await newProduct.save();
@@ -67,11 +121,19 @@ const addProduct = async (req, res) => {
       message: 'Product added successfully',
       product: newProduct
     });
+
   } catch (err) {
     console.error('Error while saving product:', err);
+    
+    // Handle specific errors
+    let errorMessage = 'Server Error';
+    if (err.message.includes('Variant')) {
+      errorMessage = err.message;
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Server Error',
+      message: errorMessage,
       error: err.message
     });
   }
