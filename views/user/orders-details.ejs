@@ -290,6 +290,37 @@
       align-items: stretch;
     }
   }
+  .payment-method {
+  margin: 0;
+}
+
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #f1f1f1;
+  color: #333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.payment-badge i {
+  font-size: 1.1rem;
+}
+
+.payment-badge.cod {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+}
+
+.payment-badge.online {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
 </style>
 
 <body>
@@ -298,6 +329,18 @@
       <div class="order-summary-card">
         <div class="order-header">
           <h1 class="order-title"><%=order.orderId%></h1>
+      <h2 class="payment-method">
+  <% if (order.paymentMethod === 'cod') { %>
+    <span class="payment-badge cod">
+      <i class="fas fa-money-bill-wave"></i> COD
+    </span>
+  <% } else { %>
+    <span class="payment-badge online">
+      <i class="fas fa-credit-card"></i> Online Payment
+    </span>
+  <% } %>
+</h2>
+
           <% if (order.paymentStatus !== 'Pending') { %>
             <div class="order-status status-<%= order.status.toLowerCase() %>">
               <%= order.status %>
