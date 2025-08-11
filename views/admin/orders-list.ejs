@@ -316,6 +316,7 @@
               <tr><td colspan="7" class="text-center">No orders found</td></tr>
             <% } else { %>
            <% orders.forEach((order, index) => { %>
+             <% if (order.status !== 'Pending') { %>
   <tr data-status="<%= order.status.toLowerCase().replace(/\s+/g,'-') %>">
     <td><%= order.orderId %></td>
     <td>
@@ -341,6 +342,7 @@
       <a href="/admin/update-orders/<%= order._id %>"><button class="edit-btn"><i class="fas fa-pen"></i></button></a>
     </td>
   </tr>
+             <% } %>
 <% }); %>
             <% } %>
           </tbody>

@@ -1,110 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Number Guessing Game</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f7fa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic Tac Toe - HTML & CSS Only</title>
+<style>
+  body {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #222;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    background: #333;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  /* Hide actual checkboxes */
+  .board input[type="checkbox"] {
+    display: none;
+  }
+  /* Each cell is a label linked to a hidden checkbox */
+  .cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #111;
+    border-radius: 8px;
+    font-size: 64px;
+    color: #eee;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background 0.3s ease;
+  }
+  .cell:hover {
+    background: #444;
+  }
 
-    .game-container {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      text-align: center;
-      width: 320px;
-    }
+  /* Using the "checked" state to toggle between X and O */
+  /* First click: X */
+  .cell input[type="checkbox"]:checked + .mark::before {
+    content: "X";
+    color: #ff4d6d;
+  }
+  /* Second click (simulate O): tricky without JS, so we simulate by using :checked + :not(:checked) is impossible, 
+     so we cheat by using radio buttons or multiple clicks or CSS counters, but here just one toggle is possible.
+  */
 
-    .game-container h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
+  /* Instead, let's do a trick with checkboxes: checked = X, unchecked = empty */
 
-    input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
+  /* But we want toggling between X and O without JS? Not possible with single checkbox. */
+  /* Alternative: Use radio buttons with two options per cell (X or O), but that complicates markup a lot. */
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #007bff;
-      color: #fff;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+  /* So let's create 2 radio buttons per cell: one for X, one for O, none checked = blank */
 
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .message {
-      margin-top: 15px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .attempts {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #888;
-    }
-  </style>
+  /* Update approach below */
+</style>
 </head>
 <body>
-  <div class="game-container">
-    <h1>Guess the Number</h1>
-    <input type="number" id="guessInput" placeholder="Enter number between 1-100" />
-    <button onclick="checkGuess()">Submit Guess</button>
-    <div class="message" id="message"></div>
-    <div class="attempts" id="attempts"></div>
+  <div class="board">
+    <!-- Cell 1 -->
+    <div class="cell">
+      <input type="radio" name="cell1" id="cell1-x" />
+      <input type="radio" name="cell1" id="cell1-o" />
+      <label for="cell1-x" class="mark x"></label>
+      <label for="cell1-o" class="mark o"></label>
+    </div>
+    <!-- Cell 2 -->
+    <div class="cell">
+      <input type="radio" name="cell2" id="cell2-x" />
+      <input type="radio" name="cell2" id="cell2-o" />
+      <label for="cell2-x" class="mark x"></label>
+      <label for="cell2-o" class="mark o"></label>
+    </div>
+    <!-- Cell 3 -->
+    <div class="cell">
+      <input type="radio" name="cell3" id="cell3-x" />
+      <input type="radio" name="cell3" id="cell3-o" />
+      <label for="cell3-x" class="mark x"></label>
+      <label for="cell3-o" class="mark o"></label>
+    </div>
+    <!-- Cell 4 -->
+    <div class="cell">
+      <input type="radio" name="cell4" id="cell4-x" />
+      <input type="radio" name="cell4" id="cell4-o" />
+      <label for="cell4-x" class="mark x"></label>
+      <label for="cell4-o" class="mark o"></label>
+    </div>
+    <!-- Cell 5 -->
+    <div class="cell">
+      <input type="radio" name="cell5" id="cell5-x" />
+      <input type="radio" name="cell5" id="cell5-o" />
+      <label for="cell5-x" class="mark x"></label>
+      <label for="cell5-o" class="mark o"></label>
+    </div>
+    <!-- Cell 6 -->
+    <div class="cell">
+      <input type="radio" name="cell6" id="cell6-x" />
+      <input type="radio" name="cell6" id="cell6-o" />
+      <label for="cell6-x" class="mark x"></label>
+      <label for="cell6-o" class="mark o"></label>
+    </div>
+    <!-- Cell 7 -->
+    <div class="cell">
+      <input type="radio" name="cell7" id="cell7-x" />
+      <input type="radio" name="cell7" id="cell7-o" />
+      <label for="cell7-x" class="mark x"></label>
+      <label for="cell7-o" class="mark o"></label>
+    </div>
+    <!-- Cell 8 -->
+    <div class="cell">
+      <input type="radio" name="cell8" id="cell8-x" />
+      <input type="radio" name="cell8" id="cell8-o" />
+      <label for="cell8-x" class="mark x"></label>
+      <label for="cell8-o" class="mark o"></label>
+    </div>
+    <!-- Cell 9 -->
+    <div class="cell">
+      <input type="radio" name="cell9" id="cell9-x" />
+      <input type="radio" name="cell9" id="cell9-o" />
+      <label for="cell9-x" class="mark x"></label>
+      <label for="cell9-o" class="mark o"></label>
+    </div>
   </div>
 
-  <!-- JavaScript Logic -->
-  <script>
-    const randomNumber = Math.floor(Math.random() * 100) + 1;
-    let attempts = 0;
-    const messageEl = document.getElementById("message");
-    const attemptsEl = document.getElementById("attempts");
+<style>
+  /* Styles for marks */
 
-    function checkGuess() {
-      const userGuess = parseInt(document.getElementById("guessInput").value);
+  /* Hide all inputs */
+  input[type="radio"] {
+    display: none;
+  }
 
-      if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
-        messageEl.textContent = "⛔ Please enter a number between 1 and 100!";
-        return;
-      }
+  /* Style label marks */
+  .mark {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 64px;
+    font-weight: bold;
+    user-select: none;
+    color: transparent;
+    transition: color 0.2s ease;
+  }
 
-      attempts++;
+  /* X mark */
+  .mark.x::before {
+    content: "X";
+  }
 
-      if (userGuess === randomNumber) {
-        messageEl.textContent = `🎉 Correct! The number was ${randomNumber}`;
-        messageEl.style.color = "green";
-      } else if (userGuess < randomNumber) {
-        messageEl.textContent = "📉 Too low! Try again.";
-        messageEl.style.color = "#333";
-      } else {
-        messageEl.textContent = "📈 Too high! Try again.";
-        messageEl.style.color = "#333";
-      }
+  /* O mark */
+  .mark.o::before {
+    content: "O";
+  }
 
-      attemptsEl.textContent = `Attempts: ${attempts}`;
-    }
-  </script>
+  /* Show X if X radio checked */
+  input[type="radio"]:checked + input[type="radio"] + label.x {
+    color: #ff4d6d;
+    cursor: default;
+  }
+
+  /* Show O if O radio checked */
+  input[type="radio"] + input[type="radio"]:checked + label.o {
+    color: #4dcfff;
+    cursor: default;
+  }
+
+  /* On hover, highlight label */
+  label.x:hover,
+  label.o:hover {
+    color: #fff;
+    cursor: pointer;
+  }
+
+</style>
+
 </body>
 </html>

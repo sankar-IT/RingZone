@@ -118,6 +118,7 @@ const addToCart = async (req, res) => {
   }
 };
 
+
 const updateCartQuantity = async (req, res) => {
   try {
     const { productId, color, storage, quantity } = req.body;
@@ -207,9 +208,7 @@ const postCartToCheckout = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Cart is empty' });
     }
 
-    if (!addressDoc || !addressDoc.addresses || addressDoc.addresses.length === 0) {
-      return res.status(404).json({ success: false, message: 'Address is empty' });
-    }
+    // Address check removed: allow proceeding to checkout even if no address
 
     const cartItemIds = cart.items.map(item => item.product);
     const dbProducts = await Product.find({ _id: { $in: cartItemIds } });
@@ -586,12 +585,8 @@ const getCartPayment = async (req, res) => {
       
       req.session.selectedShipment = shipment;
       req.session.selectedAddress = addressId;
-      req.session.appliedCoupon = {
-        code: couponCode || null,
-        discount : Number(discount)
-      };
+      // Do NOT set req.session.appliedCoupon here. Only use if already set by applyCoupon.
 
-      console.log(req.session.appliedCoupon)
       if (!cart || cart.items.length <= 0) {
         return res.status(404).json({ success: false, message: 'cart is empty' });
       }

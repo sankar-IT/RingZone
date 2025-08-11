@@ -4,6 +4,31 @@ const Product=require('../../models/productsSchema')
 const Category = require('../../models/categorySchema');
 const Wallet=require('../../models/walletSchema');
 
+// Helper to update parent order status based on item statuses
+function updateParentOrderStatus(order) {
+  const itemStatuses = order.orderedItems.map(item => item.status);
+
+  // If any item is delivered, order is delivered
+  if (itemStatuses.includes('Delivered')) {
+    order.status = 'Delivered';
+    order.deliveredAt = new Date();
+    return;
+  }
+
+  // If all items have the same status, set order status to that status
+  const uniqueStatuses = [...new Set(itemStatuses)];
+  if (uniqueStatuses.length === 1) {
+    order.status = uniqueStatuses[0];
+    if (order.status === 'Delivered') {
+      order.deliveredAt = new Date();
+    }
+    return;
+  }
+
+  // Otherwise, set to Processing (or another in-progress status)
+  order.status = 'Processing';
+}
+
 const ordersList = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -107,6 +132,8 @@ const updateOrdersStatus = async (req, res) => {
 
     } else {
       order.status = status;
+      // After setting status, recalculate parent order status based on items
+      updateParentOrderStatus(order);
     }
 
     await order.save();
@@ -154,21 +181,8 @@ const updateItemStatus = async (req, res) => {
 
     item.status = status;
 
-    // Check if all items are cancelled/returned and update order.status
-    const allItemsCancelledOrReturned = order.orderedItems.every(i =>
-      ['Cancelled', 'Returned', 'Return Approved', 'Return Rejected'].includes(i.status)
-    );
-
-    if (allItemsCancelledOrReturned) {
-      order.status = 'Cancelled';
-      if (cancellationReason) {
-        order.adminCancellation = {
-          reason: cancellationReason,
-          cancelledBy: cancelledBy || 'Admin',
-          cancellationDate: new Date(),
-        };
-      }
-    }
+    // Update parent order status based on all item statuses
+    updateParentOrderStatus(order);
 
     // Calculate refund for single cancelled item considering coupon discount:
     if (status === 'Cancelled' && order.user) {

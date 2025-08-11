@@ -11,6 +11,7 @@ const adminRouter=require('./routes/adminRouter')
 const injectCartCount = require('./middleware/cartMiddleware');
 const wishlistCountMiddleware = require('./middleware/wishlistCountMiddleware');
 
+
 connectDB()
 
 
@@ -42,17 +43,27 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.set('view engine','ejs');
-app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')])
+app.set('views', [
+  path.join(__dirname, 'views/user'),
+  path.join(__dirname, 'views/admin'),
+  path.join(__dirname, 'views/shared')
+]);
 app.use(express.static(path.join(__dirname, 'public')));
 
 
 
 app.use('/',userRouter);
 app.use('/admin',adminRouter);
+app.use((req, res) => {
+res.status(404).render('pageError');
+});
 
-const errorHandler = require('./middleware/errorHandlingMiddleware');
-app.use(errorHandler);
+app.use((err,req,res,next)=>{
+        console.error(' Error:', err.stack || err.message);
 
+       res.status(404).render('pageError');
+
+})
 app.listen(process.env.PORT,()=>{console.log(`server Running on ${process.env.PORT}`)})
 
 module.exports=app;
