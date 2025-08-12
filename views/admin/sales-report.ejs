@@ -238,16 +238,7 @@
         </div>
 
         <div class="row g-4 mb-4">
-          <div class="col-md-3">
-            <div class="stats-card d-flex align-items-center gap-3">
-              <i class="fas fa-clock fa-2x text-warning"></i>
-              <div>
-                <h5>Total Pending</h5>
-                <h3 id="pendingCount"><%= totalPending %></h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <div class="stats-card d-flex align-items-center">
               <i class="fas fa-shopping-bag fa-2x me-3 text-primary"></i>
               <div>
@@ -256,18 +247,37 @@
               </div>
             </div>
           </div>
-          <div class="col-md-3">
+
+              <div class="col-md-2">
             <div class="stats-card text-center">
               <i class="fas fa-truck fa-2x mb-2 text-success"></i>
               <h5>Order's Delivered</h5>
               <h3 id="deliveredCount"><%= totalDelivered %></h3>
             </div>
           </div>
-          <div class="col-md-3">
+                <div class="col-md-2">
             <div class="stats-card text-center">
               <i class="fas fa-times-circle fa-2x mb-2 text-danger"></i>
               <h5>Order's Cancelled</h5>
               <h3 id="cancelledCount"><%= totalCancelled %></h3>
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <div class="stats-card d-flex align-items-center gap-3">
+              <i class="fas fa-clock fa-2x text-warning"></i>
+              <div>
+                <h5>Total Pending</h5>
+                <h3 id="pendingCount"><%= totalPending %></h3>
+              </div>
+            </div>
+          </div>
+        
+          <div class="col-md-2">
+            <div class="stats-card text-center">
+              <i class="fas fa-undo-alt fa-2x mb-2" style="color: darkslategrey;"></i>
+              <h5>Order Returns</h5>
+              <h3 id="returnedCount"><%= totalReturned %></h3>
             </div>
           </div>
         </div>
@@ -431,6 +441,7 @@
       ordersCountEl.textContent = totalOrders;
       deliveredCountEl.textContent = totalDelivered;
       cancelledCountEl.textContent = totalCancelled;
+      returnedCountEl.textContent = totalReturned;
       orderAmountEl.textContent = formatINR(amount);
       discountEl.textContent = formatINR(discount);
     }

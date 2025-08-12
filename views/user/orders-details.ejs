@@ -330,24 +330,21 @@
       <div class="order-summary-card">
         <div class="order-header">
           <h1 class="order-title"><%=order.orderId%></h1>
+      <% if (order.paymentStatus !== 'Pending') { %>
       <h2 class="payment-method">
-  <% if (order.paymentMethod === 'cod') { %>
-    <span class="payment-badge cod">
-      <i class="fas fa-money-bill-wave"></i> COD
-    </span>
-  <% } else { %>
-    <span class="payment-badge online">
-      <i class="fas fa-credit-card"></i> Online Payment
-    </span>
-  <% } %>
-</h2>
+        <% if (order.paymentMethod === 'cod') { %>
+          <span class="payment-badge cod">
+            <i class="fas fa-money-bill-wave"></i> COD
+          </span>
+        <% } else { %>
+          <span class="payment-badge online">
+            <i class="fas fa-credit-card"></i> Online Payment
+          </span>
+        <% } %>
+      </h2>
+      <% } %>
 
-          <% if (order.paymentStatus !== 'Pending') { %>
-            <div class="order-status status-<%= order.status.toLowerCase() %>">
-              <%= order.status %>
-            </div>
-          <% } %>
-        </div>
+                  </div>
         <div class="order-meta">
           <div class="meta-item">
             <span class="meta-label"><i class="far fa-calendar-alt"></i> Date:</span>
@@ -364,6 +361,27 @@
 <% } %>
 
     
+<% if(order.paymentStatus === 'Pending') { %>
+  <div class="alert alert-warning d-flex align-items-center mb-3" style="font-size:1rem;">
+    <i class="fas fa-exclamation-circle me-2" style="font-size:1.3rem;"></i>
+    <span><strong>Payment failed please retry it</strong></span>
+  </div>
+<% } %>
+<% let returnedItem = order.orderedItems.find(item => item.status === 'Returned'); %>
+<% if(returnedItem) { %>
+  <div class="alert alert-info d-flex align-items-center mb-3" style="font-size:1rem;">
+    <i class="fas fa-undo-alt me-2" style="font-size:1.3rem;"></i>
+    <span>
+      <strong>Product returned</strong>
+      <% if(returnedItem.returnReason) { %>
+        <br><span>User Reason: <%= returnedItem.returnReason %></span>
+      <% } %>
+      <% if(returnedItem.adminReturnApprovalStatus === 'Approved' && returnedItem.adminReturnApprovalReason) { %>
+        <br><span>Admin Approval: <%= returnedItem.adminReturnApprovalReason %></span>
+      <% } %>
+    </span>
+  </div>
+<% } %>
 <div class="address-section">
   <div class="address-header">
     <i class="fas fa-map-marker-alt"></i>

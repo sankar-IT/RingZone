@@ -230,7 +230,8 @@ console.log("Total Confirmed/Delivered Amount:", totalAmount);
         const end = new Date(date.setHours(23, 59, 59, 999));
         
         const dailyOrders = await Order.find({
-          createdOn: { $gte: start, $lte: end }
+          createdOn: { $gte: start, $lte: end },
+          status: { $in: ['Confirmed', 'Delivered'] }
         });
         
         return {
@@ -272,7 +273,8 @@ console.log("Total Confirmed/Delivered Amount:", totalAmount);
         const end = range.end > lastDayOfMonth ? lastDayOfMonth : range.end;
         end.setHours(23, 59, 59, 999);
         const weeklyOrders = await Order.find({
-          createdOn: { $gte: start, $lte: end }
+          createdOn: { $gte: start, $lte: end },
+          status: { $in: ['Confirmed', 'Delivered'] }
         });
         return {
           label: weekLabels[idx],
@@ -291,7 +293,8 @@ console.log("Total Confirmed/Delivered Amount:", totalAmount);
         const end = new Date(today.getFullYear(), monthIndex + 1, 0, 23, 59, 59, 999);
         
         const monthlyOrders = await Order.find({
-          createdOn: { $gte: start, $lte: end }
+          createdOn: { $gte: start, $lte: end },
+          status: { $in: ['Confirmed', 'Delivered'] }
         });
         
         return {
@@ -312,7 +315,8 @@ console.log("Total Confirmed/Delivered Amount:", totalAmount);
         const end = new Date(year, 11, 31, 23, 59, 59, 999);
         
         const yearlyOrders = await Order.find({
-          createdOn: { $gte: start, $lte: end }
+          createdOn: { $gte: start, $lte: end },
+          status: { $in: ['Confirmed', 'Delivered'] }
         });
         
         return {
@@ -339,7 +343,8 @@ console.log("Total Confirmed/Delivered Amount:", totalAmount);
         const dayEnd = new Date(date.setHours(23, 59, 59, 999));
         
         const dailyOrders = await Order.find({
-          createdOn: { $gte: dayStart, $lte: dayEnd }
+          createdOn: { $gte: dayStart, $lte: dayEnd },
+          status: { $in: ['Confirmed', 'Delivered'] }
         });
         
         return {
@@ -361,7 +366,8 @@ console.log("Total Confirmed/Delivered Amount:", totalAmount);
         const end = new Date(month.getFullYear(), month.getMonth() + 1, 0, 23, 59, 59, 999);
         
         const monthlyOrders = await Order.find({
-          createdOn: { $gte: start, $lte: end }
+          createdOn: { $gte: start, $lte: end },
+          status: { $in: ['Confirmed', 'Delivered'] }
         });
         
         return {

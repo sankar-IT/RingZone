@@ -26,6 +26,7 @@ const loadSalesPage = async (req, res) => {
     const totalPending = orders.filter(order => order.status === 'Pending').length;
     const totalDelivered = orders.filter(order => order.status === 'Delivered').length;
     const totalCancelled = orders.filter(order => order.status === 'Cancelled').length;
+    const totalReturned = orders.filter(order => order.status === 'Returned').length;
     const totalConcurrency = orders.filter(order => order.paymentMethod === 'Concurrency').length;
     const totalContract = orders.filter(order => order.paymentMethod === 'Contract').length;
 
@@ -37,6 +38,7 @@ const loadSalesPage = async (req, res) => {
       totalPending,
       totalDelivered,
       totalCancelled,
+      totalReturned,
       totalConcurrency,
       totalContract
     });
