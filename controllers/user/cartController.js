@@ -208,8 +208,6 @@ const postCartToCheckout = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Cart is empty' });
     }
 
-    // Address check removed: allow proceeding to checkout even if no address
-
     const cartItemIds = cart.items.map(item => item.product);
     const dbProducts = await Product.find({ _id: { $in: cartItemIds } });
 
@@ -585,7 +583,6 @@ const getCartPayment = async (req, res) => {
       
       req.session.selectedShipment = shipment;
       req.session.selectedAddress = addressId;
-      // Do NOT set req.session.appliedCoupon here. Only use if already set by applyCoupon.
 
       if (!cart || cart.items.length <= 0) {
         return res.status(404).json({ success: false, message: 'cart is empty' });
@@ -849,7 +846,6 @@ const createRazorpayOrder = async (req, res) => {
     const couponData = req.session.appliedCoupon || {};
     const finalAmount = totalPrice - (couponData.discount || 0) + shippingCharge;
 
-    // Create order in DB
     const ord = await Order.create({
       user: userId,
       orderedItems: activeItems,
@@ -875,15 +871,14 @@ const createRazorpayOrder = async (req, res) => {
       }
     });
 
-    // Clear session/cart
+
     await Cart.deleteOne({ user: userId });
     delete req.session.selectedShipment;
     delete req.session.selectedAddress;
     delete req.session.appliedCoupon;
 
-    // Prepare Razorpay options
     const options = {
-      amount: Math.round(finalAmount * 100), // Convert to paise
+      amount: Math.round(finalAmount * 100), 
       currency: 'INR',
       receipt: 'receipt_order_' + Date.now()
     };
@@ -909,7 +904,7 @@ const createRazorpayOrder = async (req, res) => {
       });
     }
 
-    // Respond with both Razorpay and internal order info
+   
     return res.status(200).json({
       success: true,
       orderId: razorpayOrder.id,

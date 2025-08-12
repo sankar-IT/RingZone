@@ -194,7 +194,7 @@ const resendOtp = async (req, res) => {
 
     const otp = generateOtp();
     req.session.otp = otp;
-    req.session.otpExpires = Date.now() + 600000; // 10 minutes
+    req.session.otpExpires = Date.now() + 600000; 
 
     const emailSent = await sendVerificationEmail(email, otp);
     

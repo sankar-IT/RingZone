@@ -8,7 +8,6 @@ const loadSalesPage = async (req, res) => {
       .populate('orderedItems.product')
       .sort({ createdOn: -1 });
 
-    // Calculate total sales amount only for confirmed/delivered orders
     const totalAmount = orders.reduce((sum, order) => {
       if (order.status === 'Confirmed' || order.status === 'Delivered') {
         return sum + Number(order.finalAmount || 0);

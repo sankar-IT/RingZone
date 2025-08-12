@@ -19,7 +19,7 @@ const addProduct = async (req, res) => {
   try {
     const { productName, brand, category, description, variants } = req.body;
 
-    // Validate required fields
+
     if (!productName || !brand || !category || !description || !variants) {
       return res.status(400).json({ 
         success: false, 
