@@ -16,7 +16,7 @@
       We've sent a One-Time Password (OTP) to your email address. Please enter it below to verify.
     </p>
 
-    <!-- OTP Form -->
+
     <form id="otpForm" class="space-y-4">
       <input
         type="text"
@@ -57,7 +57,7 @@
   </div>
 
   <script>
-    // Show success alert on page load
+   
     window.onload = () => {
       Swal.fire({
         icon: 'success',
@@ -67,7 +67,7 @@
       });
     };
 
-    // Timer logic
+
     let timerDuration = 60;
     const timerElement = document.getElementById("timer");
     const resendBtn = document.getElementById("resendBtn");
@@ -85,7 +85,7 @@
       }
     }, 1000);
 
-    // OTP Submit
+
     document.getElementById("otpForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const otp = document.getElementById("otpInput").value;
@@ -127,7 +127,7 @@
       }
     });
 
-    // Resend OTP
+
     function resendOtp() {
       fetch('/resend-otp', { method: 'POST' })
         .then(res => res.json())

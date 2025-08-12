@@ -90,7 +90,6 @@ const updateOrdersStatus = async (req, res) => {
         }
       });
 
-      // Calculate refund with coupon discount share:
       const originalAllItems = order.orderedItems;
       const totalItemsPrice = originalAllItems.reduce(
         (sum, itm) => sum + itm.price * itm.quantity, 0
@@ -128,7 +127,6 @@ const updateOrdersStatus = async (req, res) => {
 
     } else {
       order.status = status;
-      // After setting status, recalculate parent order status based on items
       updateParentOrderStatus(order);
     }
 
@@ -177,10 +175,8 @@ const updateItemStatus = async (req, res) => {
 
     item.status = status;
 
-    // Update parent order status based on all item statuses
     updateParentOrderStatus(order);
 
-    // Calculate refund for single cancelled item considering coupon discount:
     if (status === 'Cancelled' && order.user) {
       const originalAllItems = order.orderedItems;
       const totalItemsPrice = originalAllItems.reduce(

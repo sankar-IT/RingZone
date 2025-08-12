@@ -35,7 +35,7 @@ const addProduct = async (req, res) => {
       });
     }
 
-    // File validation
+  
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ 
         success: false, 
@@ -43,7 +43,6 @@ const addProduct = async (req, res) => {
       });
     }
 
-    // Validate file types
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
     const invalidFiles = req.files.filter(file => 
       !allowedMimeTypes.includes(file.mimetype)
@@ -57,7 +56,6 @@ const addProduct = async (req, res) => {
       });
     }
 
-    // Process product images
     const productImages = req.files
       .filter(file => file.fieldname === 'productImages')
       .map(file => `uploads/products/${file.filename}`);
@@ -68,8 +66,6 @@ const addProduct = async (req, res) => {
         message: 'At least one product image is required' 
       });
     }
-
-    // Process variants
     let parsedVariants;
     try {
       parsedVariants = JSON.parse(variants);
@@ -85,8 +81,6 @@ const addProduct = async (req, res) => {
       const variantImages = req.files
         .filter(file => file.fieldname === fieldname)
         .map(file => `uploads/products/${file.filename}`);
-
-      // Validate variant images
       if (variantImages.length === 0) {
         throw new Error(`Variant ${index + 1} must have at least one image`);
       }
@@ -103,8 +97,6 @@ const addProduct = async (req, res) => {
         discountPrice
       };
     });
-
-    // Create new product
     const newProduct = new Product({
       productName,
       brand,
@@ -124,8 +116,6 @@ const addProduct = async (req, res) => {
 
   } catch (err) {
     console.error('Error while saving product:', err);
-    
-    // Handle specific errors
     let errorMessage = 'Server Error';
     if (err.message.includes('Variant')) {
       errorMessage = err.message;

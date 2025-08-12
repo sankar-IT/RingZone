@@ -2,18 +2,18 @@
 <div class="shop_page py-5">
   <div class="container">
     <div class="row">
-      <!-- Filter Sidebar -->
+    
       <div class="col-lg-3 mb-4">
         <h5 class="mb-3">Filters</h5>
 
-        <!-- Price Range -->
+ 
         <div class="mb-4">
           <h6 class="fw-bold">Price Range</h6>
           <input type="range" class="form-range" id="priceRange" min="1000" max="100000" step="1000" oninput="updatePriceLabel(this.value)">
           <p>Up to ₹<span id="priceLabel">100000</span></p>
         </div>
         
-        <!-- Categories -->
+    
         <div class="mb-4">
           <h6 class="fw-bold">Category</h6>
           <ul class="list-unstyled">
@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <!-- Products Grid -->
+
       <div class="col-lg-9">
         <div class="row" id="productContainer">
           <% products.forEach(product => { %>

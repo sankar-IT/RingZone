@@ -160,7 +160,7 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar Navigation -->
+
   <div class="sidebar">
     <h2>RingZone</h2>
     <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -173,9 +173,9 @@
     <a href="/admin/category" class="nav-link"><i class="fas fa-th-large"></i> Category</a>
   </div>
 
-  <!-- Main Content Area -->
+
   <div class="main">
-    <!-- Top Bar -->
+
     <div class="topbar">
       <h1 class="m-0 fs-4 text-dark">Edit Product</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
@@ -242,7 +242,7 @@
             <input type="file" class="form-control mt-2" name="productImages" accept="image/*" multiple />
           </div>
 
-          <!-- Variant Editor -->
+     
           <div id="variantAccordionArea" class="mb-3">
             <% product.variants.forEach(function(variant, index) { 
               const id = `variant-${index + 1}`; %>
@@ -317,15 +317,15 @@
     </div>
   </div>
 
-  <!-- Bootstrap JS Bundle with Popper -->
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    // Arrays to track removed images
+
     const removedProductImages = [];
     const removedVariantImages = {};
     
-    // Function to remove product image
+
     function removeProductImage(imgUrl, element) {
       Swal.fire({
         title: 'Are you sure?',
@@ -349,7 +349,7 @@
       });
     }
     
-    // Function to remove variant image
+
     function removeVariantImage(variantId, imgUrl, element) {
       Swal.fire({
         title: 'Are you sure?',
@@ -376,11 +376,11 @@
       });
     }
     
-    // Handle form submission
+
     document.getElementById('editProductForm').addEventListener('submit', function(e) {
       const variants = [];
       
-      // Collect variant data from form
+ 
       document.querySelectorAll('.accordion-item').forEach(item => {
         const variantId = item.id;
         const variant = {
@@ -389,7 +389,7 @@
           regularPrice: parseFloat(item.querySelector('[name="regularPrice"]').value),
           discountPrice: parseFloat(item.querySelector('[name="discountPrice"]').value),
           quantity: parseInt(item.querySelector('[name="quantity"]').value),
-          images: [] // Will be handled by the form submission
+          images: [] 
         };
         
         variants.push(variant);
@@ -398,7 +398,7 @@
       document.getElementById('variantsData').value = JSON.stringify(variants);
     });
     
-    // Preview new product images when selected
+
     document.querySelector('input[name="productImages"]').addEventListener('change', function(event) {
       const preview = document.getElementById('productPreview');
       Array.from(event.target.files).forEach(file => {

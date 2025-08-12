@@ -534,7 +534,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  // Add Coupon Form Submission
   document.getElementById('addCouponForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new URLSearchParams(new FormData(this));
@@ -560,7 +559,6 @@
     }
   });
 
-  // Edit Coupon Form Submission
   document.getElementById('editCouponForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new URLSearchParams(new FormData(this));
@@ -586,7 +584,6 @@
     }
   });
 
-  // Toggle Coupon Status
   async function toggleCouponStatus(couponId, newStatus) {
     try {
       const response = await fetch('/admin/toggle-coupon-status', {
@@ -609,7 +606,7 @@
     }
   }
 
-  // Delete Coupon
+
   async function deleteCoupon(couponId) {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -638,7 +635,7 @@
     }
   }
 
-  // Open Edit Modal with Coupon Data
+
 function openEditModal(id, code, discount, maxDiscount, minOrder, maxUsage, userType, expiryDate, active, instruction) {
   document.getElementById('editCouponId').value = id;
   document.getElementById('editCouponCode').value = code;
@@ -655,7 +652,7 @@ function openEditModal(id, code, discount, maxDiscount, minOrder, maxUsage, user
 }
 
 
-  // Close modals when clicking outside
+
   window.onclick = function(event) {
     const addModal = document.getElementById('addCouponModal');
     const editModal = document.getElementById('editCouponModal');
@@ -663,7 +660,6 @@ function openEditModal(id, code, discount, maxDiscount, minOrder, maxUsage, user
     if (event.target === editModal) editModal.style.display = "none";
   };
 
-  // Filter and Search Functionality
   document.addEventListener('DOMContentLoaded', function() {
     const statusFilter = document.getElementById('statusFilter');
     const userTypeFilter = document.getElementById('userTypeFilter');
@@ -698,7 +694,7 @@ function openEditModal(id, code, discount, maxDiscount, minOrder, maxUsage, user
       });
     }
 
-    // Event listeners for filters and search
+
     statusFilter.addEventListener('change', filterCoupons);
     userTypeFilter.addEventListener('change', filterCoupons);
     searchBtn.addEventListener('click', filterCoupons);
@@ -708,7 +704,7 @@ function openEditModal(id, code, discount, maxDiscount, minOrder, maxUsage, user
       }
     });
 
-    // Reset filters
+
     resetBtn.addEventListener('click', function() {
       statusFilter.value = 'all';
       userTypeFilter.value = 'all';

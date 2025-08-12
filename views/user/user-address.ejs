@@ -8,9 +8,9 @@
       background-color: #f8f9fa;
       font-family: 'Segoe UI', sans-serif;
       padding-top: 50px;
-      margin-top: 100px;
+      margin-top: 40px;
     }
-    /* Pagination Styles */
+
 .pagination {
   margin-top: 30px;
 }
@@ -152,7 +152,7 @@
 
 <div class="container my-4 px-3 px-md-4">
   <div class="row g-4 flex-column flex-md-row">
-    <!-- Sidebar -->
+   
     <div class="col-md-3">
       <div class="sidebar">
         <div class="text-center mb-3">
@@ -178,7 +178,7 @@
       </div>
     </div>
 
-    <!-- Main Content -->
+
     <div class="col-md-9">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">My Addresses</h4>
@@ -186,7 +186,7 @@
       </div>
 
       <div class="row g-3">
-        <!-- Address Card -->
+  
     <div class="row" style="margin-top: 50px;">
   <% if (addressData.addresses.length === 0) { %>
     <p>No addresses found.</p>
@@ -208,13 +208,13 @@
     </span>
   <% } %>
   
-          <!-- Edit Button -->
+   
          <a href="/edit-address/<%= i %>" class="btn btn-sm btn-outline-primary" title="Edit">
   <i class="fas fa-pen"></i>
 </a>
 
 
-          <!-- Delete Button -->
+      
  <form id="deleteForm-<%= addr._id %>" action="/address-dlt" method="POST" class="d-inline">
   <input type="hidden" name="addressId" value="<%= addr._id %>">
   <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Delete" data-form-id="deleteForm-<%= addr._id %>">
@@ -245,7 +245,7 @@
     </div>
   </div>
 </div>
-<!-- Pagination -->
+
 <% if (totalPages > 1) { %>
   <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
@@ -278,7 +278,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Handle all delete buttons
+  
     document.querySelectorAll('.delete-btn').forEach(button => {
       button.addEventListener('click', function() {
         const formId = this.getAttribute('data-form-id');
@@ -300,7 +300,7 @@
     });
   });
   document.addEventListener('DOMContentLoaded', function() {
-  // Handle all delete buttons
+
   document.querySelectorAll('.delete-btn').forEach(button => {
     button.addEventListener('click', function() {
       const formId = this.getAttribute('data-form-id');
@@ -321,10 +321,10 @@
     });
   });
 
-  // NEW: Handle set default address buttons
+
   document.querySelectorAll('form[action^="/set-default-address"]').forEach(form => {
     form.addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent immediate form submission
+      e.preventDefault(); 
       
       Swal.fire({
         title: 'Set as Default Address?',
@@ -336,7 +336,7 @@
         confirmButtonText: 'Yes, set as default'
       }).then((result) => {
         if (result.isConfirmed) {
-          form.submit(); // Submit the form if confirmed
+          form.submit(); 
         }
       });
     });

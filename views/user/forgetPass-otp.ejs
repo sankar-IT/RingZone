@@ -78,7 +78,7 @@
   </div> 
 
   <script>
-    // OTP Input Handling
+    
     const otpInputs = document.querySelectorAll('.otp-input');
     otpInputs.forEach((input, index) => {
       input.addEventListener('input', (e) => {
@@ -94,7 +94,7 @@
       });
     });
 
-    // Timer Implementation
+
     let timeLeft = 60;
     const countdownEl = document.getElementById('countdown');
     const resendBtn = document.getElementById('resend-btn');
@@ -104,7 +104,7 @@
       const seconds = timeLeft % 60;
       countdownEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
       
-      // Color coding based on time remaining
+     
       if (timeLeft > 30) {
         countdownEl.className = 'text-green-600';
       } else if (timeLeft > 10) {
@@ -124,9 +124,9 @@
     }
     
     const timerInterval = setInterval(updateTimer, 1000);
-    updateTimer(); // Initial call
+    updateTimer(); 
 
-    // Form Submission
+
     document.getElementById('otpForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -174,7 +174,7 @@
       });
     });
 
-    // Resend OTP Functionality
+
     resendBtn.addEventListener('click', function() {
       $.ajax({
         type: 'POST',
@@ -185,7 +185,7 @@
         },
         success: function(response) {
           if (response.success) {
-            // Reset timer
+        
             timeLeft = 60;
             clearInterval(timerInterval);
             countdownEl.style.display = 'inline';

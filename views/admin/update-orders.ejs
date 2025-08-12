@@ -175,7 +175,7 @@
       font-weight: 600;
     }
 
-    /* Return Request Styles */
+
     .return-request {
       font-size: 0.85rem;
       background-color: #fffaf0;
@@ -206,7 +206,7 @@
       cursor: not-allowed;
     }
 
-    /* New styles */
+
     .disabled-control {
       background-color: #f8f9fa;
       cursor: not-allowed;
@@ -431,7 +431,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Disable controls if item is in certain statuses
+
       document.querySelectorAll('.item-status-select').forEach(select => {
         const status = select.value;
         if (['Returned', 'Cancelled', 'Return Approved', 'Return Rejected', 'Delivered'].includes(status)) {
@@ -444,7 +444,7 @@
       });
     });
 
-    // Update item status buttons
+
     document.querySelectorAll('.update-item-status-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.preventDefault();

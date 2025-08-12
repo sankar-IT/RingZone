@@ -5,7 +5,7 @@
     body {
       background-color: #f5f5f5;
       font-family: 'Segoe UI', sans-serif;
-      margin-top: 120px;
+      margin-top: 40px;
     }
 
     .step-nav span {
@@ -67,7 +67,7 @@
 <body>
 <div class="container my-5">
 
-  <!-- Step Indicator -->
+
   <div class="mb-4 text-center step-nav">
    <a href="/user-cart"> <span>Cart</span> </a>
    <a href=""><span class="active">Checkout</span> </a>
@@ -75,7 +75,7 @@
   </div>
 
   <div class="row">
-    <!-- Address Selection -->
+   
     <div class="col-md-8">
       <div class="address-box mb-4">
         <h5 class="mb-4">Select Delivery Address</h5>
@@ -276,7 +276,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  // Address check on Proceed to Payment button click
+ 
   document.getElementById('checkoutBtn').addEventListener('click', async function(e) {
     var addressCount = <%= addressData && addressData.addresses ? addressData.addresses.length : 0 %>;
     if (addressCount === 0) {
@@ -293,7 +293,7 @@
       });
       return;
     }
-    // The rest of the original click handler will run if addressCount > 0
+
   });
 
   function applyCoupon(code) {
@@ -426,7 +426,7 @@
 
     if (!isValid) return false;
 
-    // Clear errors
+
     document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
     document.querySelectorAll('.invalid-feedback').forEach(el => el.classList.remove('d-block'));
 

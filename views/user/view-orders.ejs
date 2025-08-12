@@ -3,7 +3,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
 body{
-      margin-top: 150px;
+      margin-top: 40px;
     }
     :root {
       --brand: #ff4646;
@@ -305,7 +305,7 @@ body{
           <a class="nav-link active" href="view-orders"><i class="fas fa-box me-2"></i> My Orders</a>
           <a class="nav-link " href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
           <a class="nav-link" href="#"><i class="fas fa-wallet me-2"></i> My Wallet</a>
-          <!-- <a class="nav-link" href="#"><i class="fas fa-key me-2"></i> Change Password</a> -->
+         
         </nav>
       </div>
     </div>
@@ -316,7 +316,6 @@ body{
             <div>Order ID</div>
             <div>Product</div>
             <div>Amount</div>
-            <!-- <div>Status</div> -->
             <div>Action</div>
           </div>
 
@@ -345,18 +344,6 @@ body{
                   <div class="product-price">
                     ₹<%= item.discountPrice || item.price %>
                   </div>
-<!-- <div class="product-status 
-  <%= order.status === 'Pending' ? 'status-pending' :
-      order.status === 'Failed' ? 'status-failed' :
-      order.status === 'Processing' ? 'status-processing' :
-      order.status === 'Confirmed' ? 'status-confirmed' :
-      order.status === 'Shipped' ? 'status-shipped' :
-      order.status === 'Delivered' ? 'status-delivered' :
-      order.status === 'Returned' ? 'status-Returned' :
-      order.status === 'Return Requested' ? 'status-Return-Requested' :
-      'status-cancelled' %>">
-  <%= order.status %>
-</div> -->
 
                  <div class="d-flex gap-2">
   <a href="/orders-details/<%= order._id %>" class="btn btn-outline-primary btn-sm">view more</a>
