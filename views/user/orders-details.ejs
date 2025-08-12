@@ -10,7 +10,8 @@
   }
 
   body {
-   margin-top: 180px;
+   margin-top: 140px;
+
     background-color: #f8f9fa;
     font-family: 'Segoe UI', sans-serif;
   }
@@ -329,21 +330,24 @@
       <div class="order-summary-card">
         <div class="order-header">
           <h1 class="order-title"><%=order.orderId%></h1>
-      <% if (order.status !== 'Pending') { %>
       <h2 class="payment-method">
-        <% if (order.paymentMethod === 'cod') { %>
-          <span class="payment-badge cod">
-            <i class="fas fa-money-bill-wave"></i> COD
-          </span>
-        <% } else { %>
-          <span class="payment-badge online">
-            <i class="fas fa-credit-card"></i> Online Payment
-          </span>
-        <% } %>
-      </h2>
-      <% } %>
+  <% if (order.paymentMethod === 'cod') { %>
+    <span class="payment-badge cod">
+      <i class="fas fa-money-bill-wave"></i> COD
+    </span>
+  <% } else { %>
+    <span class="payment-badge online">
+      <i class="fas fa-credit-card"></i> Online Payment
+    </span>
+  <% } %>
+</h2>
 
-                  </div>
+          <% if (order.paymentStatus !== 'Pending') { %>
+            <div class="order-status status-<%= order.status.toLowerCase() %>">
+              <%= order.status %>
+            </div>
+          <% } %>
+        </div>
         <div class="order-meta">
           <div class="meta-item">
             <span class="meta-label"><i class="far fa-calendar-alt"></i> Date:</span>
@@ -351,19 +355,6 @@
           </div>
         </div>
       </div>
-
-      <% if(order.status === 'Failed') { %>
-        <div class="alert alert-danger d-flex align-items-center gap-2" style="font-size:1.1rem;">
-          <i class="fa-solid fa-circle-exclamation" style="color:#ff4646;"></i>
-          <span>Payment Failed, please try again.</span>
-        </div>
-      <% } else if(order.status === 'Pending') { %>
-        <div class="alert alert-warning d-flex align-items-center gap-2" style="font-size:1.1rem;">
-          <i class="fa-solid fa-hourglass-half" style="color:#ffc107;"></i>
-          <span>Payment Pending, please complete your payment.</span>
-        </div>
-      <% } %>
-
       <% if(order.status === 'Cancelled' && order.adminCancellation && order.adminCancellation.reason) { %>
   <div class="alert alert-danger mt-3">
     <strong>Order Cancelled Reason:</strong> <%= order.adminCancellation.reason %><br>
@@ -426,6 +417,18 @@
                 <div class="order-status status-<%= (item.status || order.status).toLowerCase() %>">
                   <%= item.status || order.status %>
                 </div>
+                <% if (item.status === 'Return Requested' && item.adminReturnApprovalStatus) { %>
+                  <div class="text-info small mt-1">
+                    <% if (item.adminReturnApprovalStatus === 'Approved') { %>
+                      <strong>Admin approved the return</strong>
+                    <% } else if (item.adminReturnApprovalStatus === 'Rejected') { %>
+                      <strong>Admin rejected the return</strong>
+                      <% if (item.adminReturnApprovalReason) { %>
+                        : <%= item.adminReturnApprovalReason %>
+                      <% } %>
+                    <% } %>
+                  </div>
+                <% } %>
                 <% if (item.status === 'Cancelled') { %>
                   <% if (item.cancellationReason) { %>
                     <div class="text-danger small mt-1">
