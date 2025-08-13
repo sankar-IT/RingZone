@@ -5,10 +5,6 @@ const mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 
 
-const pageerror=async(req,res)=>{
-  res.render('admin-error')
-}
-
 const loadLogin= (req,res)=>{
   if(req.session.admin){
     return res.redirect('/admin/dashboard');
@@ -108,8 +104,6 @@ const loadDashboard = async (req, res) => {
       }
       return sum;
     }, 0);
-
-console.log("Total Confirmed/Delivered Amount:", totalAmount);
 
     const totalsales = orders.length;
     const productCount = await Product.countDocuments();
@@ -397,7 +391,6 @@ const periodDisplay = req.query.period ?
       periodDisplay
     });
   } catch (error) {
-    console.error(error);
     res.redirect('/pageerror');
   }
 };
@@ -417,6 +410,5 @@ module.exports={
   loadLogin,
   login,
   loadDashboard,
-  pageerror,
   logout
 }

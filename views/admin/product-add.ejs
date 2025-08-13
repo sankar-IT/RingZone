@@ -390,7 +390,6 @@ async function handleFormSubmit(e) {
     } else {
       showError(response.message || 'Error adding product');
       if (response.invalidFiles) {
-        console.log('Invalid files:', response.invalidFiles);
       }
     }
   } catch (error) {

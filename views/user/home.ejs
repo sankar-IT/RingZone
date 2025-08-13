@@ -30,13 +30,22 @@
               <h6><%= products[i].productName?.length > 10 ? products[i].productName.slice(0,15) + '...' : products[i].productName %></h6>
               <p class="text-muted small mb-1"><%= products[i].brand.name %></p>
               <div class="d-flex justify-content-center align-items-center gap-2">
-                <span class="text-danger fw-bold">₹<%= products[i].variants[0].discountPrice.toLocaleString('en-IN') %></span>
-                <span class="text-muted text-decoration-line-through">₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %></span>
+                <% if (products[i].variants[0].discountPrice && products[i].variants[0].discountPrice < products[i].variants[0].regularPrice) { %>
+  <span class="text-danger fw-bold">
+    ₹<%= products[i].variants[0].discountPrice.toLocaleString('en-IN') %>
+  </span>
+  <span class="text-muted text-decoration-line-through">
+    ₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %>
+  </span>
+<% } else { %>
+  <span class="text-danger fw-bold">
+    ₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %>
+  </span>
+<% } %>
+
               </div>
             </a>
-          <a href="/products/<%= products[i]._id %>" class="btn btn-sm mt-2 w-100 text-white" style="background-color: #ff4646;">
-  Add to Cart
-</a>
+        
           </div>
         </div>
       <% } %>

@@ -21,6 +21,7 @@ const pageNotFound=async(req,res)=>{
 }
 
 // Home page 
+
 const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
@@ -273,6 +274,20 @@ const verifyOtp = async (req, res) => {
 };
 
 
+//googleAuth
+
+const googleCallBack=async(req,res)=>{
+  try {
+     if (req.user.isBlocked) {
+    return res.redirect('/login?error=blocked');
+  }
+  req.session.user = req.user;
+  res.redirect('/');
+  } catch (error) {
+    
+  }
+}
+
 
 const loadOtpPage = (req, res) => {
   res.render('verify-otp');
@@ -365,18 +380,21 @@ const loadShoppingPage = async (req, res) => {
     const user = req.session.user;
     const userData = await User.findOne({ _id: user?._id });
 
+    // Check if user is blocked
     if (userData?.isBlocked) {
       req.session.user = null;
       return res.redirect('/login?error=blocked');
     }
 
+    // Cart count
     const cart = await Cart.findOne({ user: user?._id });
     if (cart) res.locals.cartCount = cart.items?.length;
 
+    // Get only listed categories and unblocked brands
     const categories = await Category.find({ isListed: true });
     const brands = await Brand.find({ isBlocked: false });
 
- 
+    // Filters from query params
     const selectedCategory = req.query.category || null;
     const selectedBrand = req.query.brand || null;
     const gt = req.query.gt ? parseInt(req.query.gt) : null;
@@ -387,23 +405,43 @@ const loadShoppingPage = async (req, res) => {
     const limit = 9;
     const skip = (page - 1) * limit;
 
- 
+    // Prepare base query
     const query = {
       isBlocked: false,
       variants: { $elemMatch: { quantity: { $gt: 0 } } }
     };
-    if (selectedCategory) query.category = selectedCategory;
-    if (selectedBrand) query.brand = selectedBrand;
-    if (search) query.productName = { $regex: search, $options: 'i' };
 
-    
+    // Ensure category is listed
+    const listedCategoryIds = categories.map(cat => cat._id);
+    if (selectedCategory) {
+      query.category = { $in: listedCategoryIds, $eq: selectedCategory };
+    } else {
+      query.category = { $in: listedCategoryIds };
+    }
+
+    // Ensure brand is not blocked
+    const listedBrandIds = brands.map(br => br._id);
+    if (selectedBrand) {
+      query.brand = { $in: listedBrandIds, $eq: selectedBrand };
+    } else {
+      query.brand = { $in: listedBrandIds };
+    }
+
+    // Search filter
+    if (search) {
+      query.productName = { $regex: search, $options: 'i' };
+    }
+
+    // Fetch products
     let products = await product.find(query)
       .populate('brand')
       .populate('category')
       .lean();
+
+    // Apply offers
     products.forEach(prod => {
       const categoryOffer = prod.category?.categoryOffer || 0;
-      const productOffer = prod.offer || 0;  
+      const productOffer = prod.offer || 0;
       const finalOffer = Math.max(categoryOffer, productOffer);
 
       prod.variants = prod.variants.map(variant => {
@@ -424,7 +462,7 @@ const loadShoppingPage = async (req, res) => {
       });
     });
 
-    
+    // Price range filter
     if (gt !== null && lt !== null) {
       products = products.filter(prod => {
         const variantPrice = prod.variants[0]?.finalPrice || 0;
@@ -432,7 +470,7 @@ const loadShoppingPage = async (req, res) => {
       });
     }
 
-    
+    // Sorting
     if (sort === "price_asc") {
       products.sort((a, b) => (a.variants[0]?.finalPrice || 0) - (b.variants[0]?.finalPrice || 0));
     } else if (sort === "price_desc") {
@@ -441,12 +479,12 @@ const loadShoppingPage = async (req, res) => {
       products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
-   
+    // Pagination
     const totalProducts = products.length;
     const totalPages = Math.ceil(totalProducts / limit);
     products = products.slice(skip, skip + limit);
 
-    
+    // Render page
     res.render('shopping-pageList', {
       user: userData || null,
       products,
@@ -468,6 +506,10 @@ const loadShoppingPage = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
+
+
+
 
 
 
@@ -782,6 +824,7 @@ module.exports = {
   verifyOtp,
   loadOtpPage,
   resendOtp,
+  googleCallBack,
   loadLogin,
   pageNotFound,
   login,

@@ -31,7 +31,7 @@ const categoryInfo = async (req, res) => {
       searchQuery: search,
     });
   } catch (error) {
-    console.error(error);
+
     res.redirect('/pageerror');
   }
 };
@@ -63,7 +63,7 @@ const addCategory = async (req, res) => {
     return res.status(200).json({ message: 'Category added successfully' });
 
   } catch (error) {
-    console.error('Add Category Error:', error.message);
+
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -99,7 +99,7 @@ const addCategoryOffer = async (req, res) => {
 
     res.json({ status: true, message: 'Category offer applied successfully' });
   } catch (error) {
-    console.error('Error in addCategoryOffer:', error);
+
     res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
@@ -130,7 +130,7 @@ const removeCategoryOffer = async (req, res) => {
 
     res.json({ status: true, message: 'Category offer removed successfully' });
   } catch (error) {
-    console.error('Error in removeCategoryOffer:', error);
+
     res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
@@ -204,7 +204,6 @@ const editCategory = async (req, res) => {
     res.redirect('/admin/category');
 
   } catch (error) {
-    console.error('Error updating category:', error.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

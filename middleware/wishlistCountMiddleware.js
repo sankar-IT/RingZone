@@ -14,8 +14,6 @@ const wishlistCountMiddleware = async (req, res, next) => {
     }
 
     res.locals.wishlistLength = count;
-    console.log(count);
-    
     next();
   } catch (err) {
     console.error('Error in wishlistCountMiddleware:', err);

@@ -679,15 +679,19 @@
     const dateToInput = document.getElementById('date-to');
     const applyFilterBtn = document.getElementById('apply-filter');
     const salesCtx = document.getElementById('salesChart').getContext('2d');
-    
+
 
     const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    dateFromInput.setAttribute('max', todayStr);
+    dateToInput.setAttribute('max', todayStr);
+
+  
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
     dateFromInput.valueAsDate = oneWeekAgo;
     dateToInput.valueAsDate = today;
-    
+
     const salesChart = new Chart(salesCtx, {
       type: 'line',
       data: {
@@ -730,67 +734,80 @@
       }
     });
 
-function updateReportHeading() {
-  const period = timePeriodSelect.value;
-  let periodText = '';
-  
-  switch(period) {
-    case 'daily':
-      periodText = 'Daily Sales Report';
-      break;
-    case 'weekly':
-      periodText = 'Weekly Sales Report';
-      break;
-    case 'monthly':
-      periodText = 'Monthly Sales Report';
-      break;
-    case 'yearly':
-      periodText = 'Yearly Sales Report';
-      break;
-    case 'custom':
-      const fromDate = dateFromInput.value ? new Date(dateFromInput.value).toLocaleDateString() : '';
-      const toDate = dateToInput.value ? new Date(dateToInput.value).toLocaleDateString() : '';
-      periodText = `Custom Report (${fromDate} to ${toDate})`;
-      break;
-    default:
-      periodText = 'Sales Report';
-  }
-  
-  document.getElementById('report-period-text').textContent = periodText;
-}
-
-timePeriodSelect.addEventListener('change', function() {
-  customDateRangeDiv.style.display = this.value === 'custom' ? 'block' : 'none';
-  updateReportHeading();
-});
-
-dateFromInput.addEventListener('change', updateReportHeading);
-dateToInput.addEventListener('change', updateReportHeading);
-
-applyFilterBtn.addEventListener('click', function() {
-  const period = timePeriodSelect.value;
-  let startDate, endDate;
-  
-  if (period === 'custom') {
-    startDate = dateFromInput.value;
-    endDate = dateToInput.value;
-    
-    if (!startDate || !endDate) {
-      alert('Please select both dates for custom range');
-      return;
+    function updateReportHeading() {
+      const period = timePeriodSelect.value;
+      let periodText = '';
+      
+      switch(period) {
+        case 'daily':
+          periodText = 'Daily Sales Report';
+          break;
+        case 'weekly':
+          periodText = 'Weekly Sales Report';
+          break;
+        case 'monthly':
+          periodText = 'Monthly Sales Report';
+          break;
+        case 'yearly':
+          periodText = 'Yearly Sales Report';
+          break;
+        case 'custom':
+          const fromDate = dateFromInput.value ? new Date(dateFromInput.value).toLocaleDateString() : '';
+          const toDate = dateToInput.value ? new Date(dateToInput.value).toLocaleDateString() : '';
+          periodText = `Custom Report (${fromDate} to ${toDate})`;
+          break;
+        default:
+          periodText = 'Sales Report';
+      }
+      
+      document.getElementById('report-period-text').textContent = periodText;
     }
-  }
-  
-  const params = new URLSearchParams();
-  params.append('period', period);
-  if (period === 'custom') {
-    params.append('startDate', startDate);
-    params.append('endDate', endDate);
-  }
-  
-  window.location.href = `/admin/Dashboard?${params.toString()}`;
-});
- 
+
+    timePeriodSelect.addEventListener('change', function() {
+      customDateRangeDiv.style.display = this.value === 'custom' ? 'block' : 'none';
+      updateReportHeading();
+    });
+
+    dateFromInput.addEventListener('change', function() {
+
+      if (dateToInput.value && dateFromInput.value > dateToInput.value) {
+        dateToInput.value = dateFromInput.value;
+      }
+      updateReportHeading();
+    });
+
+    dateToInput.addEventListener('change', function() {
+
+      if (dateFromInput.value && dateToInput.value < dateFromInput.value) {
+        dateFromInput.value = dateToInput.value;
+      }
+      updateReportHeading();
+    });
+
+    applyFilterBtn.addEventListener('click', function() {
+      const period = timePeriodSelect.value;
+      let startDate, endDate;
+      
+      if (period === 'custom') {
+        startDate = dateFromInput.value;
+        endDate = dateToInput.value;
+        
+        if (!startDate || !endDate) {
+          alert('Please select both dates for custom range');
+          return;
+        }
+      }
+      
+      const params = new URLSearchParams();
+      params.append('period', period);
+      if (period === 'custom') {
+        params.append('startDate', startDate);
+        params.append('endDate', endDate);
+      }
+      
+      window.location.href = `/admin/Dashboard?${params.toString()}`;
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const periodParam = urlParams.get('period');
     if (periodParam) {
@@ -805,5 +822,6 @@ applyFilterBtn.addEventListener('click', function() {
     updateReportHeading();
   });
 </script>
+
   
 </body>

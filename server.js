@@ -8,7 +8,7 @@ const userRouter=require('./routes/userRouter')
 const passport=require('./config/passport')
 const session=require('express-session')
 const adminRouter=require('./routes/adminRouter')
-const injectCartCount = require('./middleware/cartMiddleware');
+const {injectCartCount} = require('./middleware/cartMiddleware');
 const wishlistCountMiddleware = require('./middleware/wishlistCountMiddleware');
 
 
@@ -49,6 +49,7 @@ app.set('views', [
   path.join(__dirname, 'views/shared')
 ]);
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 

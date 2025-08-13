@@ -12,7 +12,7 @@ const getBrandPage = async (req, res) => {
    
     const testBrand = await Brand.findOne().sort({ createdAt: -1 });
     if (!testBrand || !testBrand.createdAt) {
-      console.log('Warning: createdAt field missing or empty in brands');
+  
     }
 
     
@@ -29,10 +29,6 @@ const getBrandPage = async (req, res) => {
         .lean()
     ]);
 
- 
-    console.log('First brand in results:', brands[0]?.brandName, brands[0]?.createdAt);
-    console.log('Last brand in results:', brands[brands.length-1]?.brandName, brands[brands.length-1]?.createdAt);
-
     res.render('brands', {
       cat: brands,
       currentPage: page,
@@ -41,7 +37,7 @@ const getBrandPage = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in getBrandPage:", error);
+
     res.redirect('/pageerror');
   }
 };

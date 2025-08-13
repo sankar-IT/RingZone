@@ -205,7 +205,6 @@
         function forceRedirect(url, delay = 0) {
             setTimeout(() => {
                 hideLoading();
-                console.log('Redirecting to:', url);
                
                 try {
                     window.location.replace(url);
@@ -221,7 +220,6 @@
                 
                 setTimeout(() => {
                     if (window.location.pathname === '/payment') {
-                        console.log('Redirect failed, reloading page');
                         window.location.reload();
                     }
                 }, 3000);
@@ -244,7 +242,6 @@
 
         document.getElementById('checkoutBtn').addEventListener('click', async () => {
             if (isProcessing) {
-                console.log('Already processing, ignoring click');
                 return;
             }
 
@@ -256,10 +253,6 @@
                 const grandTotal = parseInt(
                     document.getElementById('grandTotal').textContent.replace(/[₹,]/g, '')
                 );
-
-                console.log('Selected payment method:', selectedPaymentMethod);
-                console.log('Grand total:', grandTotal);
-
                 if (selectedPaymentMethod === 'card') {
                     await handleCardPayment(grandTotal);
                 } else if (selectedPaymentMethod === 'wallet') {
@@ -289,7 +282,6 @@
                     throw new Error(data.message || 'Failed to create Razorpay order.');
                 }
 
-                console.log('Razorpay order created:', data.orderId);
                 hideLoading();
 
                 const options = {
@@ -307,7 +299,6 @@
                     },
                     theme: { color: "#ff4646" },
                     handler: async function (response) {
-                        console.log('Payment successful:', response);
                         showLoading();
                         
                         try {
@@ -338,7 +329,6 @@
                     },
                     modal: {
                         ondismiss: function () {
-                            console.log("Payment modal dismissed by user");
                             resetBtn();
                             forceRedirect(`/payment-failure/${data.orderId}`, 1000);
                         },

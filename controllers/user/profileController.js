@@ -903,6 +903,8 @@ const orderCancel=async(req,res)=>{
 const cancelItem = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
+    const { reason } = req.body; 
+
     const order = await Order.findById(orderId).populate('coupon');
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
@@ -916,27 +918,28 @@ const cancelItem = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order cannot be cancelled at this stage' });
 
     item.status = 'Cancelled';
-    const allActiveItems = order.orderedItems.filter(i => i.status !== 'Cancelled');
-    const originalAllItems = order.orderedItems; 
-    
-    if(order.orderedItems.every(itm => itm.status == 'Cancelled')){
-      order.status = 'Cancelled'
+    item.cancellationReason = reason || 'No reason provided';
+    item.cancelledBy = 'user';
+    item.cancellationDate = new Date();
+
+    if (order.orderedItems.every(itm => itm.status == 'Cancelled')) {
+      order.status = 'Cancelled';
     }
+
     await order.save();
-    
-    const totalItemsPrice = originalAllItems.reduce(
-      (sum, itm) => sum + itm.price * itm.quantity, 0);
+
+    const totalItemsPrice = order.orderedItems.reduce(
+      (sum, itm) => sum + itm.price * itm.quantity, 0
+    );
 
     const itemPrice = item.price * item.quantity;
-
     let refundAmount = itemPrice;
-    let couponDiscount = 0;
     if (order.coupon && order.coupon.discountAmount > 0) {
       const totalCoupon = order.coupon.discountAmount;
       const itemShare = (itemPrice / totalItemsPrice) * totalCoupon;
       refundAmount = Math.floor(itemPrice - itemShare);
-      
     }
+
     let wallet = await Wallet.findOne({ user: order.user });
     if (!wallet) wallet = new Wallet({ user: order.user, balance: 0, transactions: [] });
 
@@ -944,24 +947,22 @@ const cancelItem = async (req, res) => {
     wallet.transactions.push({
       type: 'credit',
       amount: refundAmount,
-      description: `Refund for cancelled item in Order  ORD${( order._id).toString().substring(0,8).toUpperCase()} `
+      description: `Refund for cancelled item in Order ORD${order._id.toString().substring(0, 8).toUpperCase()} `
     });
-    await wallet.save();
-    await order.save();
 
-  await Product.updateOne(
-  {
-    _id: item.product,
-    'variants.color': item.variant.color,
-    'variants.storage': item.variant.storage
-  },
-  {
-    $inc: { 'variants.$.quantity': item.quantity }
-  }
-);
+    await wallet.save();
+    await Product.updateOne(
+      {
+        _id: item.product,
+        'variants.color': item.variant.color,
+        'variants.storage': item.variant.storage
+      },
+      { $inc: { 'variants.$.quantity': item.quantity } }
+    );
+
     return res.status(200).json({
       success: true,
-      message: 'Item cancelled and net amount credited to wallet',
+      message: 'Item cancelled and refund credited to wallet',
       itemStatus: item.status,
       refundAmount,
       walletBalance: wallet.balance,

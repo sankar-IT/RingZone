@@ -356,7 +356,6 @@ const removeProductOffer = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      console.log("fkjbfjbvkhbf");
       
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
@@ -371,7 +370,6 @@ const removeProductOffer = async (req, res) => {
 
     res.json({ success: true, message: 'Product offer removed successfully' });
   } catch (error) {
-    console.log('Error in removeProductOffer:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

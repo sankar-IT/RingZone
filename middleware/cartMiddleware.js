@@ -1,24 +1,24 @@
-
 const Order = require('../models/orderSchema');
+
+const initializeCartCount = (req, res, next) => {
+  res.locals.cartCount = 0;
+  next();
+};
 
 const injectCartCount = async (req, res, next) => {
   try {
     let cartCount = 0;
-    
     if (req.session.user?._id) {
       const activeCart = await Order.findOne({ 
         userId: req.session.user._id,
-        status: 'Proccessing' 
+        status: 'Proccessing'  
       });
-      
-     
+
       cartCount = activeCart?.orderedItems?.reduce(
-        (total, item) => total + item.quantity, 
+        (total, item) => total + item.quantity,
         0
       ) || 0;
     }
-
-  
     res.locals.cartCount = cartCount;
     next();
   } catch (error) {
@@ -28,4 +28,7 @@ const injectCartCount = async (req, res, next) => {
   }
 };
 
-module.exports = injectCartCount;
+module.exports = {
+  injectCartCount,
+  initializeCartCount
+};

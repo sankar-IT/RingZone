@@ -528,24 +528,28 @@
           <span>₹<%= order.finalAmount %></span>
         </div>
       </div>
-  
-      <div class="action-buttons">
-        <button class="back-btn" onclick="window.history.back()">
-          <i class="fas fa-arrow-left me-1"></i> Back
-        </button>
-        
-        <% if (order.paymentStatus === 'Pending') { %>
-         <button class="btn btn-primary" id="retryPaymentBtn" data-order-id="<%= order._id  %>">Retry Payment</button>
-        <% } else if (
-          order.status && 
-          (order.status.toLowerCase() === 'confirmed' || order.status.toLowerCase() === 'delivered')
-        ) { %>
-          <button class="invoice-btn btn-danger"
-            onclick="window.location.href='/download-invoice/<%= order._id %>'">
-            <i class="fas fa-file-invoice me-1"></i> Invoice
-          </button>
-        <% } %>
-      </div>
+  <div class="action-buttons">
+  <button class="back-btn" onclick="window.history.back()">
+    <i class="fas fa-arrow-left me-1"></i> Back
+  </button>
+
+  <% if (order.paymentStatus === 'Pending') { %>
+    <button class="btn btn-primary" id="retryPaymentBtn" data-order-id="<%= order._id %>">
+      Retry Payment
+    </button>
+  <% } else if (
+    order.orderedItems && 
+    order.orderedItems.some(item => 
+      ['delivered', 'confirmed'].includes(item.status?.toLowerCase())
+    )
+  ) { %>
+    <button class="invoice-btn btn-danger"
+      onclick="window.location.href='/download-invoice/<%= order._id %>'">
+      <i class="fas fa-file-invoice me-1"></i> Invoice
+    </button>
+  <% } %>
+</div>
+
     </div>
   </div>
 
@@ -635,52 +639,63 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.querySelectorAll('.cancel-btn:not(:disabled)').forEach(button => {
-    button.addEventListener('click', async function() {
-      const productName = this.closest('.product-item').querySelector('.product-name').textContent;
-      const orderId = this.dataset.orderId;
-      const itemId = this.dataset.itemId;
-      const result = await Swal.fire({
-        title: `Cancel ${productName}?`,
-        text: "Are you sure you want to cancel this item?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, cancel it!'
-      });
-      if (result.isConfirmed) {
-        try {
-          this.disabled = true;
-          this.textContent = 'Cancelled';
-          const response = await fetch(`/cancel-item/${orderId}/${itemId}`, {
-            method: 'get',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          const data = await response.json();
-          if (response.ok && data.success) {
-            await Swal.fire({
-              icon: 'success',
-              title: 'Cancelled!',
-              text: data.message || 'Item cancelled successfully',
-              timer: 2000,
-              showConfirmButton: false
-            });
-            window.location.reload();
-          } else {
-            throw new Error(data.message || 'Failed to cancel item');
-          }
-        } catch (error) {
-          await Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message,
-          });
-          this.disabled = false;
-          this.textContent = 'Cancel';
+  button.addEventListener('click', async function () {
+    const productName = this.closest('.product-item').querySelector('.product-name').textContent;
+    const orderId = this.dataset.orderId;
+    const itemId = this.dataset.itemId;
+
+    const { value: reason } = await Swal.fire({
+      title: `Cancel ${productName}?`,
+      input: 'textarea',
+      inputLabel: 'Reason for cancellation',
+      inputPlaceholder: 'Enter your reason...',
+      inputAttributes: { 'aria-label': 'Reason for cancellation' },
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'No, keep it',
+      inputValidator: (value) => {
+        if (!value.trim()) {
+          return 'Cancellation reason is required';
         }
       }
     });
+
+    if (reason) {
+      try {
+        this.disabled = true;
+        this.textContent = 'Cancelling...';
+
+        const response = await fetch(`/cancel-item/${orderId}/${itemId}`, {
+          method: 'POST', // Changed to POST to send reason
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Cancelled!',
+            text: data.message || 'Item cancelled successfully',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          window.location.reload();
+        } else {
+          throw new Error(data.message || 'Failed to cancel item');
+        }
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+        });
+        this.disabled = false;
+        this.textContent = 'Cancel';
+      }
+    }
   });
+});
 
   document.querySelectorAll('.return-btn').forEach(btn => {
     btn.addEventListener('click', function() {

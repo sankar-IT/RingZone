@@ -214,13 +214,29 @@
               <input type="text" class="form-control form-control-sm" id="lastName" name="lastName" required>
             </div>
 
-            <div class="col-md-6">
-              <label for="phone" class="form-label">
-                <i class="fas fa-phone me-1"></i>Phone Number
-              </label>
-              <input type="text" class="form-control form-control-sm" id="phone" name="phone" pattern="^\d{10}$" title="Phone number must be 10 digits" required>
-            </div>
-
+         <div class="col-md-6">
+  <label for="phone" class="form-label">
+    <i class="fas fa-phone me-1"></i>Phone Number
+  </label>
+  <div class="input-group">
+    <span class="input-group-text bg-light d-flex align-items-center">
+      <img src="https://flagcdn.com/w20/in.png" 
+           srcset="https://flagcdn.com/w40/in.png 2x" 
+           width="20" 
+           alt="India" 
+           class="me-1">
+      +91
+    </span>
+    <input type="tel" 
+           class="form-control form-control-sm" 
+           id="phone" 
+           name="phone" 
+           pattern="^\d{10}$" 
+           title="Phone number must be 10 digits" 
+           placeholder="Enter 10-digit number"
+           required>
+  </div>
+</div>
             <div class="col-md-6">
               <label for="pinCode" class="form-label">
                 <i class="fas fa-map-pin me-1"></i>Pin Code
