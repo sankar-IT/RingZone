@@ -35,12 +35,16 @@ const loadHomepage = async (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
 
+
+
+
     if (user) {
       const userData = await User.findById(user._id);
       if(userData.isBlocked){
         req.session.user = null;
         return res.redirect('/login?error=blocked')
       }
+   
 
       const cart = await Cart.findOne({ user: user._id  });
 
@@ -49,8 +53,7 @@ const loadHomepage = async (req, res) => {
       }
 
      const wishlist = await Wishlist.findOne({ userId: user._id });
-      res.locals.wishlistLength = wishlist ? wishlist.products.length : 0;
-
+     res.locals.wishlistLength = wishlist ? wishlist.products.length : 0;
       res.locals.user = userData;
       return res.render('home', {
         user: userData,

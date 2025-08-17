@@ -171,6 +171,17 @@ const loadDashboard = async (req, res) => {
       { $sort: { totalSales: -1 } },
       { $limit: 10 }
     ]);
+  
+
+const statusValue='Cancelled';
+const findResult= await Order.aggregate([
+  {$unwind:'$orderedItems'},
+  { $match: { "orderedItems.status": { $regex: new RegExp(`^${statusValue}$`, "i") } } },
+  {$group:{_id:null,totalsum:{$sum:1}}}
+])
+
+console.log(findResult);
+
 
     const brandSales = await Order.aggregate([
       { $match: dateFilter },

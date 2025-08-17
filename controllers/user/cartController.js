@@ -88,6 +88,32 @@ const getCartPage=async(req,res)=>{
 
       const userId=req.session.user._id;
       const cartProducts= await Cart.findOne({user:userId}).populate('items.product')
+  //     const CartTotal=cartProducts?.items?.length || 0;
+  //     console.log('cartcount is : ',CartTotal);
+      
+  //  let wishListCount=await Wishlist.findOne({userId}).populate('products.productId')
+  //    let resultCount=wishListCount?.products.length || 0
+  //    console.log(resultCount); 
+
+        // const result=cartProducts.items.reduce((sum,item)=>{
+        //   return sum + (item.price * item.quantity);
+        // },0)
+        // console.log(result);
+
+    // const cartQuantity=await Cart.findOne({user:userId})
+    // const result=cartQuantity?.items.reduce((sum,item)=>sum + item.quantity,0)
+    // console.log(result);
+
+    // const wishListCount= await Wishlist.findOne({userId}).populate('products.productId')
+    // const wishResult=wishListCount?.products.length || 0;
+    // console.log(wishResult);
+        
+
+      //  const cartSum=await Cart.findOne({user:userId}).populate('items.product')
+      //   const cartResult=cartSum.items.reduce((sum,item)=>{
+      //     return sum + (item.price * item.quantity)
+      //   },0)
+      //   console.log(cartResult);
     
         res.locals.cartCount = cartProducts?.items?.length || 0;
         res.render('user-cart',{cartProducts , user:req.session.user, cartCount: res.locals.cartCount})
@@ -128,7 +154,7 @@ const updateCartQuantity = async (req, res) => {
     const matchedVariant = dbProduct.variants.find( variant => variant.color == color  && variant.storage == storage);
 
     if(matchedVariant.quantity < quantity){
-      return res.status(400).json({success: false, message: 'out of stoc k product'})
+      return res.status(400).json({success: false, message: 'out of stock product'})
     }
 
     cart.items[itemIndex].quantity = quantity;

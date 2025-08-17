@@ -149,6 +149,7 @@ const addProductList = async (req, res) => {
     const totalPages = Math.ceil(totalProducts / perPage);
 
     const products = await Product.find(query)
+      .sort({ createdAt: -1 })
       .populate('brand')
       .populate('category')
       .skip((perPage * page) - perPage)

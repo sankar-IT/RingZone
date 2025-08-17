@@ -30,6 +30,9 @@ const loadSalesPage = async (req, res) => {
     const totalConcurrency = orders.filter(order => order.paymentMethod === 'Concurrency').length;
     const totalContract = orders.filter(order => order.paymentMethod === 'Contract').length;
 
+
+       
+
     res.render('sales-report', {
       orders,
       totalAmount,
