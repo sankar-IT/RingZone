@@ -175,8 +175,9 @@
     <div class="wishlist-items">
       <% wishlistItems.forEach(item => { 
         const product = item.productId;
-        const variant = product.variants[0];
+        const variant = product?.variants[0];
       %>
+      <% if(product){ %>
         <div class="wishlist-item">
           <img src="/<%= product.images[0] %>" alt="<%= product.productName %>" class="product-image" />
           <div class="item-details">
@@ -195,6 +196,7 @@
             </button>
           </div>
         </div>
+        <% } %>
       <% }) %>
     </div>
   <% } %>

@@ -25,9 +25,7 @@ const pageNotFound=async(req,res)=>{
 const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
-
-    const categories = await Category.find({ islisted: true });
-
+    // const categories = await Category.find({ islisted: true });
     const productData = await product.find({ isBlocked: false })
      .sort({ createdAt: -1 })
      .limit(8);
@@ -35,7 +33,7 @@ const loadHomepage = async (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
 
-
+ 
 
 
     if (user) {
@@ -45,6 +43,9 @@ const loadHomepage = async (req, res) => {
         return res.redirect('/login?error=blocked')
       }
    
+     
+
+
 
       const cart = await Cart.findOne({ user: user._id  });
 

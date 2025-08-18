@@ -1214,7 +1214,7 @@ const loadWishListPage = async (req, res) => {
      const cart = await Cart.findOne({ user: userId });
      const cartCount=cart?.items?.length || 0
     const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
-
+  console.log(wishlist);
     res.render('wishlist', { cartCount,  wishlistItems: wishlist?.products || [] });
   } catch (error) {
     console.error(error);
