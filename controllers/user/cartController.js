@@ -87,6 +87,16 @@ const getCartPage=async(req,res)=>{
     if(req.session.user){
 
       const userId=req.session.user._id;
+
+
+    const cartItemSum=await Cart.findOne({user:userId}).populate('items.product')
+    const sumResult=cartItemSum.items.reduce((sum,item)=>{
+     return sum + (item.price * item.quantity)
+    },0)
+    console.log(`the sum of the cart products is ${sumResult}`);
+
+
+
       const cartProducts= await Cart.findOne({user:userId}).populate('items.product')
   //     const CartTotal=cartProducts?.items?.length || 0;
   //     console.log('cartcount is : ',CartTotal);
@@ -114,6 +124,9 @@ const getCartPage=async(req,res)=>{
       //     return sum + (item.price * item.quantity)
       //   },0)
       //   console.log(cartResult);
+
+
+   
     
         res.locals.cartCount = cartProducts?.items?.length || 0;
         res.render('user-cart',{cartProducts , user:req.session.user, cartCount: res.locals.cartCount})

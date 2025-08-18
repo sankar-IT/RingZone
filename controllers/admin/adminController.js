@@ -173,14 +173,14 @@ const loadDashboard = async (req, res) => {
     ]);
   
 
-const statusValue='Cancelled';
-const findResult= await Order.aggregate([
-  {$unwind:'$orderedItems'},
-  { $match: { "orderedItems.status": { $regex: new RegExp(`^${statusValue}$`, "i") } } },
-  {$group:{_id:null,totalsum:{$sum:1}}}
-])
+// const statusValue='Cancelled';
+// const findResult= await Order.aggregate([
+//   {$unwind:'$orderedItems'},
+//   { $match: { "orderedItems.status": { $regex: new RegExp(`^${statusValue}$`, "i") } } },
+//   {$group:{_id:null,totalsum:{$sum:1}}}
+// ])
 
-console.log(findResult);
+// console.log(findResult);
 
 
     const brandSales = await Order.aggregate([

@@ -180,6 +180,12 @@
       width: 3rem;
       height: 3rem;
     }
+    .date-error {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -224,10 +230,12 @@
             <div class="col-md-3" id="dateRangeSection" style="display:none;">
               <label class="form-label">From Date</label>
               <input type="date" class="form-control" id="fromDate">
+              <div class="date-error" id="fromDateError"></div>
             </div>
             <div class="col-md-3" id="dateRangeSectionTo" style="display:none;">
               <label class="form-label">To Date</label>
               <input type="date" class="form-control" id="toDate">
+              <div class="date-error" id="toDateError"></div>
             </div>
             <div class="col-md-3">
               <button type="button" class="btn btn-primary w-100" id="generateReport">
@@ -248,14 +256,14 @@
             </div>
           </div>
 
-              <div class="col-md-2">
+          <div class="col-md-2">
             <div class="stats-card text-center">
               <i class="fas fa-truck fa-2x mb-2 text-success"></i>
               <h5>Order's Delivered</h5>
               <h3 id="deliveredCount"><%= totalDelivered %></h3>
             </div>
           </div>
-                <div class="col-md-2">
+          <div class="col-md-2">
             <div class="stats-card text-center">
               <i class="fas fa-times-circle fa-2x mb-2 text-danger"></i>
               <h5>Order's Cancelled</h5>
@@ -300,7 +308,6 @@
                 <h3 id="discount">₹ <%= totalDiscount %></h3>
               </div>
             </div>
-          </div>
           </div>
         </div>
 
@@ -382,12 +389,29 @@
     const rowsPerPage = 5;
     let currentOrders = ordersData || [];
 
+    function disableFutureDates() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('fromDate').max = today;
+      document.getElementById('toDate').max = today;
+    }
+
     function showLoading() {
       loadingSpinner.style.display = 'flex';
     }
 
     function hideLoading() {
       loadingSpinner.style.display = 'none';
+    }
+
+    function showError(elementId, message) {
+      const element = document.getElementById(elementId);
+      element.textContent = message;
+      element.style.display = 'block';
+    }
+
+    function hideError(elementId) {
+      const element = document.getElementById(elementId);
+      element.style.display = 'none';
     }
 
     function toNumber(v) {
@@ -461,19 +485,21 @@
       return { amount, discount };
     }
 
-    document.getElementById('reportType').addEventListener('change', function() {
-      const type = this.value;
-      const dateFrom = document.getElementById('dateRangeSection');
-      const dateTo = document.getElementById('dateRangeSectionTo');
+    function validateDateRange() {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
       
-      if (type === 'custom') {
-        dateFrom.style.display = 'block';
-        dateTo.style.display = 'block';
-      } else {
-        dateFrom.style.display = 'none';
-        dateTo.style.display = 'none';
+      hideError('fromDateError');
+      hideError('toDateError');
+      
+      if (fromDate && toDate) {
+        if (new Date(toDate) < new Date(fromDate)) {
+          showError('toDateError', 'To date must be after from date');
+          return false;
+        }
       }
-    });
+      return true;
+    }
 
     function filterOrdersByType(type, fromDate, toDate) {
       const today = new Date();
@@ -567,11 +593,52 @@
       });
     }
 
-    document.getElementById('generateReport').addEventListener('click', () => {
+
+    document.getElementById('reportType').addEventListener('change', function() {
+      const type = this.value;
+      const dateFrom = document.getElementById('dateRangeSection');
+      const dateTo = document.getElementById('dateRangeSectionTo');
+      
+      if (type === 'custom') {
+        dateFrom.style.display = 'block';
+        dateTo.style.display = 'block';
+        disableFutureDates();
+      } else {
+        dateFrom.style.display = 'none';
+        dateTo.style.display = 'none';
+      }
+    });
+
+    document.getElementById('fromDate').addEventListener('change', function() {
+      validateDateRange();
+    });
+
+    document.getElementById('toDate').addEventListener('change', function() {
+      validateDateRange();
+    });
+
+    document.getElementById('generateReport').addEventListener('click', function() {
+      const reportType = document.getElementById('reportType').value;
+      
+  
+      if (reportType === 'custom') {
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        
+        if (!fromDate || !toDate) {
+          showError('fromDateError', 'Please select from date');
+          showError('toDateError', 'Please select to date');
+          return;
+        }
+        
+        if (!validateDateRange()) {
+          return;
+        }
+      }
+      
       showLoading();
       
       setTimeout(() => {
-        const reportType = document.getElementById('reportType').value;
         const fromDate = document.getElementById('fromDate').value;
         const toDate = document.getElementById('toDate').value;
 
@@ -641,7 +708,9 @@
       
       doc.save('sales-report.pdf');
     });
+
     window.addEventListener('DOMContentLoaded', () => {
+      disableFutureDates();
       currentOrders = ordersData || [];
       renderPaginatedTable(currentOrders, currentPage);
       updateStats(currentOrders);

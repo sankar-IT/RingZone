@@ -267,30 +267,44 @@
   <div class="row g-4 flex-column flex-md-row">
 
     <div class="col-md-3">
-      <div class="sidebar">
-        <div class="text-center mb-3">
-          <div class="profile-image-wrapper position-relative mx-auto">
-  <% if (user && user.profileImage) { %>
-    <img src="<%= user.profileImage %>" class="profile-pic" alt="User">
-  <% } else { %>
-    <div class="profile-pic placeholder d-flex align-items-center justify-content-center">
-      <i class="fa-solid fa-user fa-xl text-muted"></i>
+  <div class="sidebar">
+    <div class="text-center mb-3">
+      <div class="profile-image-wrapper position-relative mx-auto">
+        <% if (user && user.profileImage) { %>
+          <img src="<%= user.profileImage %>" class="profile-pic" alt="User">
+        <% } else { %>
+          <%
+            const colors = ['#FF5733', '#33B5E5', '#FFB400', '#4CAF50', '#9C27B0', '#3F51B5', '#E91E63', '#795548'];
+            const getColorFromName = (name) => {
+              const charCodeSum = name
+                .toUpperCase()
+                .split('')
+                .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+              return colors[charCodeSum % colors.length];
+            };
+            const initials = (user.firstname?.charAt(0) || '').toUpperCase();
+            const userColor = getColorFromName(user.firstname || 'U');
+          %>
+          <div class="profile-pic d-flex align-items-center  justify-content-center text-white fw-bold" 
+               style=" margin-left: 80px;   background-color:<%- userColor %>; font-size:36px;">
+            <%= initials %>
+          </div>
+        <% } %>
+      </div>
+      <h6 class="mt-2 mb-0">Welcome, <%= user.firstname %></h6>
+      <small class="text-muted"><%= user.email %></small>
     </div>
-  <% } %>
+
+    <nav class="nav flex-column">
+      <a class="nav-link " href="user-profile"><i class="fas fa-gauge me-2"></i> Dashboard</a>
+      <a class="nav-link" href="edit-profile"><i class="fas fa-user-edit me-2"></i> Edit Profile</a>
+      <a class="nav-link" href="#"><i class="fas fa-box me-2"></i> My Orders</a>
+      <a class="nav-link " href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
+      <a class="nav-link active" href="#"><i class="fas fa-wallet me-2"></i> My Wallet</a>
+    </nav>
+  </div>
 </div>
 
-          <h6 class="mt-2 mb-0">weclome, <%=user.firstname%></h6>
-          <small class="text-muted"><%=user.email%></small>
-        </div>
-        <nav class="nav flex-column">
-          <a class="nav-link " href="user-profile"><i class="fas fa-gauge me-2"></i> Dashboard</a>
-          <a class="nav-link " href="edit-profile"><i class="fas fa-user-edit me-2"></i> Edit Profile</a>
-          <a class="nav-link" href="view-orders"><i class="fas fa-box me-2"></i> My Orders</a>
-          <a class="nav-link " href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
-          <a class="nav-link  active" href="/user-wallet"><i class="fas fa-wallet me-2"></i> My Wallet</a>
-        </nav>
-      </div>
-    </div>
   
     <div class="wallet-container">
 
