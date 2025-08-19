@@ -42,11 +42,6 @@ const loadHomepage = async (req, res) => {
         req.session.user = null;
         return res.redirect('/login?error=blocked')
       }
-   
-     
-
-
-
       const cart = await Cart.findOne({ user: user._id  });
 
       if(cart){

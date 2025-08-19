@@ -3,8 +3,6 @@ const Order=require('../../models/orderSchema');
 const Product=require('../../models/productsSchema')
 const mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
-const { foreign_key } = require('i/lib/methods');
-
 
 const loadLogin= (req,res)=>{
   if(req.session.admin){
@@ -105,69 +103,6 @@ const loadDashboard = async (req, res) => {
       }
       return sum;
     }, 0);
-
-//     const statusValue='Cancelled';
-//     const StatusResult=await Order.aggregate([
-//       {$unwind:'$orderedItems'},
-//       {$match:{'orderedItems.status':statusValue}},
-//       {
-//         $group:{
-//           _id:null,
-//           totalSum:{$sum:1}
-
-//         }},
-//         {$sort:{totalSum:-1}},
-//         {$limit:1}
-//     ]);
-// const total=StatusResult.length>0 ? StatusResult[0].totalSum : 0;
-// console.log(`the total sum is ${total}`);
-
-//  const findCatgeoryValue='Feature Phones';
-//  const categoryTotal = await Order.aggregate([
-//   {$unwind:'$orderedItems'},
-//   {
-//     $lookup:{
-//       from:'products',
-//       localField:'orderedItems.product',
-//       foreignField:'_id',
-//       as:'productDetails'
-//     }
-//   },
-//   {$unwind:'$productDetails'},
-//   {
-//     $lookup:{
-//       from:'categories',
-//       localField:'productDetails.category',
-//       foreignField:'_id',
-//       as:'categoryDetails'
-//     }
-//   },
-//   {$unwind:'$categoryDetails'},
-//   {$match:{
-//     'categoryDetails.name':findCatgeoryValue
-//   }},
-//   {
-// $group:{
-//   _id:'$productDetails.productName',
-//   totalsum:{$sum:1},
-//   totalquantity:{$sum:'$orderedItems.quantity'},
-//   totalSales:{$sum:{$multiply:['$orderedItems.quantity','$orderedItems.price']}}
-// }
-//   },
-//   {$sort:{totalsum:-1}},
-//   {$limit:3},
-//   {
-//     $project:{
-//     _id:0,
-//     productName:'$_id',
-//     totalsum:1,
-//     totalquantity:1,
-//     totalSales:1
-//     }
-//   }
-// ])
-
-// console.log(categoryTotal);
 
     const totalsales = orders.length;
     const productCount = await Product.countDocuments();

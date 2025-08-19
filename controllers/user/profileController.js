@@ -226,10 +226,13 @@ const userProfile=async(req,res)=>{
     } else {
       res.locals.cartCount = 0;
     }
+
     const addressData=await Address.findOne({ userId: new mongoose.Types.ObjectId(userId) });
       const ordersCount = await Order.countDocuments({ user: userId});
+      const wishCount =await Wishlist.findOne({userId}).populate('products.productId');
+      const WishListCount=wishCount?.products.length || 0;
      const addressCount = addressData ? addressData.addresses.length : 0;
-    res.render('user-profile',{user: userData, userAddress:addressData,ordersCount, addressCount, cartCount: res.locals.cartCount})
+    res.render('user-profile',{user: userData, userAddress:addressData,ordersCount,WishListCount, addressCount, cartCount: res.locals.cartCount})
   } catch (err) {
   
     
@@ -1214,7 +1217,6 @@ const loadWishListPage = async (req, res) => {
      const cart = await Cart.findOne({ user: userId });
      const cartCount=cart?.items?.length || 0
     const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
-  console.log(wishlist);
     res.render('wishlist', { cartCount,  wishlistItems: wishlist?.products || [] });
   } catch (error) {
     console.error(error);

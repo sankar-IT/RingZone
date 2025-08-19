@@ -60,7 +60,6 @@ router.post('/addProductOffer/:productId', adminAuth, productController.addProdu
 router.post('/removeProductOffer/:productId', adminAuth, productController.removeProductOffer);
 
 
-
 //sale management
 router.get('/sales-report',adminAuth,salesController.loadSalesPage)
 
