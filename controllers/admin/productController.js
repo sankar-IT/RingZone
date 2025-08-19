@@ -351,6 +351,11 @@ const addProductOffer = async (req, res) => {
 };
 
 
+
+
+
+
+
 const removeProductOffer = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -384,5 +389,6 @@ module.exports = {
   editProduct,
   updateProduct,
   addProductOffer,
-  removeProductOffer
+  removeProductOffer,
+  
 };
