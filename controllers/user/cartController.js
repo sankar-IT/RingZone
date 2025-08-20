@@ -5,6 +5,7 @@ const Product=require('../../models/productsSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const productsSchema = require('../../models/productsSchema');
 const Coupon = require('../../models/couponSchema');
+const Wallet=require('../../models/walletSchema');
 
 const addToCart = async (req, res) => {
   try {
@@ -89,28 +90,6 @@ const getCartPage=async(req,res)=>{
       const userId=req.session.user._id;
 
       const cartProducts= await Cart.findOne({user:userId}).populate('items.product')
-
-        // const result=cartProducts.items.reduce((sum,item)=>{
-        //   return sum + (item.price * item.quantity);
-        // },0)
-        // console.log(result);
-
-    // const cartQuantity=await Cart.findOne({user:userId})
-    // const result=cartQuantity?.items.reduce((sum,item)=>sum + item.quantity,0)
-    // console.log(result);
-
-    // const wishListCount= await Wishlist.findOne({userId}).populate('products.productId')
-    // const wishResult=wishListCount?.products.length || 0;
-    // console.log(wishResult);
-        
-
-      //  const cartSum=await Cart.findOne({user:userId}).populate('items.product')
-      //   const cartResult=cartSum.items.reduce((sum,item)=>{
-      //     return sum + (item.price * item.quantity)
-      //   },0)
-      //   console.log(cartResult);
-
-      
 
         res.locals.cartCount = cartProducts?.items?.length || 0;
         res.render('user-cart',{cartProducts , user:req.session.user, cartCount: res.locals.cartCount})
@@ -518,11 +497,11 @@ const removeCoupon = async (req, res) => {
 
 const renderPaymentPage = async (req, res) => {
   try {
-
     const userId = req.session.user?._id;
     const cart = await Cart.findOne({ user: userId }).populate('items.product');
-    const cartCount=cart?.items?.length || 0
+    const cartCount = cart?.items?.length || 0;
     if (!cart) return res.redirect('/user-cart');
+
     let subtotal = 0;
     let discount = req.session.appliedCoupon?.discount || 0;
     let shipment = 0;
@@ -547,26 +526,45 @@ const renderPaymentPage = async (req, res) => {
     const grandTotal = subtotal - discount + shipment;
 
     const addressData = await Address.findOne({ userId });
-     const razorpayKey = process.env.RAZORPAY_KEY_ID;
+
+   const wallet = await Wallet.findOne({ user: userId });
+const walletBalance = wallet?.balance || 0;
+
+
+    const razorpayKey = process.env.RAZORPAY_KEY_ID;
 
     return res.render('cart-payment', {
       addressData,
       cart,
-      orderSummary: {
-        subtotal,
-        discount,
-        shipment,
-        grandTotal
-      },
+      orderSummary: { subtotal, discount, shipment, grandTotal },
       appliedCoupon: req.session.appliedCoupon || null,
-        razorpayKey,   
-        cartCount 
+      razorpayKey,
+      cartCount,
+      walletBalance  
     });
 
   } catch (error) {
     res.redirect('/checkout');
   }
 };
+
+const checkWalletBalance = async (req,res) => {
+  try{
+
+    const wallet = await Wallet.findOne({ user: req.session.user._id });
+    let balance = wallet.balance || 0;
+    if(!wallet){
+      return res.status(200).json({balance: balance})
+    }else{
+      return res.status(200).json({balance: balance})
+    }
+  
+  }catch(err){
+    res.status(500).json({balance: 0})
+  }
+
+}
+
 
 const proceedToPayment = async (req, res) => {
   try {
@@ -625,6 +623,6 @@ module.exports = {
   removeCoupon,
   renderPaymentPage,
   proceedToPayment,
-
+  checkWalletBalance
 };
 

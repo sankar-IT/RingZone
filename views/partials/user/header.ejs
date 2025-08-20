@@ -192,15 +192,34 @@
     height: 150px;
   }
 }
+.navbar_menu a {
+  font-size: 20px;           
+  font-weight: 700;        
+  letter-spacing: 1px;       
+  color: #222;             
+  text-decoration: none;
+  padding: 10px 18px;       
+  position: relative;
+  transition: color 0.3s ease;
+}
 
+.navbar_menu a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 0;
+  height: 3px;
+  background-color: #ff7f50; 
+  transition: width 0.3s ease;
+}
 
-.navbar_menu {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  list-style: none;
-  padding-left: 0;
-  margin-bottom: 0;
+.navbar_menu a:hover {
+  color: #ff7f50;
+}
+
+.navbar_menu a:hover::after {
+  width: 100%; 
 }
 
 .sign-in-link {
@@ -328,8 +347,7 @@
   <ul class="navbar_menu">
     <li><a href="/">Home</a></li>
     <li><a href="/shopping-pageList">Shop</a></li>
-    <li><a href="#">About Us</a></li>
-    <li><a href="#">Contact</a></li>
+    <li><a href="/page-about">About Us</a></li>
   </ul>
 </nav>
 

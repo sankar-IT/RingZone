@@ -668,47 +668,116 @@
       XLSX.writeFile(wb, 'sales-report.xlsx');
     });
 
-    document.getElementById('downloadPDF').addEventListener('click', () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text('Sales Report', 14, 15);
-      const reportType = document.getElementById('reportType').value;
-      if (reportType === 'custom') {
-        const fromDate = document.getElementById('fromDate').value;
-        const toDate = document.getElementById('toDate').value;
-        if (fromDate && toDate) {
-          doc.setFontSize(10);
-          doc.text(`Date Range: ${fromDate} to ${toDate}`, 14, 22);
-        }
+document.getElementById('downloadPDF').addEventListener('click', () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  const reportType = document.getElementById('reportType').value;
+  let reportHeading = 'Sales Report: ';
+  
+  switch(reportType) {
+    case 'daily':
+      reportHeading += 'Daily - ' + new Date().toLocaleDateString('en-IN');
+      break;
+    case 'weekly':
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      reportHeading += 'Weekly - ' + startOfWeek.toLocaleDateString('en-IN') + ' to ' + endOfWeek.toLocaleDateString('en-IN');
+      break;
+    case 'monthly':
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+                          "July", "August", "September", "October", "November", "December"];
+      reportHeading += 'Monthly - ' + monthNames[new Date().getMonth()] + ' ' + new Date().getFullYear();
+      break;
+    case 'yearly':
+      reportHeading += 'Yearly - ' + new Date().getFullYear();
+      break;
+    case 'custom':
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      if (fromDate && toDate) {
+        reportHeading += 'Custom - ' + new Date(fromDate).toLocaleDateString('en-IN') + ' to ' + new Date(toDate).toLocaleDateString('en-IN');
+      } else {
+        reportHeading += 'Custom Date Range';
       }
-      doc.autoTable({
-        head: [['No', 'Order ID', 'Date', 'Customer', 'Amount', 'Coupon', 'Status']],
-        body: currentOrders.map((order, index) => [
-          index + 1,
-          order.orderId,
-          order.invoiceDate ? new Date(order.invoiceDate).toLocaleDateString('en-IN') : 'N/A',
-          order.address?.name || '',
-          formatINR(order.finalAmount),
-          formatINR(order.coupon ? order.coupon.discountAmount : 0),
-          order.status
-        ]),
-        startY: 30,
-        styles: {
-          fontSize: 8,
-          cellPadding: 2,
-          overflow: 'linebreak'
-        },
-        headStyles: {
-          fillColor: [44, 62, 80],
-          textColor: 255,
-          fontSize: 9
-        }
-      });
-      
-      doc.save('sales-report.pdf');
-    });
+      break;
+    default:
+      reportHeading += 'All Data';
+  }
+  
 
+  doc.setFontSize(18);
+  doc.text(reportHeading, 14, 15);
+  
+
+  const totalDelivered = currentOrders.filter(order => order.status === 'Delivered').length;
+  const totalCancelled = currentOrders.filter(order => order.status === 'Cancelled').length;
+  const totalReturned = currentOrders.filter(order => order.status === 'Returned').length;
+  
+
+  const boxWidth = 50;
+  const boxHeight = 20;
+  const startX = 14;
+  const startY = 30;
+  const gap = 10;
+  
+
+  doc.setFillColor(21, 87, 36);
+  doc.rect(startX, startY, boxWidth, boxHeight, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text('Delivered', startX + 5, startY + 8);
+  doc.setFontSize(12);
+  doc.text(totalDelivered.toString(), startX + 5, startY + 15);
+  
+  
+  doc.setFillColor(114, 28, 36); 
+  doc.rect(startX + boxWidth + gap, startY, boxWidth, boxHeight, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text('Cancelled', startX + boxWidth + gap + 5, startY + 8);
+  doc.setFontSize(12);
+  doc.text(totalCancelled.toString(), startX + boxWidth + gap + 5, startY + 15);
+  
+
+  doc.setFillColor(47, 79, 79); 
+  doc.rect(startX + (boxWidth + gap) * 2, startY, boxWidth, boxHeight, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text('Returned', startX + (boxWidth + gap) * 2 + 5, startY + 8);
+  doc.setFontSize(12);
+  doc.text(totalReturned.toString(), startX + (boxWidth + gap) * 2 + 5, startY + 15);
+  
+
+  doc.autoTable({
+    head: [['No', 'Order ID', 'Date', 'Customer', 'Amount', 'Coupon', 'Status']],
+    body: currentOrders.map((order, index) => [
+      index + 1,
+      order.orderId,
+      order.invoiceDate ? new Date(order.invoiceDate).toLocaleDateString('en-IN') : 'N/A',
+      order.address?.name || '',
+      formatINR(order.finalAmount),
+      formatINR(order.coupon ? order.coupon.discountAmount : 0),
+      order.status
+    ]),
+    startY: startY + boxHeight + 10, 
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      overflow: 'linebreak'
+    },
+    headStyles: {
+      fillColor: [44, 62, 80],
+      textColor: 255,
+      fontSize: 9
+    }
+  });
+  
+  doc.save('sales-report.pdf');
+});
     window.addEventListener('DOMContentLoaded', () => {
       disableFutureDates();
       currentOrders = ordersData || [];

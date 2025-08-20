@@ -322,6 +322,11 @@
   color: #1565c0;
 }
 
+.payment-badge.wallet {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
 </style>
 
 <body>
@@ -335,6 +340,10 @@
         <% if (order.paymentMethod === 'cod') { %>
           <span class="payment-badge cod">
             <i class="fas fa-money-bill-wave"></i> COD
+          </span>
+        <% } else if (order.paymentMethod === 'wallet') { %>
+          <span class="payment-badge wallet">
+            <i class="fas fa-wallet"></i> Wallet Payment
           </span>
         <% } else { %>
           <span class="payment-badge online">

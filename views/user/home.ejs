@@ -14,115 +14,224 @@
     </div>
   </div>
 </div>
+
+<!-- Enhanced New Arrivals Section -->
 <section class="new_arrivals py-5">
   <div class="container">
-    <div class="row">
-      <div class="col text-center">
-        <h2 class="fw-bold mb-4">New Arrivals</h2>
+    <!-- Styled Section Header -->
+    <div class="row mb-5">
+      <div class="col text-center position-relative">
+        <div class="section-heading-wrapper">
+          <h2 class="section-title">New Arrivals</h2>
+          <div class="title-underline">
+            <div class="title-underline-core"></div>
+          </div>
+          <p class="section-subtitle text-muted">Discover our latest collection of smartphones</p>
+        </div>
       </div>
     </div>
-    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-      <% for(let i = 0; i < products.length; i++) { %>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+      <% for(let i = 0; i < Math.min(products.length, 8); i++) { 
+        const product = products[i];
+        const variant = product.variants[0];
+        const hasDiscount = variant.discountPrice && variant.discountPrice < variant.regularPrice;
+        const discountPercentage = hasDiscount ? Math.round(((variant.regularPrice - variant.discountPrice) / variant.regularPrice) * 100) : 0;
+      %>
         <div class="col">
-          <div class="product-card p-3 border rounded text-center h-100 position-relative">
-            <a href="/products/<%= products[i]._id %>">
-              <img src="/<%= products[i].images[0] %>" alt="<%= products[i].productName %>" class="img-fluid mb-2" style="height: 200px; object-fit: cover;">
-              <h6><%= products[i].productName?.length > 10 ? products[i].productName.slice(0,15) + '...' : products[i].productName %></h6>
-              <p class="text-muted small mb-1"><%= products[i].brand.name %></p>
-              <div class="d-flex justify-content-center align-items-center gap-2">
-                <% if (products[i].variants[0].discountPrice && products[i].variants[0].discountPrice < products[i].variants[0].regularPrice) { %>
-  <span class="text-danger fw-bold">
-    ₹<%= products[i].variants[0].discountPrice.toLocaleString('en-IN') %>
-  </span>
-  <span class="text-muted text-decoration-line-through">
-    ₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %>
-  </span>
-<% } else { %>
-  <span class="text-danger fw-bold">
-    ₹<%= products[i].variants[0].regularPrice.toLocaleString('en-IN') %>
-  </span>
-<% } %>
-
+          <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
+            <!-- Offer Badge -->
+            <% if (hasDiscount && discountPercentage > 0) { %>
+              <span class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 small fw-bold z-2">
+                <%= discountPercentage %>% OFF
+              </span>
+            <% } %>
+            
+            <!-- New Badge -->
+            <span class="position-absolute top-0 end-0 bg-success text-white px-2 py-1 small fw-bold z-2">
+              NEW
+            </span>
+            
+            <!-- Product Image -->
+            <a href="/products/<%= product._id %>" class="text-decoration-none">
+              <div class="card-img-top position-relative overflow-hidden bg-light" style="height: 220px;">
+                <img src="/<%= product.images[0] %>" alt="<%= product.productName %>" 
+                     class="img-fluid p-3" style="height: 100%; width: 100%; object-fit: contain; transition: transform 0.3s ease;">
               </div>
             </a>
-        
+            
+            <!-- Card Body -->
+            <div class="card-body pb-2">
+              <!-- Brand Name -->
+              <p class="card-text mb-1">
+                <small class="text-muted text-uppercase"><%= product.brand.name %></small>
+              </p>
+              
+              <!-- Product Name -->
+              <h6 class="card-title text-dark mb-2" style="font-size: 0.95rem; min-height: 2.5rem;">
+                <%= product.productName.length > 35 ? product.productName.slice(0, 35) + '...' : product.productName %>
+              </h6>
+              
+              <!-- Pricing -->
+              <div class="d-flex align-items-center mb-2">
+                <% if (hasDiscount) { %>
+                  <span class="text-danger fw-bold fs-5 me-2">
+                    ₹<%= variant.discountPrice.toLocaleString('en-IN') %>
+                  </span>
+                  <span class="text-muted text-decoration-line-through small">
+                    ₹<%= variant.regularPrice.toLocaleString('en-IN') %>
+                  </span>
+                <% } else { %>
+                  <span class="text-danger fw-bold fs-5">
+                    ₹<%= variant.regularPrice.toLocaleString('en-IN') %>
+                  </span>
+                <% } %>
+              </div>
+            </div>
+            
+            <!-- View Details Button -->
+            <div class="card-footer bg-transparent border-0 pt-0">
+              <div class="d-grid gap-2">
+                <a href="/products/<%= product._id %>" class="btn btn-outline-primary btn-sm">
+                  View Details
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       <% } %>
     </div>
   </div>
 </section>
-    </div>
-  </div>
-</div>
 
+<style>
+/* New Arrivals Section Styling */
+.section-heading-wrapper {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-title:after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+}
+
+.title-underline {
+  position: relative;
+  height: 5px;
+  width: 100px;
+  margin: 0 auto 15px;
+}
+
+.title-underline-core {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  border-radius: 5px;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.1) !important;
+}
+
+.product-card:hover .card-img-top img {
+  transform: scale(1.05);
+}
+
+.card-img-top {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.card-footer {
+  border-bottom-left-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1rem;
+  }
+}
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
- 
-  document.addEventListener("DOMContentLoaded", () => {
-    const updateAccountMenu = (elementId) => {
-      const username = localStorage.getItem("username");
-      const accountMenu = document.getElementById(elementId);
+document.addEventListener("DOMContentLoaded", () => {
+  // Account menu functionality (unchanged)
+  const updateAccountMenu = (elementId) => {
+    const username = localStorage.getItem("username");
+    const accountMenu = document.getElementById(elementId);
 
-      if (username) {
-        const firstLetter = username.charAt(0).toUpperCase();
-        accountMenu.innerHTML = `
-          <a href="#">
-            ${firstLetter}
-            <i class="fa fa-angle-down"></i>
-          </a>
-          <ul class="${elementId === 'accountMenu' ? 'account_selection' : 'menu_selection'}">
-            <li><a href="/profile"><i class="fa fa-user"></i> Profile</a></li>
-            <li><a href="#" onclick="logout()"><i class="fa fa-sign-out"></i> Logout</a></li>
-          </ul>
-        `;
-      } else {
-        accountMenu.innerHTML = `
-          <a href="#">
-            My Account
-            <i class="fa fa-angle-down"></i>
-          </a>
-          <ul class="${elementId === 'accountMenu' ? 'account_selection' : 'menu_selection'}">
-            <li><a href="/login"><i class="fa fa-sign-in"></i> Sign In</a></li>
-            <li><a href="/register"><i class="fa fa-user-plus"></i> Register</a></li>
-          </ul>
-        `;
-      }
-    };
+    if (username) {
+      const firstLetter = username.charAt(0).toUpperCase();
+      accountMenu.innerHTML = `
+        <a href="#">
+          ${firstLetter}
+          <i class="fa fa-angle-down"></i>
+        </a>
+        <ul class="${elementId === 'accountMenu' ? 'account_selection' : 'menu_selection'}">
+          <li><a href="/profile"><i class="fa fa-user"></i> Profile</a></li>
+          <li><a href="#" onclick="logout()"><i class="fa fa-sign-out"></i> Logout</a></li>
+        </ul>
+      `;
+    } else {
+      accountMenu.innerHTML = `
+        <a href="#">
+          My Account
+          <i class="fa fa-angle-down"></i>
+        </a>
+        <ul class="${elementId === 'accountMenu' ? 'account_selection' : 'menu_selection'}">
+          <li><a href="/login"><i class="fa fa-sign-in"></i> Sign In</a></li>
+          <li><a href="/register"><i class="fa fa-user-plus"></i> Register</a></li>
+        </ul>
+      `;
+    }
+  };
 
-    updateAccountMenu('accountMenu');
-    updateAccountMenu('mobileAccountMenu');
+  updateAccountMenu('accountMenu');
+  updateAccountMenu('mobileAccountMenu');
+});
 
-    // Countdown Timer
-    const countDownDate = new Date();
-    countDownDate.setDate(countDownDate.getDate() + 3);
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = countDownDate - now;
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      document.getElementById("day").innerText = days.toString().padStart(2, '0');
-      document.getElementById("hour").innerText = hours.toString().padStart(2, '0');
-      document.getElementById("minute").innerText = minutes.toString().padStart(2, '0');
-      document.getElementById("second").innerText = seconds.toString().padStart(2, '0');
-
-      if (distance < 0) {
-        clearInterval(timer);
-        document.querySelector(".deal_ofthe_week_content").innerHTML = '<h2>Deal Expired!</h2>';
-      }
-    }, 1000);
-  });
-
-  function logout() {
-    localStorage.removeItem("username");
-    window.location.href = "/";
-  }
+function logout() {
+  localStorage.removeItem("username");
+  window.location.href = "/";
+}
 </script>
 
 <%-include('../../views/partials/user/footer')%>

@@ -136,6 +136,14 @@
                         </label>
                     </div>
 
+ <div class="form-check mb-3">
+  <input class="form-check-input" type="radio" name="payment" id="wallet">
+  <label class="form-check-label" for="wallet">
+      <i class="fas fa-wallet"></i> Wallet 
+      <span class="wallet-balance" id="walletBalanceDisplay">Balance: ₹<%= walletBalance %></span>
+  </label>
+</div>
+
                    
                 </div>
             </div>
@@ -230,7 +238,7 @@
             try {
                 const response = await fetch('/wallet/balance');
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok) {
                     walletBalance = data.balance;
                     document.getElementById('walletBalanceDisplay').textContent = `(Balance: ₹${walletBalance.toFixed(2)})`;
                 }
@@ -351,8 +359,10 @@
             }
         }
 
+
         async function handleWalletPayment(grandTotal) {
             try {
+                
                 if (walletBalance < grandTotal) {
                     hideLoading();
                     const result = await Swal.fire({
@@ -418,13 +428,13 @@
             }
         }
 
-        function beforeUnloadHandler(e) {
-            if (isProcessing) {
-                e.preventDefault();
-                e.returnValue = 'Payment is being processed. Are you sure you want to leave?';
-            }
-        }
-        window.addEventListener('beforeunload', beforeUnloadHandler);
+        // function beforeUnloadHandler(e) {
+        //     if (isProcessing) {
+        //         e.preventDefault();
+        //         e.returnValue = 'Payment is being processed. Are you sure you want to leave?';
+        //     }
+        // }
+        // window.addEventListener('beforeunload', beforeUnloadHandler);
     </script>
 </body>
 <%- include('../../views/partials/user/footer') %>

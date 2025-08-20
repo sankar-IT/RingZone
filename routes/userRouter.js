@@ -22,10 +22,10 @@ router.post('/verify-otp', userController.verifyOtp);
 router.post('/resend-otp',userController.resendOtp);
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),userController.googleCallBack)
-
 router.get('/login',userController.loadLogin);
 router.post('/login',userController.login)
 router.get('/logout',userController.logout)
+router.get('/page-about',userController.loadAboutpage)
 router.get('/shopping-pageList',userAuth,userController.loadShoppingPage);
 router.get('/products/:id', userAuth,userController.loadProductDetails);
 router.get('/check-product-status/:id',userAuth, userController.checkProductStatus);
@@ -86,11 +86,14 @@ router.post('/load-payment',userAuth,cartController.proceedToPayment)
 router.get('/load-payment',userAuth,cartController.renderPaymentPage)
 router.post('/apply-coupon', userAuth,cartController.applyCoupon);
 router.post('/remove-coupon',userAuth,cartController.removeCoupon);
+router.get('/wallet/balance', userAuth, cartController.checkWalletBalance);
 
 
 
 //order management
 router.post('/place-order',userAuth,orderController.confirmOrder)
+router.post('/place-order/wallet',userAuth,orderController.placeOrderWithWallet);
+
 router.get('/order-placed',userAuth,orderController.OrderConfirmation)
 router.post('/create-razorpay-order',userAuth, orderController.createRazorpayOrder);
 router.post('/verify-razorpay-payment',userAuth, orderController.verifyRazorPayOrder);
