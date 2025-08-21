@@ -1,6 +1,4 @@
 const Brand=require('../../models/brandSchema')
-const Product =require('../../models/productsSchema')
-
 
 const getBrandPage = async (req, res) => {
   try {

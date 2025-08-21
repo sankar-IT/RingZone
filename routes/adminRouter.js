@@ -12,7 +12,6 @@ const {userAuth,adminAuth}=require('../middleware/auth');
 const multer=require('multer');
 const storage=require('../helpers/multer');
 const upload = require('../helpers/multer');
-const Order = require('../models/orderSchema');
 
 
 //login Mangement

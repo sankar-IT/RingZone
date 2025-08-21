@@ -1,6 +1,7 @@
 <%- include('../../views/partials/user/header') %>
 
 <style>
+  /* All your existing CSS styles remain the same. */
   .product-detail-page .container {
     max-width: 1200px;
     margin-top: 140px;
@@ -16,7 +17,7 @@
     margin-left: auto;
     margin-right: auto;
   }
-  
+
   .related-products-section h2 {
     font-size: 1.8rem;
     margin-bottom: 25px;
@@ -25,7 +26,7 @@
     position: relative;
     padding-bottom: 10px;
   }
-  
+
   .related-products-section h2:after {
     content: '';
     position: absolute;
@@ -35,13 +36,13 @@
     height: 3px;
     background-color: #1e918b;
   }
-  
+
   .related-products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 25px;
   }
-  
+
   .related-product-card {
     border: 1px solid #eee;
     border-radius: 10px;
@@ -50,12 +51,12 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
   }
-  
+
   .related-product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   }
-  
+
   .related-product-image-container {
     position: relative;
     width: 100%;
@@ -63,18 +64,18 @@
     overflow: hidden;
     background: #f9f9f9;
   }
-  
+
   .related-product-image {
     width: 100%;
     height: 100%;
     object-fit: contain;
     transition: transform 0.3s ease;
   }
-  
+
   .related-product-card:hover .related-product-image {
     transform: scale(1.05);
   }
-  
+
   .offer-badge {
     position: absolute;
     top: 10px;
@@ -87,11 +88,11 @@
     font-weight: 600;
     z-index: 2;
   }
-  
+
   .related-product-info {
     padding: 15px;
   }
-  
+
   .related-product-name {
     font-size: 0.95rem;
     margin: 0 0 10px 0;
@@ -103,7 +104,7 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
-  
+
   .price-container {
     display: flex;
     align-items: center;
@@ -143,6 +144,9 @@
     display: flex;
     gap: 40px;
     flex-wrap: wrap;
+  }
+  .old-price{
+    margin-bottom: 20px;
   }
 
   .stock-status {
@@ -269,13 +273,13 @@
     font-size: 0.9em;
   }
 
-  .color-options input[type="radio"]:checked + .color-button {
+  .color-options input[type="radio"]:checked+.color-button {
     background: #1e918b;
     color: white;
     border-color: #1e918b;
   }
 
-  .color-options input[type="radio"]:disabled + .color-button {
+  .color-options input[type="radio"]:disabled+.color-button {
     opacity: 0.5;
     cursor: not-allowed;
     text-decoration: line-through;
@@ -398,7 +402,7 @@
     box-shadow: 0 4px 8px rgba(30,145,139,0.3);
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 200%; 
+    background-size: 200%;
     z-index: 10;
     transition: opacity 0.2s ease-in-out;
   }
@@ -408,48 +412,48 @@
       flex-direction: column;
       gap: 30px;
     }
-    
+
     .gallery {
       flex-direction: column-reverse;
     }
-    
+
     .thumbnails {
       flex-direction: row;
       order: 1;
       margin-top: 15px;
     }
-    
+
     .action-buttons {
       flex-direction: column;
     }
-    
+
     .buy-now,
     .add-to-basket {
       width: 100%;
     }
-    
+
     .wishlist-icon {
       right: 20px;
       top: 10px;
     }
-    
+
     .related-products-grid {
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 15px;
     }
-    
+
     .related-product-image-container {
       height: 150px;
     }
-    
+
     .related-product-info {
       padding: 12px;
     }
-    
+
     .related-product-name {
       font-size: 0.9rem;
     }
-    
+
     .related-product-price {
       font-size: 1rem;
     }
@@ -457,473 +461,515 @@
 </style>
 
 <body>
-<main class="product-detail-page">
-  <div style="height: 100px; background-color: white;"></div>
-  
-  <div class="container">
-    
-    <% if (product && product._id) { %>
-      <div class="product-main">
-     
-        <div class="wishlist-icon" data-product-id="<%= product._id %>">
-          <i class="fa fa-heart-o"></i>
-        </div>
+  <main class="product-detail-page">
+    <div style="height: 100px; background-color: white;"></div>
 
-        <div class="gallery">
-          <div class="thumbnails" id="thumbnailsContainer">
-            <% if (product.variants[0] && product.variants[0].images.length > 0) { %>
-              <% product.variants[0].images.forEach((img, index) => { %>
-                <img 
-                  src="/<%= img %>" 
-                  onclick="changeImage(this, '/<%= img %>')" 
-                  class="thumbnail <%= index === 0 ? 'active' : '' %>"
-                  alt="<%= product.productName %> - Thumbnail <%= index + 1 %>"
+    <div class="container">
+
+      <% if (product && product._id) { %>
+        <div class="product-main">
+
+          <div class="wishlist-icon" data-product-id="<%= product._id %>">
+            <i class="fa fa-heart-o"></i>
+          </div>
+
+          <div class="gallery">
+            <div class="thumbnails" id="thumbnailsContainer">
+              <% if (product.variants[0] && product.variants[0].images.length > 0) { %>
+                <% product.variants[0].images.forEach((img, index) => { %>
+                  <img
+                    src="/<%= img %>"
+                    onclick="changeImage(this, '/<%= img %>')"
+                    class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                    alt="<%= product.productName %> - Thumbnail <%= index + 1 %>"
+                  >
+                <% }); %>
+              <% } else { %>
+                <img
+                  src="/images/default-product.jpg"
+                  onclick="changeImage(this, '/images/default-product.jpg')"
+                  class="thumbnail active"
+                  alt="Default product image"
                 >
-              <% }); %>
-            <% } else { %>
-              <img 
-                src="/images/default-product.jpg" 
-                onclick="changeImage(this, '/images/default-product.jpg')" 
-                class="thumbnail active"
-                alt="Default product image"
+              <% } %>
+            </div>
+            <div class="main-image-box">
+              <img
+                id="mainImage"
+                src="<%= product.variants[0] && product.variants[0].images[0] ? '/' + product.variants[0].images[0] : '/images/default-product.jpg' %>"
+                alt="<%= product.productName %>"
               >
-            <% } %>
-          </div>
-          <div class="main-image-box">
-            <img 
-              id="mainImage" 
-              src="<%= product.variants[0] && product.variants[0].images[0] ? '/' + product.variants[0].images[0] : '/images/default-product.jpg' %>" 
-              alt="<%= product.productName %>"
-            >
-          </div>
-        </div>
-
-        <div class="details">
-          <h1><%= product.productName %></h1>
-          <p class="short-desc"><%= product.description %></p>
-
-          
-          <% const firstVariant = product.variants[0]; %>
-          <% const hasValidDiscount =
-               typeof firstVariant.discountPrice === 'number' &&
-               firstVariant.discountPrice > 0 &&
-               firstVariant.discountPrice < firstVariant.regularPrice; %>
-
-         <div class="price-row">
-  <p class="price" id="dynamicPrice" data-regular="<%= firstVariant.regularPrice %>" data-discount="<%= hasValidDiscount ? firstVariant.discountPrice : '' %>">
-    ₹₹<%= firstVariant.finalPrice.toLocaleString('en-IN') %>
-  </p>
-  <% if (firstVariant.regularPrice > firstVariant.finalPrice) { %>
-    <p class="text-success" style="font-weight:600;">
-      You save ₹<%= (firstVariant.regularPrice - firstVariant.finalPrice).toLocaleString('en-IN') %>
-    </p>
-  <% } %>
-  <% if (firstVariant.appliedOffer > 0 && firstVariant.finalPrice < firstVariant.regularPrice) { %>
-  <span class="old-price">
-    ₹<%= firstVariant.regularPrice.toLocaleString('en-IN') %>
-  </span>
-<% } %>
-
-</div>
-          <div id="stockMessageContainer">
-            <% if (firstVariant.quantity <= 0) { %>
-              <span class="stock-status out-of-stock">
-                <i class="fa fa-times-circle"></i> Out of stock
-              </span>
-            <% } else { %>
-              <span class="stock-status in-stock">
-                <i class="fa fa-check-circle"></i> In stock
-              </span>
-            <% } %>
+            </div>
           </div>
 
-          
-          <% if (product.variants.some(v => v.color)) { %>
-            <div class="variant-group">
-              <label>Colour</label>
-              <div class="color-options">
-                <% product.variants.forEach((variant, index) => { %>
-                  <label>
-                    <input 
-                      type="radio" 
-                      name="color" 
-                      value="<%= variant.color %>" 
-                      <%= index === 0 ? 'checked' : '' %>
-                      <%= variant.quantity <= 0 ? 'disabled' : '' %>
-                    />
-                    <span class="color-button">
-                      <%= variant.color %>
-                      <%= variant.quantity <= 0 ? ' (Out of Stock)' : '' %>
-                    </span>
-                  </label>
-                <% }); %>
+          <div class="details">
+            <h1><%= product.productName %></h1>
+            <p class="short-desc"><%= product.description %></p>
+
+
+            <% const firstVariant = product.variants[0]; %>
+            <% const hasValidDiscount =
+                typeof firstVariant.discountPrice === 'number' &&
+                firstVariant.discountPrice > 0 &&
+                firstVariant.discountPrice < firstVariant.regularPrice; %>
+
+            <div class="price-row" id="priceRowContainer">
+              <p class="price" id="dynamicPrice">
+                ₹<%= firstVariant.finalPrice.toLocaleString('en-IN') %>
+              </p>
+              <% if (firstVariant.appliedOffer > 0 && firstVariant.finalPrice < firstVariant.regularPrice) { %>
+                <span class="old-price">
+                  ₹<%= firstVariant.regularPrice.toLocaleString('en-IN') %>
+                </span>
+                <p class="text-success" style="font-weight:600;">
+                  You save ₹<%= (firstVariant.regularPrice - firstVariant.finalPrice).toLocaleString('en-IN') %>
+                </p>
+              <% } %>
+            </div>
+            <div id="stockMessageContainer">
+              <% const isAnyVariantInStock = product.variants.some(v => v.quantity > 0); %>
+              <% if (!isAnyVariantInStock) { %>
+                <span class="stock-status out-of-stock">
+                  <i class="fa fa-times-circle"></i> Out of stock
+                </span>
+              <% } else { %>
+                <span class="stock-status in-stock">
+                  <i class="fa fa-check-circle"></i> In stock
+                </span>
+              <% } %>
+            </div>
+
+
+            <% if (product.variants.some(v => v.color)) { %>
+              <div class="variant-group">
+                <label>Colour</label>
+                <div class="color-options">
+                  <% product.variants.forEach((variant, index) => { %>
+                    <label>
+                      <input
+                        type="radio"
+                        name="color"
+                        value="<%= variant.color %>"
+                        <%= index === 0 ? 'checked' : '' %>
+                        <%= product.variants.every(v => v.color !== variant.color || v.quantity <= 0) ? 'disabled' : '' %>
+                      />
+                      <span class="color-button">
+                        <%= variant.color %>
+                      </span>
+                    </label>
+                  <% }); %>
+                </div>
               </div>
+            <% } %>
+
+            <% if (product.variants.some(v => v.storage)) { %>
+              <div class="variant-group">
+                <label>Storage</label>
+                <select id="storageSelect" class="storage-select">
+                  <% product.variants.forEach(variant => { %>
+                    <option
+                      value='<%- JSON.stringify(variant) %>'
+                      <%= variant.quantity <= 0 ? 'disabled' : '' %>
+                      >
+                      <%= variant.storage %>
+                      <%= variant.quantity <= 0 ? ' (Out of Stock)' : '' %>
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+            <% } %>
+
+
+            <div class="action-buttons">
+              <button class="add-to-basket" <%= !isAnyVariantInStock ? 'disabled' : '' %>>
+                Add to cart
+              </button>
             </div>
-          <% } %>
 
-          <% if (product.variants.some(v => v.storage)) { %>
-            <div class="variant-group">
-              <label>Storage</label>
-              <select id="storageSelect" class="storage-select">
-                <% product.variants.forEach(variant => { %>
-                  <option 
-                    value='<%- JSON.stringify(variant) %>'
-                    <%= variant.quantity <= 0 ? 'disabled' : '' %>
-                  >
-                    <%= variant.storage %>
-                    <%= variant.quantity <= 0 ? ' (Out of Stock)' : '' %>
-                  </option>
-                <% }); %>
-              </select>
+            <div class="delivery-info">
+              <p class="delivery-text">
+                <i class="fa fa-truck"></i> Dispatched in 5 - 7 business days
+              </p>
+              <a class="delivery-link">Delivery options &amp; fees</a>
             </div>
-          <% } %>
-
-        
-          <div class="action-buttons">
-            <button class="add-to-basket" <%= firstVariant.quantity <= 0 ? 'disabled' : '' %>>
-              Add to cart
-            </button>
-          </div>
-
-          <div class="delivery-info">
-            <p class="delivery-text">
-              <i class="fa fa-truck"></i> Dispatched in 5 - 7 business days
-            </p>
-            <a class="delivery-link">Delivery options &amp; fees</a>
           </div>
         </div>
-      </div>
-      
-      <% if (similarProducts && similarProducts.length > 0) { %>
-        <section class="related-products-section">
-          <h2>Similar Products</h2>
-          <div class="related-products-grid">
-            <% similarProducts.forEach(prod => { 
-              const variant = prod.variants[0];
-              const hasDiscount = variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice;
-              const discountPercentage = hasDiscount ? 
-                Math.round(((variant.regularPrice - variant.finalPrice) / variant.regularPrice) * 100) : 0;
-            %>
-              <a href="/products/<%= prod._id %>" class="related-product-card">
-                <% if (hasDiscount && discountPercentage > 0) { %>
-                  <div class="offer-badge"><%= discountPercentage %>% OFF</div>
-                <% } %>
-                <div class="related-product-image-container">
-                  <img 
-                    src="/<%= prod.images[0] || 'images/default-product.jpg' %>" 
-                    alt="<%= prod.productName %>" 
-                    class="related-product-image"
-                    onerror="this.src='/images/default-product.jpg'"
-                  >
-                </div>
-                <div class="related-product-info">
-                  <h3 class="related-product-name"><%= prod.productName %></h3>
-                  <div class="price-container">
-                    <span class="related-product-price">
-                      ₹<%= variant.finalPrice.toLocaleString('en-IN') %>
-                    </span>
-                    <% if (hasDiscount) { %>
-                      <div class="original-price-container">
-                        <span class="original-price">
-                          ₹<%= variant.regularPrice.toLocaleString('en-IN') %>
-                        </span>
-                        <% if (discountPercentage > 0) { %>
-                          <span class="discount-percentage"><%= discountPercentage %>% off</span>
-                        <% } %>
-                      </div>
-                    <% } %>
+
+        <% if (similarProducts && similarProducts.length > 0) { %>
+          <section class="related-products-section">
+            <h2>Similar Products</h2>
+            <div class="related-products-grid">
+              <% similarProducts.forEach(prod => {
+                const variant = prod.variants[0];
+                const hasDiscount = variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice;
+                const discountPercentage = hasDiscount ?
+                  Math.round(((variant.regularPrice - variant.finalPrice) / variant.regularPrice) * 100) : 0;
+              %>
+                <a href="/products/<%= prod._id %>" class="related-product-card">
+                  <% if (hasDiscount && discountPercentage > 0) { %>
+                    <div class="offer-badge"><%= discountPercentage %>% OFF</div>
+                  <% } %>
+                  <div class="related-product-image-container">
+                    <img
+                      src="/<%= prod.images[0] || 'images/default-product.jpg' %>"
+                      alt="<%= prod.productName %>"
+                      class="related-product-image"
+                      onerror="this.src='/images/default-product.jpg'"
+                    >
                   </div>
-                </div>
-              </a>
-            <% }); %>
-          </div>
-        </section>
+                  <div class="related-product-info">
+                    <h3 class="related-product-name"><%= prod.productName %></h3>
+                    <div class="price-container">
+                      <span class="related-product-price">
+                        ₹<%= variant.finalPrice.toLocaleString('en-IN') %>
+                      </span>
+                      <% if (hasDiscount) { %>
+                        <div class="original-price-container">
+                          <span class="original-price">
+                            ₹<%= variant.regularPrice.toLocaleString('en-IN') %>
+                          </span>
+                          <% if (discountPercentage > 0) { %>
+                            <span class="discount-percentage"><%= discountPercentage %>% off</span>
+                          <% } %>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </a>
+              <% }); %>
+            </div>
+          </section>
+        <% } %>
+      <% } else { %>
+        <div class="product-not-found">
+          <h2>Product not found</h2>
+          <p>We couldn't find the product you're looking for.</p>
+          <a href="/products" class="btn">Browse Products</a>
+        </div>
       <% } %>
-    <% } else { %>
-      <div class="product-not-found">
-        <h2>Product not found</h2>
-        <p>We couldn't find the product you're looking for.</p>
-        <a href="/products" class="btn">Browse Products</a>
-      </div>
-    <% } %>
-  </div>
-</main>
+    </div>
+  </main>
 
-<script>
-const variants = <%- JSON.stringify(product.variants) %>;
-let currentMagnifier = null;
+  <script>
+    const variants = <%- JSON.stringify(product.variants) %>;
+    let currentMagnifier = null;
 
-function waitForImageLoad(img) {
-  return new Promise(resolve => {
-    if (img.complete) resolve();
-    else img.onload = resolve;
-  });
-}
-
-async function updateGallery(images) {
-  const thumbnailsContainer = document.getElementById('thumbnailsContainer');
-  const mainImage = document.getElementById('mainImage');
-  thumbnailsContainer.innerHTML = '';
-  images.forEach((img, idx) => {
-    const thumb = document.createElement('img');
-    thumb.src = '/' + img;
-    thumb.className = 'thumbnail' + (idx === 0 ? ' active' : '');
-    thumb.onclick = function() { changeImage(this, '/' + img); };
-    thumb.alt = `Product Thumbnail ${idx+1}`;
-    thumbnailsContainer.appendChild(thumb);
-  });
-  mainImage.src = '/' + images[0];
-  await waitForImageLoad(mainImage);
-
-  if (currentMagnifier) currentMagnifier.destroy();
-  currentMagnifier = new Magnifier(mainImage, 2);
-}
-
-function changeImage(el, src) {
-  const mainImage = document.getElementById('mainImage');
-  mainImage.src = src;
-  waitForImageLoad(mainImage).then(() => {
-    if (currentMagnifier) currentMagnifier.destroy();
-    currentMagnifier = new Magnifier(mainImage, 2);
-    document.querySelectorAll('.thumbnail').forEach(img => img.classList.remove('active'));
-    el.classList.add('active');
-  });
-}
-
-class Magnifier {
-  constructor(img, zoom) {
-    this.img = img;
-    this.zoom = zoom;
-    this.container = img.parentElement;
-    this.glass = null;
-    this.moveHandler = this.moveMagnifier.bind(this);
-    this.leaveHandler = this.hideMagnifier.bind(this);
-    this.init();
-  }
-  init() {
-    const existingGlass = this.container.querySelector('.magnifier-glass');
-    if (existingGlass) existingGlass.remove();
-
-    this.glass = document.createElement('DIV');
-    this.glass.setAttribute('class', 'magnifier-glass');
-    this.glass.style.left = 0;
-    this.glass.style.top = 0;
-    this.glass.style.opacity = 0;
-    this.glass.style.backgroundImage = `url('${this.img.src}')`;
-    this.glass.style.backgroundSize = `${this.img.width * this.zoom}px ${this.img.height * this.zoom}px`;
-    this.container.appendChild(this.glass);
-  
-    this.container.addEventListener('mousemove', this.moveHandler);
-    this.container.addEventListener('mouseleave', this.leaveHandler);
-
-    this.container.addEventListener('touchmove', this.moveHandler);
-    this.container.addEventListener('touchend', this.leaveHandler);
-  }
-  moveMagnifier(e) {
-    e.preventDefault();
-    let clientX, clientY;
-    if (e.touches) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
+    function waitForImageLoad(img) {
+      return new Promise(resolve => {
+        if (img.complete) resolve();
+        else img.onload = resolve;
+      });
     }
-    const bounding = this.img.getBoundingClientRect();
-    let x = clientX - bounding.left;
-    let y = clientY - bounding.top;
-    x -= window.pageXOffset;
-    y -= window.pageYOffset;
 
-    const glassW = this.glass.offsetWidth / 2;
-    const glassH = this.glass.offsetHeight / 2;
-    if (x > this.img.width - (glassW/this.zoom)) x = this.img.width - (glassW / this.zoom);
-    if (x < glassW / this.zoom) x = glassW / this.zoom;
-    if (y > this.img.height - (glassH/this.zoom)) y = this.img.height - (glassH/this.zoom);
-    if (y < glassH/this.zoom) y = glassH/this.zoom;
-    this.glass.style.left = (x - glassW) + 'px';
-    this.glass.style.top  = (y - glassH) + 'px';
-    this.glass.style.opacity = 1;
-    this.glass.style.backgroundPosition = `-${(x*this.zoom - glassW)}px -${(y*this.zoom - glassH)}px`;
-  }
-  hideMagnifier() {
-    this.glass.style.opacity = 0;
-  }
-  destroy() {
-    this.container.removeEventListener('mousemove', this.moveHandler);
-    this.container.removeEventListener('mouseleave', this.leaveHandler);
-    this.container.removeEventListener('touchmove', this.moveHandler);
-    this.container.removeEventListener('touchend', this.leaveHandler);
-    if (this.glass) this.glass.remove();
-  }
-}
+    async function updateGallery(images) {
+      const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+      const mainImage = document.getElementById('mainImage');
+      thumbnailsContainer.innerHTML = '';
+      images.forEach((img, idx) => {
+        const thumb = document.createElement('img');
+        thumb.src = '/' + img;
+        thumb.className = 'thumbnail' + (idx === 0 ? ' active' : '');
+        thumb.onclick = function() { changeImage(this, '/' + img); };
+        thumb.alt = `Product Thumbnail ${idx+1}`;
+        thumbnailsContainer.appendChild(thumb);
+      });
+      mainImage.src = '/' + images[0];
+      await waitForImageLoad(mainImage);
 
-function updateVariantDetails(variant) {
-  const priceDisplay = document.getElementById('dynamicPrice');
-  const oldPriceElement = document.querySelector('.old-price');
-  priceDisplay.textContent = '₹' + variant.finalPrice.toLocaleString('en-IN');
-  if (oldPriceElement) oldPriceElement.remove();
-  if (variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice) {
-    const oldPrice = document.createElement('span');
-    oldPrice.className = 'old-price';
-    oldPrice.textContent = '₹' + variant.regularPrice.toLocaleString('en-IN');
-    priceDisplay.parentNode.appendChild(oldPrice);
-  }
-  
-  updateGallery(variant.images);
-  checkStockStatus(variant._id, variant.quantity);
-}
-
-function getSelectedVariant() {
-  const storageSelect = document.getElementById('storageSelect');
-  if (storageSelect) {
-    try {
-      return JSON.parse(storageSelect.value);
-    } catch {
-      return variants[0];
+      if (currentMagnifier) currentMagnifier.destroy();
+      currentMagnifier = new Magnifier(mainImage, 2);
     }
-  }
-  return variants[0];
-}
 
-function checkStockStatus(variantId, quantity) {
-  const buyNowBtn = document.querySelector('.buy-now');
-  const addToBasketBtn = document.querySelector('.add-to-basket');
-  const stockMessageContainer = document.getElementById('stockMessageContainer');
-  const isOutOfStock = quantity <= 0;
+    function changeImage(el, src) {
+      const mainImage = document.getElementById('mainImage');
+      mainImage.src = src;
+      waitForImageLoad(mainImage).then(() => {
+        if (currentMagnifier) currentMagnifier.destroy();
+        currentMagnifier = new Magnifier(mainImage, 2);
+        document.querySelectorAll('.thumbnail').forEach(img => img.classList.remove('active'));
+        el.classList.add('active');
+      });
+    }
 
-  buyNowBtn.disabled = isOutOfStock;
-  addToBasketBtn.disabled = isOutOfStock;
-  
-  stockMessageContainer.innerHTML = isOutOfStock 
-    ? '<span class="stock-status out-of-stock"><i class="fa fa-times-circle"></i> Out of stock</span>' 
-    : '<span class="stock-status in-stock"><i class="fa fa-check-circle"></i> In stock</span>';
-}
+    class Magnifier {
+      constructor(img, zoom) {
+        this.img = img;
+        this.zoom = zoom;
+        this.container = img.parentElement;
+        this.glass = null;
+        this.moveHandler = this.moveMagnifier.bind(this);
+        this.leaveHandler = this.hideMagnifier.bind(this);
+        this.init();
+      }
+      init() {
+        const existingGlass = this.container.querySelector('.magnifier-glass');
+        if (existingGlass) existingGlass.remove();
 
-document.addEventListener('DOMContentLoaded', async function() {
-  const storageSelect = document.getElementById('storageSelect');
-  const colorRadios = document.querySelectorAll('input[name="color"]');
+        this.glass = document.createElement('DIV');
+        this.glass.setAttribute('class', 'magnifier-glass');
+        this.glass.style.left = 0;
+        this.glass.style.top = 0;
+        this.glass.style.opacity = 0;
+        this.glass.style.backgroundImage = `url('${this.img.src}')`;
+        this.glass.style.backgroundSize = `${this.img.width * this.zoom}px ${this.img.height * this.zoom}px`;
+        this.container.appendChild(this.glass);
 
-  colorRadios.forEach(radio => {
-    radio.addEventListener('change', function() {
-      const selectedColor = this.value;
-      const filteredVariants = variants.filter(v => v.color === selectedColor);
+        this.container.addEventListener('mousemove', this.moveHandler);
+        this.container.addEventListener('mouseleave', this.leaveHandler);
+
+        this.container.addEventListener('touchmove', this.moveHandler);
+        this.container.addEventListener('touchend', this.leaveHandler);
+      }
+      moveMagnifier(e) {
+        e.preventDefault();
+        let clientX, clientY;
+        if (e.touches) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+        const bounding = this.img.getBoundingClientRect();
+        let x = clientX - bounding.left;
+        let y = clientY - bounding.top;
+        x -= window.pageXOffset;
+        y -= window.pageYOffset;
+
+        const glassW = this.glass.offsetWidth / 2;
+        const glassH = this.glass.offsetHeight / 2;
+        if (x > this.img.width - (glassW / this.zoom)) x = this.img.width - (glassW / this.zoom);
+        if (x < glassW / this.zoom) x = glassW / this.zoom;
+        if (y > this.img.height - (glassH / this.zoom)) y = this.img.height - (glassH / this.zoom);
+        if (y < glassH / this.zoom) y = glassH / this.zoom;
+        this.glass.style.left = (x - glassW) + 'px';
+        this.glass.style.top = (y - glassH) + 'px';
+        this.glass.style.opacity = 1;
+        this.glass.style.backgroundPosition = `-${(x * this.zoom - glassW)}px -${(y * this.zoom - glassH)}px`;
+      }
+      hideMagnifier() {
+        this.glass.style.opacity = 0;
+      }
+      destroy() {
+        this.container.removeEventListener('mousemove', this.moveHandler);
+        this.container.removeEventListener('mouseleave', this.leaveHandler);
+        this.container.removeEventListener('touchmove', this.moveHandler);
+        this.container.removeEventListener('touchend', this.leaveHandler);
+        if (this.glass) this.glass.remove();
+      }
+    }
+    function updateVariantDetails(variant) {
+      const priceRow = document.getElementById('priceRowContainer');
+      priceRow.innerHTML = '';
+      const finalPrice = document.createElement('p');
+      finalPrice.className = 'price';
+      finalPrice.id = 'dynamicPrice';
+      finalPrice.textContent = '₹' + variant.finalPrice.toLocaleString('en-IN');
+      priceRow.appendChild(finalPrice);
+      if (variant.appliedOffer > 0 && variant.finalPrice < variant.regularPrice) {
+        const oldPrice = document.createElement('span');
+        oldPrice.className = 'old-price';
+        oldPrice.textContent = '₹' + variant.regularPrice.toLocaleString('en-IN');
+        priceRow.appendChild(oldPrice);
+        const savings = document.createElement('p');
+        savings.className = 'text-success';
+        savings.style.fontWeight = '600';
+        savings.textContent = `You save ₹${(variant.regularPrice - variant.finalPrice).toLocaleString('en-IN')}`;
+        priceRow.appendChild(savings);
+      }
+
+      updateGallery(variant.images);
+      checkStockStatus(variant.quantity);
+    }
+
+    function getSelectedVariant() {
+      const selectedColor = document.querySelector('input[name="color"]:checked')?.value;
+      const storageSelect = document.getElementById('storageSelect');
       if (storageSelect) {
-        storageSelect.innerHTML = '';
-        filteredVariants.forEach(variant => {
-          const option = document.createElement('option');
-          option.value = JSON.stringify(variant);
-          option.text = variant.storage;
-          if (variant.quantity <= 0) option.disabled = true;
-          storageSelect.appendChild(option);
+        try {
+          const selectedStorage = JSON.parse(storageSelect.value);
+          return variants.find(v => v.color === selectedColor && v.storage === selectedStorage.storage);
+        } catch {
+          return variants.find(v => v.color === selectedColor);
+        }
+      }
+      return variants.find(v => v.color === selectedColor);
+    }
+
+    function checkStockStatus(quantity) {
+      const buyNowBtn = document.querySelector('.buy-now');
+      const addToBasketBtn = document.querySelector('.add-to-basket');
+      const stockMessageContainer = document.getElementById('stockMessageContainer');
+      const isOutOfStock = quantity <= 0;
+
+      buyNowBtn.disabled = isOutOfStock;
+      addToBasketBtn.disabled = isOutOfStock;
+
+      stockMessageContainer.innerHTML = isOutOfStock
+        ? '<span class="stock-status out-of-stock"><i class="fa fa-times-circle"></i> Out of stock</span>'
+        : '<span class="stock-status in-stock"><i class="fa fa-check-circle"></i> In stock</span>';
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const storageSelect = document.getElementById('storageSelect');
+      const colorRadios = document.querySelectorAll('input[name="color"]');
+
+      const defaultVariant = variants.find(v => v.quantity > 0) || variants[0];
+
+      if (defaultVariant) {
+        const defaultColorRadio = document.querySelector(`input[name="color"][value="${defaultVariant.color}"]`);
+        if (defaultColorRadio) {
+          defaultColorRadio.checked = true;
+        }
+
+        if (storageSelect) {
+          const filteredByColor = variants.filter(v => v.color === defaultVariant.color);
+          storageSelect.innerHTML = '';
+          filteredByColor.forEach(variant => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify(variant);
+            option.text = variant.storage;
+            if (variant.quantity <= 0) option.disabled = true;
+            storageSelect.appendChild(option);
+          });
+          const defaultStorageOption = storageSelect.querySelector(`option[value='${JSON.stringify(defaultVariant)}']`);
+          if (defaultStorageOption) {
+            defaultStorageOption.selected = true;
+          }
+        }
+
+        updateVariantDetails(defaultVariant);
+      }
+
+      colorRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          const selectedColor = this.value;
+          const filteredVariants = variants.filter(v => v.color === selectedColor);
+
+          if (storageSelect) {
+            storageSelect.innerHTML = '';
+            filteredVariants.forEach(variant => {
+              const option = document.createElement('option');
+              option.value = JSON.stringify(variant);
+              option.text = variant.storage;
+              if (variant.quantity <= 0) option.disabled = true;
+              storageSelect.appendChild(option);
+            });
+          }
+
+          const firstAvailableVariant = filteredVariants.find(v => v.quantity > 0) || filteredVariants[0];
+          if (firstAvailableVariant) {
+            updateVariantDetails(firstAvailableVariant);
+          }
+        });
+      });
+
+      if (storageSelect) {
+        storageSelect.addEventListener('change', function() {
+          const variant = getSelectedVariant();
+          updateVariantDetails(variant);
         });
       }
-      updateVariantDetails(filteredVariants[0]);
-    });
-  });
 
-  if (storageSelect) {
-    storageSelect.addEventListener('change', function() {
-      const variant = getSelectedVariant();
-      updateVariantDetails(variant);
-    });
-  }
-
-  const mainImage = document.getElementById('mainImage');
-  await waitForImageLoad(mainImage);
-  if (currentMagnifier) currentMagnifier.destroy();
-  currentMagnifier = new Magnifier(mainImage, 2);
-
-  updateVariantDetails(variants[0]);
-});
-
-document.querySelector('.add-to-basket').addEventListener('click', async function() {
-  const selectedVariant = getSelectedVariant();
-  const quantity = 1;
-
-  this.disabled = true;
-  this.textContent = 'Adding...';
-  const productId = '<%= product._id %>';
-
-  try {
-    const response = await fetch('/user-cart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId: '<%= product._id %>',
-        variantId: selectedVariant._id,
-        quantity: quantity
-      })
+      const mainImage = document.getElementById('mainImage');
+      await waitForImageLoad(mainImage);
+      if (currentMagnifier) currentMagnifier.destroy();
+      currentMagnifier = new Magnifier(mainImage, 2);
     });
 
-    const result = await response.json();
-    if (result.success) {
-      const storageKey = 'wishlistProductIds';
-      let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      ids = ids.filter(id => id !== productId);
-      localStorage.setItem(storageKey, JSON.stringify(ids));  
-      const cartCountElement = document.querySelector('.fa-shopping-cart + .cart-count');
-      if (cartCountElement) cartCountElement.textContent = result.cartCount;
-      Swal.fire({ icon: 'success', title: result.message || 'Added to Cart', timer: 1500 });
-    } else {
-      Swal.fire({ icon: 'error', title: result.message || 'Error occurred', timer: 1500 });
-    }
-  } catch (error) {
-    Swal.fire({ icon: 'error', title: 'Failed to Add', text: 'Error adding to cart' });
-  } finally {
-    this.disabled = false;
-    this.textContent = 'Add to Basket';
-  }
-});
+    document.querySelector('.add-to-basket').addEventListener('click', async function() {
+      const selectedVariant = getSelectedVariant();
+      const quantity = 1;
 
-document.addEventListener('DOMContentLoaded', function () {
-  const storageKey = 'wishlistProductIds';
-  function getWishlist() {
-    return JSON.parse(localStorage.getItem(storageKey) || '[]');
-  }
-  function setWishlist(ids) {
-    localStorage.setItem(storageKey, JSON.stringify(ids));
-  }
-  async function updateWishlistServer(productId, isAdding) {
-    try {
-      await fetch('/wishlist/toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, action: isAdding ? 'add' : 'remove' })
-      });
-    } catch (err) {
-      console.error('Wishlist update failed', err);
-    }
-  }
-  const wishlist = getWishlist();
-  const icon = document.querySelector('.wishlist-icon');
-  if (icon) {
-    const productId = icon.dataset.productId;
-    const heartIcon = icon.querySelector('i');
-    if (wishlist.includes(productId)) {
-      icon.classList.add('active');
-      heartIcon.classList.remove('fa-heart-o');
-      heartIcon.classList.add('fa-heart');
-    }
-    icon.addEventListener('click', async function (event) {
-      event.preventDefault();
-      icon.classList.toggle('active');
-      let ids = getWishlist();
-      const isAdding = icon.classList.contains('active');
-      if (isAdding) {
-        heartIcon.classList.remove('fa-heart-o');
-        heartIcon.classList.add('fa-heart');
-        if (!ids.includes(productId)) ids.push(productId);
-      } else {
-        heartIcon.classList.remove('fa-heart');
-        heartIcon.classList.add('fa-heart-o');
-        ids = ids.filter(id => id !== productId);
+      this.disabled = true;
+      this.textContent = 'Adding...';
+      const productId = '<%= product._id %>';
+
+      try {
+        const response = await fetch('/user-cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: '<%= product._id %>',
+            variantId: selectedVariant._id,
+            quantity: quantity
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          const storageKey = 'wishlistProductIds';
+          let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          ids = ids.filter(id => id !== productId);
+          localStorage.setItem(storageKey, JSON.stringify(ids));
+          const cartCountElement = document.querySelector('.fa-shopping-cart + .cart-count');
+          if (cartCountElement) cartCountElement.textContent = result.cartCount;
+          Swal.fire({ icon: 'success', title: result.message || 'Added to Cart', timer: 1500 });
+        } else {
+          Swal.fire({ icon: 'error', title: result.message || 'Error occurred', timer: 1500 });
+        }
+      } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Failed to Add', text: 'Error adding to cart' });
+      } finally {
+        this.disabled = false;
+        this.textContent = 'Add to Basket';
       }
-      setWishlist(ids);
-      await updateWishlistServer(productId, isAdding);
     });
-  }
-});
-</script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const storageKey = 'wishlistProductIds';
+
+      function getWishlist() {
+        return JSON.parse(localStorage.getItem(storageKey) || '[]');
+      }
+
+      function setWishlist(ids) {
+        localStorage.setItem(storageKey, JSON.stringify(ids));
+      }
+
+      async function updateWishlistServer(productId, isAdding) {
+        try {
+          await fetch('/wishlist/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId,
+              action: isAdding ? 'add' : 'remove'
+            })
+          });
+        } catch (err) {
+          console.error('Wishlist update failed', err);
+        }
+      }
+      const wishlist = getWishlist();
+      const icon = document.querySelector('.wishlist-icon');
+      if (icon) {
+        const productId = icon.dataset.productId;
+        const heartIcon = icon.querySelector('i');
+        if (wishlist.includes(productId)) {
+          icon.classList.add('active');
+          heartIcon.classList.remove('fa-heart-o');
+          heartIcon.classList.add('fa-heart');
+        }
+        icon.addEventListener('click', async function(event) {
+          event.preventDefault();
+          icon.classList.toggle('active');
+          let ids = getWishlist();
+          const isAdding = icon.classList.contains('active');
+          if (isAdding) {
+            heartIcon.classList.remove('fa-heart-o');
+            heartIcon.classList.add('fa-heart');
+            if (!ids.includes(productId)) ids.push(productId);
+          } else {
+            heartIcon.classList.remove('fa-heart');
+            heartIcon.classList.add('fa-heart-o');
+            ids = ids.filter(id => id !== productId);
+          }
+          setWishlist(ids);
+          await updateWishlistServer(productId, isAdding);
+        });
+      }
+    });
+  </script>
 
 <%- include('../../views/partials/user/footer') %>

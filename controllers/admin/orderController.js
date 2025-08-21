@@ -1,7 +1,5 @@
 const Order=require('../../models/orderSchema')
-const Brand=require('../../models/brandSchema')
 const Product=require('../../models/productsSchema')
-const Category = require('../../models/categorySchema');
 const Wallet=require('../../models/walletSchema');
 
 

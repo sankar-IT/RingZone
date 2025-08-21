@@ -1,202 +1,217 @@
-
-
-    <%- include('../../views/partials/user/header') %>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+<%- include('../../views/partials/user/header') %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f8f9fa;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+   
+    .about {
+        padding: 80px 0;
+        background: white;
+    }
+    
+    .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .section-title h2 {
+        font-size: 36px;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-title h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70px;
+        height: 4px;
+        background: #ff4646; 
+    }
+    
+    .about-content {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 40px;
+    }
+    
+    .about-text {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .about-text h3 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+    
+    .about-text p {
+        margin-bottom: 15px;
+        color: #555;
+    }
+    
+    .about-image {
+        flex: 1;
+        min-width: 300px;
+        text-align: center;
+    }
+    
+    .about-image img {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .features {
+        padding: 80px 0;
+        background: #f8f9fa;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .feature-icon {
+        font-size: 40px;
+        color: #ff4646;
+        margin-bottom: 20px;
+    }
+    
+    .feature-card h3 {
+        font-size: 22px;
+        margin-bottom: 15px;
+        color: #2c3e50;
+    }
+    
+    .feature-card p {
+        color: #666;
+    }
+    
+    .stats {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 30px;
+    }
+    
+    .stat-item h3 {
+        font-size: 42px;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    
+    .stat-item p {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+    
+    @media (max-width: 768px) {
+        .section-title h2 {
+            font-size: 28px;
         }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-       
-        .about {
-            padding: 80px 0;
-            background: white;
-        }
-        
-        .section-title {
+        .about-content {
+            flex-direction: column;
             text-align: center;
-            margin-bottom: 50px;
+        }
+    
+        .about-image {
+            order: -1; 
+            margin-bottom: 20px;
+        }
+    
+        .about-text {
+            min-width: unset;
+        }
+    
+        .features {
+            padding: 50px 0; 
+        }
+    
+        .feature-card {
+            padding: 20px;
+        }
+    
+        .stats {
+            padding: 50px 0;
+        }
+    
+        .stat-item h3 {
+            font-size: 32px; 
+        }
+    
+        .stat-item p {
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 0 15px;
         }
         
         .section-title h2 {
-            font-size: 36px;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            position: relative;
-            display: inline-block;
+            font-size: 24px;
         }
-        
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70px;
-            height: 4px;
-            background: #ff4646; 
-        }
-        
-        .about-content {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 40px;
-        }
-        
-        .about-text {
-            flex: 1;
-            min-width: 300px;
-        }
-        
+    
         .about-text h3 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #2c3e50;
+            font-size: 24px;
         }
-        
+    
         .about-text p {
-            margin-bottom: 15px;
-            color: #555;
+            font-size: 14px;
         }
-        
-        .about-image {
-            flex: 1;
-            min-width: 300px;
-            text-align: center;
-        }
-        
-        .about-image img {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .features {
-            padding: 80px 0;
-            background: #f8f9fa;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        
-        .feature-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .feature-icon {
-            font-size: 40px;
-            color: #ff4646;
-            margin-bottom: 20px;
-        }
-        
-        .feature-card h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-        
-        .feature-card p {
-            color: #666;
-        }
-      
-        .stats {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            text-align: center;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-        }
-        
-        .stat-item h3 {
-            font-size: 42px;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .stat-item p {
-            font-size: 18px;
-            opacity: 0.9;
-        }
-        
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            nav ul {
-                margin-top: 20px;
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            nav ul li {
-                margin: 10px 0;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-                position: absolute;
-                top: 20px;
-                right: 20px;
-            }
-            
-            .hero h1 {
-                font-size: 36px;
-            }
-            
-            .hero p {
-                font-size: 18px;
-            }
-            
-            .about-content {
-                flex-direction: column;
-            }
-            
-            .section-title h2 {
-                font-size: 30px;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
     <section class="about">
         <div class="container">
             <div class="section-title">
-                <h2>Our Story</h2>
+                <h2> </h2>
             </div>
             <div class="about-content">
                 <div class="about-text">

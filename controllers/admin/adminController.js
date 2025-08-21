@@ -1,7 +1,6 @@
 const User=require('../../models/userSchema')
 const Order=require('../../models/orderSchema');
 const Product=require('../../models/productsSchema')
-const mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 
 const loadLogin= (req,res)=>{

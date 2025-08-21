@@ -20,12 +20,11 @@ const pageNotFound=async(req,res)=>{
   }
 }
 
-// Home page 
+
 
 const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
-    // const categories = await Category.find({ islisted: true });
     const productData = await product.find({ isBlocked: false })
      .sort({ createdAt: -1 })
      .limit(8);
@@ -272,8 +271,6 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-
-//googleAuth
 
 const googleCallBack=async(req,res)=>{
   try {

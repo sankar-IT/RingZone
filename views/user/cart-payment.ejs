@@ -136,15 +136,13 @@
                         </label>
                     </div>
 
- <div class="form-check mb-3">
-  <input class="form-check-input" type="radio" name="payment" id="wallet">
-  <label class="form-check-label" for="wallet">
-      <i class="fas fa-wallet"></i> Wallet 
-      <span class="wallet-balance" id="walletBalanceDisplay">Balance: ₹<%= walletBalance %></span>
-  </label>
-</div>
-
-                   
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="payment" id="wallet">
+                        <label class="form-check-label" for="wallet">
+                            <i class="fas fa-wallet"></i> Wallet 
+                            <span class="wallet-balance" id="walletBalanceDisplay">Balance: ₹<%= walletBalance %></span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -174,267 +172,246 @@
         </div>
     </div>
 
-    <script>
-        
-        const razorpayKey = "rzp_test_your_key_here";
-        const spinner = document.getElementById('checkoutSpinner');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        let walletBalance = 0;
-        let isProcessing = false;
 
-      
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
 
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
+<script>
+    const razorpayKey = "rzp_test_your_key_here"; 
+    const spinner = document.getElementById('checkoutSpinner');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    let walletBalance = 0;
+    let isProcessing = false;
+    let currentOrderId = null; 
 
-        function resetBtn() {
-            spinner.classList.add('d-none');
-            const btnText = document.getElementById('checkoutText');
-            btnText.textContent = 'Place secure order';
-            const btn = document.getElementById('checkoutBtn');
-            btn.disabled = false;
-            isProcessing = false;
-        }
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+    }
 
-        function disableBtn() {
-            spinner.classList.remove('d-none');
-            const btnText = document.getElementById('checkoutText');
-            btnText.textContent = 'Processing...';
-            const btn = document.getElementById('checkoutBtn');
-            btn.disabled = true;
-            isProcessing = true;
-        }
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
 
-      
-        function forceRedirect(url, delay = 0) {
-            setTimeout(() => {
-                hideLoading();
-               
-                try {
-                    window.location.replace(url);
-                } catch (e) {
-                    console.error('Replace failed, trying assign:', e);
-                    try {
-                        window.location.assign(url);
-                    } catch (e2) {
-                        console.error('Assign failed, trying href:', e2);
-                        window.location.href = url;
-                    }
-                }
-                
-                setTimeout(() => {
-                    if (window.location.pathname === '/payment') {
-                        window.location.reload();
-                    }
-                }, 3000);
-            }, delay);
-        }
+    function resetBtn() {
+        spinner.classList.add('d-none');
+        const btnText = document.getElementById('checkoutText');
+        btnText.textContent = 'Place secure order';
+        const btn = document.getElementById('checkoutBtn');
+        btn.disabled = false;
+        isProcessing = false;
+    }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/wallet/balance');
-                const data = await response.json();
-                if (response.ok) {
-                    walletBalance = data.balance;
-                    document.getElementById('walletBalanceDisplay').textContent = `(Balance: ₹${walletBalance.toFixed(2)})`;
-                }
-            } catch (error) {
-                console.error('Error fetching wallet balance:', error);
-                document.getElementById('walletBalanceDisplay').textContent = '(Balance unavailable)';
+    function disableBtn() {
+        spinner.classList.remove('d-none');
+        const btnText = document.getElementById('checkoutText');
+        btnText.textContent = 'Processing...';
+        const btn = document.getElementById('checkoutBtn');
+        btn.disabled = true;
+        isProcessing = true;
+    }
+
+    function forceRedirect(url, delay = 0) {
+        setTimeout(() => {
+            hideLoading();
+            window.location.href = url;
+        }, delay);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/wallet/balance');
+            const data = await response.json();
+            if (response.ok) {
+                walletBalance = data.balance;
+                document.getElementById('walletBalanceDisplay').textContent = `(Balance: ₹${walletBalance.toFixed(2)})`;
             }
-        });
+        } catch (error) {
+            console.error('Error fetching wallet balance:', error);
+            document.getElementById('walletBalanceDisplay').textContent = '(Balance unavailable)';
+        }
+    });
 
-        document.getElementById('checkoutBtn').addEventListener('click', async () => {
-            if (isProcessing) {
+    document.getElementById('checkoutBtn').addEventListener('click', async () => {
+        if (isProcessing) {
+            return;
+        }
+
+        try {
+            disableBtn();
+            showLoading();
+
+            const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked')?.id;
+            const grandTotal = parseInt(
+                document.getElementById('grandTotal').textContent.replace(/[₹,]/g, '')
+            );
+            
+            if (selectedPaymentMethod === 'card') {
+                await handleCardPayment(grandTotal);
+            } else if (selectedPaymentMethod === 'wallet') {
+                await handleWalletPayment(grandTotal);
+            } else {
+                await handleCODPayment();
+            }
+        } catch (err) {
+            console.error("Checkout error:", err);
+            hideLoading();
+            Swal.fire('Error', err.message || 'Something went wrong during checkout.', 'error');
+            resetBtn();
+        }
+    });
+
+    async function handleCardPayment(grandTotal) {
+        try {
+            const orderRes = await fetch('/create-razorpay-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ finalAmount: grandTotal }),
+            });
+
+            const data = await orderRes.json();
+
+            if (!orderRes.ok || !data.success) {
+                throw new Error(data.message || 'Failed to create Razorpay order.');
+            }
+
+            hideLoading();
+
+            const options = {
+                key: data.keyId,
+                amount: data.amount,
+                currency: data.currency,
+                order_id: data.orderId, 
+                name: "RingZone",
+                description: "Payment for order",
+                image: "/images/logoicon.png",
+                prefill: {
+                    name: data.customer?.name || '',
+                    email: data.customer?.email || '',
+                    contact: data.customer?.phone || '',
+                },
+                theme: { color: "#ff4646" },
+                handler: async function (response) {
+                    showLoading();
+
+                    try {
+                        const verifyRes = await fetch('/verify-razorpay-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                order_id: data.dbOrderId, 
+                            }),
+                        });
+
+                        const verifyData = await verifyRes.json();
+
+                        if (verifyData.redirectUrl) {
+                            forceRedirect(verifyData.redirectUrl, 500);
+                        } else {
+                           
+                            forceRedirect(`/payment-failure/${data.dbOrderId}`, 500);
+                        }
+                    } catch (err) {
+                        console.error("Error verifying payment:", err);
+                        forceRedirect(`/payment-failure/${data.dbOrderId}`, 500);
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        resetBtn();
+                       
+                        forceRedirect(`/payment-failure/${data.dbOrderId}`, 1000);
+                    },
+                },
+            };
+
+            const rzp = new Razorpay(options);
+
+            rzp.on('payment.failed', function (response) {
+                console.error("Payment Failed:", response.error);
+                resetBtn();
+                
+                forceRedirect(`/payment-failure/${data.dbOrderId}`, 1000);
+            });
+
+            rzp.open();
+
+        } catch (error) {
+            console.error('Card payment error:', error);
+            hideLoading();
+            Swal.fire('Error', error.message || 'Failed to process card payment', 'error');
+            resetBtn();
+        }
+    }
+
+    async function handleWalletPayment(grandTotal) {
+        try {
+            if (walletBalance < grandTotal) {
+                hideLoading();
+                const result = await Swal.fire({
+                    title: 'Insufficient Balance',
+                    text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is less than the order total (₹${grandTotal}). Would you like to add money to your wallet?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Add Money'
+                });
+
+                if (result.isConfirmed) {
+                    forceRedirect('/wallet');
+                } else {
+                    resetBtn();
+                }
                 return;
             }
 
-            try {
-                disableBtn();
-                showLoading();
+            const response = await fetch('/place-order/wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-                const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked')?.id;
-                const grandTotal = parseInt(
-                    document.getElementById('grandTotal').textContent.replace(/[₹,]/g, '')
-                );
-                if (selectedPaymentMethod === 'card') {
-                    await handleCardPayment(grandTotal);
-                } else if (selectedPaymentMethod === 'wallet') {
-                    await handleWalletPayment(grandTotal);
-                } else {
-                    await handleCODPayment();
-                }
-            } catch (err) {
-                console.error("Checkout error:", err);
+            const result = await response.json();
+            
+            if (result.success) {
+                forceRedirect(result.redirectUrl || '/order-placed', 500);
+            } else {
                 hideLoading();
-                Swal.fire('Error', err.message || 'Something went wrong during checkout.', 'error');
+                Swal.fire('Oops!', result.message || 'Payment failed', 'error');
                 resetBtn();
             }
-        });
 
-        async function handleCardPayment(grandTotal) {
-            try {
-                const orderRes = await fetch('/create-razorpay-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ finalAmount: grandTotal }),
-                });
+        } catch (error) {
+            console.error('Wallet payment error:', error);
+            hideLoading();
+            Swal.fire('Error', 'Wallet payment failed', 'error');
+            resetBtn();
+        }
+    }
 
-                const data = await orderRes.json();
+    async function handleCODPayment() {
+        try {
+            const response = await fetch('/place-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-                if (!orderRes.ok || !data.success) {
-                    throw new Error(data.message || 'Failed to create Razorpay order.');
-                }
-
+            const result = await response.json();
+            
+            if (result.success) {
+                forceRedirect(result.redirectUrl || '/order-placed', 500);
+            } else {
                 hideLoading();
-
-                const options = {
-                    key: data.keyId,
-                    amount: data.amount,
-                    currency: data.currency,
-                    order_id: data.orderId,
-                    name: "RingZone",
-                    description: "Payment for order",
-                    image: "/images/logoicon.png",
-                    prefill: {
-                        name: data.customer?.name || '',
-                        email: data.customer?.email || '',
-                        contact: data.customer?.phone || '',
-                    },
-                    theme: { color: "#ff4646" },
-                    handler: async function (response) {
-                        showLoading();
-                        
-                        try {
-                            const verifyRes = await fetch('/verify-razorpay-payment', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    order_id: data.dbOrderId,
-                                }),
-                            });
-
-                            const verifyData = await verifyRes.json();
-
-                            if (verifyRes.ok && verifyData.redirectUrl) {
-                                window.removeEventListener('beforeunload', beforeUnloadHandler);
-                                isProcessing = false;
-                                forceRedirect(verifyData.redirectUrl, 500);
-                            } else {
-                                forceRedirect(`/payment-failure/${data.orderId}`, 500);
-                            }
-                        } catch (err) {
-                            console.error("Error verifying payment:", err);
-                            forceRedirect(`/payment-failure/${data.orderId}`, 500);
-                        }
-                    },
-                    modal: {
-                        ondismiss: function () {
-                            resetBtn();
-                            forceRedirect(`/payment-failure/${data.orderId}`, 1000);
-                        },
-                    },
-                };
-
-                const rzp = new Razorpay(options);
-                
-                rzp.on('payment.failed', function (response) {
-                    console.error("Payment Failed:", response.error);
-                    resetBtn();
-                    forceRedirect(`/payment-failure/${data.orderId}`, 1000);
-                });
-                
-                rzp.open();
-
-            } catch (error) {
-                console.error('Card payment error:', error);
-                throw error;
+                Swal.fire('Oops!', result.message || 'Cart is empty.', 'warning');
+                resetBtn();
             }
+
+        } catch (error) {
+            console.error('COD payment error:', error);
+            hideLoading();
+            Swal.fire('Error', 'COD payment failed', 'error');
+            resetBtn();
         }
-
-
-        async function handleWalletPayment(grandTotal) {
-            try {
-                
-                if (walletBalance < grandTotal) {
-                    hideLoading();
-                    const result = await Swal.fire({
-                        title: 'Insufficient Balance',
-                        text: `Your wallet balance (₹${walletBalance.toFixed(2)}) is less than the order total (₹${grandTotal}). Would you like to add money to your wallet?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        cancelButtonText: 'Cancel',
-                        confirmButtonText: 'Add Money'
-                    });
-
-                    if (result.isConfirmed) {
-                        forceRedirect('/wallet');
-                    } else {
-                        resetBtn();
-                    }
-                    return;
-                }
-
-                const response = await fetch('/place-order/wallet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    forceRedirect(result.redirectUrl || '/order-placed', 500);
-                } else {
-                    hideLoading();
-                    Swal.fire('Oops!', result.message || 'Payment failed', 'error');
-                    resetBtn();
-                }
-
-            } catch (error) {
-                console.error('Wallet payment error:', error);
-                throw error;
-            }
-        }
-
-        async function handleCODPayment() {
-            try {
-                const response = await fetch('/place-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    window.removeEventListener('beforeunload', beforeUnloadHandler);
-                    isProcessing = false;
-                    forceRedirect(result.redirectUrl || '/order-placed', 500);
-                } else {
-                    hideLoading();
-                    Swal.fire('Oops!', result.message || 'Cart is empty.', 'warning');
-                    resetBtn();
-                }
-
-            } catch (error) {
-                console.error('COD payment error:', error);
-                throw error;
-            }
-        }
-
-        // function beforeUnloadHandler(e) {
-        //     if (isProcessing) {
-        //         e.preventDefault();
-        //         e.returnValue = 'Payment is being processed. Are you sure you want to leave?';
-        //     }
-        // }
-        // window.addEventListener('beforeunload', beforeUnloadHandler);
-    </script>
+    }
+</script>
 </body>
 <%- include('../../views/partials/user/footer') %>

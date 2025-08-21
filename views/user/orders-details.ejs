@@ -214,17 +214,60 @@
     cursor: not-allowed;
   }
 
-  .price-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 0.95rem;
-  }
+.price-summary {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+}
 
-  .price-total {
-    font-weight: 700;
-    color: var(--brand);
-  }
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  color: #4a5568;
+}
+
+.price-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.price-label i {
+  width: 20px;
+  color: #718096;
+}
+
+.price-value {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.price-value.discount {
+  color: #38a169;
+}
+
+.price-value.shipping {
+  color: #3182ce;
+}
+
+.price-total .price-value.total-amount {
+  font-weight: 700;
+  color: var(--brand);
+  font-size: 18px;
+}
+
+.price-total {
+  border-top: 2px dashed #e2e8f0;
+  margin-top: 10px;
+  padding-top: 15px;
+  font-size: 18px;
+  color: #2d3748;
+}
 
   .action-buttons {
     display: flex;
@@ -512,31 +555,50 @@
         <% } %>
       </div>
 
-      <div class="price-summary">
-        <div class="price-row">
-          <span>Subtotal:</span>
-          <span>₹<%= order.totalPrice %></span>
-        </div>
-        <% if (order.coupon && order.coupon.discountAmount > 0) { %>
-          <div class="price-row">
-            <% if(order.totalPrice >=10000){ %>
-            <span>Discount:</span>
-            <span>- ₹<%= order.coupon.discountAmount %></span>
-            <% } else { %>
-            <span>Discount:</span>
-            <span>0</span>
-            <% } %>
-          </div>
-         <div class="price-row">
-          <span>Shipping:</span>
-          <span><%= order.shipping %></span>
-        </div>
+<div class="price-summary">
+  <div class="price-row">
+    <div class="price-label">
+      <i class="fas fa-shopping-bag"></i>
+      <span>Subtotal:</span>
+    </div>
+    <span class="price-value">₹<%= order.totalPrice %></span>
+  </div>
+  
+  <% if (order.coupon && order.coupon.discountAmount > 0) { %>
+    <div class="price-row">
+      <div class="price-label">
+        <i class="fas fa-tag"></i>
+        <% if(order.totalPrice >=10000){ %>
+          <span>Coupon Discount:</span>
+        <% } else { %>
+          <span>Discount:</span>
         <% } %>
-        <div class="price-row price-total fw-bold border-top pt-2 mt-2">
-          <span>Total:</span>
-          <span>₹<%= order.finalAmount %></span>
-        </div>
       </div>
+      <% if(order.totalPrice >=10000){ %>
+        <span class="price-value discount">- ₹<%= order.coupon.discountAmount %></span>
+      <% } else { %>
+        <span class="price-value">0</span>
+      <% } %>
+    </div>
+    
+    <div class="price-row">
+      <div class="price-label">
+        <i class="fas fa-truck"></i>
+        <span>Shipping:</span>
+      </div>
+      <span class="price-value shipping"><%= order.shipping %></span>
+    </div>
+  <% } %>
+  
+  <div class="price-row price-total fw-bold border-top pt-2 mt-2">
+    <div class="price-label">
+      <i class="fas fa-receipt"></i>
+      <span>Total:</span>
+    </div>
+    <span class="price-value total-amount">₹<%= order.finalAmount %></span>
+  </div>
+</div>
+
   <div class="action-buttons">
   <button class="back-btn" onclick="window.history.back()">
     <i class="fas fa-arrow-left me-1"></i> Back
@@ -550,6 +612,9 @@
     order.orderedItems && 
     order.orderedItems.some(item => 
       ['delivered', 'confirmed'].includes(item.status?.toLowerCase())
+    ) &&
+    !order.orderedItems.some(item => 
+      item.status === 'Cancelled'
     )
   ) { %>
     <button class="invoice-btn btn-danger"
@@ -675,7 +740,7 @@ document.addEventListener('DOMContentLoaded', function() {
         this.textContent = 'Cancelling...';
 
         const response = await fetch(`/cancel-item/${orderId}/${itemId}`, {
-          method: 'POST', // Changed to POST to send reason
+          method: 'POST', 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ reason })
         });
