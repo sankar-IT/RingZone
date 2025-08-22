@@ -7,38 +7,60 @@
   body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', sans-serif;
-    padding-top: 50px;
-    margin-top: 140px;
+    padding-top: 20px;
+    margin-top: 100px;
   }
 
   .sidebar {
     background: #fff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     height: fit-content;
   }
 
   .sidebar .nav-link {
-    color: #333;
+    color: #495057;
     font-weight: 500;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
   }
 
   .sidebar .nav-link.active,
   .sidebar .nav-link:hover {
     background-color: #ff4646;
     color: #fff;
+    transform: translateX(3px);
   }
-  
+
+  .sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+  }
+
+  .main-content {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 25px;
+  }
+
   .profile-img {
     width: 140px;
     height: 140px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid #ccc;
-    margin: auto;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    margin-left: 380px;
+  }
+
+  .profile-img:hover {
+    transform: scale(1.03);
   }
 
   .change-photo-btn {
@@ -46,23 +68,30 @@
     border: 1px solid #ff4646;
     color: #ff4646;
     font-weight: 500;
-    padding: 6px 14px;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: 6px;
     font-size: 14px;
+    transition: all 0.2s ease;
   }
 
   .change-photo-btn:hover {
     background-color: #ff4646;
     color: white;
+    transform: translateY(-2px);
   }
 
   .btn-update {
     background-color: #ff4646;
     color: white;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
   }
 
   .btn-update:hover {
     background-color: #e03e3e;
+    transform: translateY(-2px);
   }
 
   input[type="file"] {
@@ -71,222 +100,282 @@
 
   .form-label {
     font-weight: 500;
+    color: #495057;
+    margin-bottom: 8px;
   }
 
-  .main-content {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    padding: 20px;
+  .form-control {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
   }
- .profile-pic.placeholder {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f8f8f8, #e5e5e5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 48px; 
-  color: #555;
-  margin: 0 auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
-}
 
-.profile-pic.placeholder:hover {
-  background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
-  color: #ff4646; 
-  transform: scale(1.05);
-}
+  .form-control:focus {
+    border-color: #ff4646;
+    box-shadow: 0 0 0 0.25rem rgba(255, 70, 70, 0.25);
+  }
 
-.profile-image-wrapper {
-  width: 120px;
-  height: 100px;
-  position: relative;
-  margin: 0 auto;            
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  input[type="date"] {
+    max-width: 200px;
+    padding: 8px 12px;
+  }
 
+  h4 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
 
-.profile-image-wrapper .profile-pic {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;         
-  display: block;
-  border: 3px solid #ccc;    
-}
+  .profile-image-wrapper {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
+  .profile-image-wrapper .profile-pic {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
 
+  .is-invalid {
+    border-color: #dc3545 !important;
+  }
+
+  .invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+  }
+
+  .file-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      margin-top: 80px;
+      padding-top: 10px;
+    }
+    
+    .sidebar {
+      margin-bottom: 20px;
+    }
+    
+    .main-content {
+      padding: 20px 15px;
+    }
+    
+    .profile-img {
+      width: 120px;
+      height: 120px;
+    }
+    
+    input[type="date"] {
+      max-width: 100%;
+    }
+  }
 </style>
 
 <body>
   <div class="container my-4 px-3 px-md-4">
-    <div class="row g-4">
+    <div class="row g-4" style="margin-top: 30px;">
       
-         <div class="col-md-3">
-  <div class="sidebar">
-    <div class="text-center mb-3">
-      <div class="profile-image-wrapper position-relative mx-auto">
-        <% if (user && user.profileImage) { %>
-          <img src="<%= user.profileImage %>" class="profile-pic" alt="User">
-        <% } else { %>
-          <%
-            const colors = ['#FF5733', '#33B5E5', '#FFB400', '#4CAF50', '#9C27B0', '#3F51B5', '#E91E63', '#795548'];
-            const getColorFromName = (name) => {
-              const charCodeSum = name
-                .toUpperCase()
-                .split('')
-                .reduce((sum, char) => sum + char.charCodeAt(0), 0);
-              return colors[charCodeSum % colors.length];
-            };
-            const initials = (user.firstname?.charAt(0) || '').toUpperCase();
-            const userColor = getColorFromName(user.firstname || 'U');
-          %>
-          <div class="profile-pic d-flex align-items-center  justify-content-center text-white fw-bold" 
-               style=" margin-left: 10px;   background-color:<%- userColor %>; font-size:36px;">
-            <%= initials %>
+      <div class="col-md-3">
+        <div class="sidebar">
+          <div class="text-center mb-3">
+            <div class="profile-image-wrapper position-relative mx-auto">
+              <% if (user && user.profileImage) { %>
+                <img src="<%= user.profileImage %>" class="profile-pic" alt="User">
+              <% } else { %>
+                <%
+                  const colors = ['#FF5733', '#33B5E5', '#FFB400', '#4CAF50', '#9C27B0', '#3F51B5', '#E91E63', '#795548'];
+                  const getColorFromName = (name) => {
+                    const charCodeSum = name
+                      .toUpperCase()
+                      .split('')
+                      .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+                    return colors[charCodeSum % colors.length];
+                  };
+                  const initials = (user.firstname?.charAt(0) || '').toUpperCase();
+                  const userColor = getColorFromName(user.firstname || 'U');
+                %>
+                <div class="profile-pic d-flex align-items-center justify-content-center text-white fw-bold" 
+                     style="background-color:<%- userColor %>; font-size:36px;">
+                  <%= initials %>
+                </div>
+              <% } %>
+            </div>
+            <h6 class="mt-2 mb-0 fw-bold">Welcome, <%= user.firstname %></h6>
+            <small class="text-muted"><%= user.email %></small>
           </div>
-        <% } %>
-      </div>
-      <h6 class="mt-2 mb-0">Welcome, <%= user.firstname %></h6>
-      <small class="text-muted"><%= user.email %></small>
-    </div>
 
-    <nav class="nav flex-column">
-      <a class="nav-link " href="user-profile"><i class="fas fa-gauge me-2"></i> Dashboard</a>
-      <a class="nav-link active" href="edit-profile"><i class="fas fa-user-edit me-2"></i> Edit Profile</a>
-      <a class="nav-link" href="view-orders"><i class="fas fa-box me-2"></i> My Orders</a>
-      <a class="nav-link " href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
-      <a class="nav-link " href="/user-wallet"><i class="fas fa-wallet me-2"></i> My Wallet</a>
-    </nav>
-  </div>
-</div>
+          <nav class="nav flex-column">
+            <a class="nav-link" href="user-profile"><i class="fas fa-gauge-high me-2"></i> Dashboard</a>
+            <a class="nav-link active" href="edit-profile"><i class="fas fa-user-edit me-2"></i> Edit Profile</a>
+            <a class="nav-link" href="view-orders"><i class="fas fa-box me-2"></i> My Orders</a>
+            <a class="nav-link" href="/user-address"><i class="fas fa-map-marker-alt me-2"></i> My Address</a>
+            <a class="nav-link" href="/user-wallet"><i class="fas fa-wallet me-2"></i> My Wallet</a>
+          </nav>
+        </div>
+      </div>
       
       <div class="col-md-9">
         <div class="main-content">
-          <h4 class="mb-4 border-bottom pb-2">Your Details</h4>
+          <h4 class="mb-4">Your Details</h4>
           
-          <form action="/update-profile" method="post" enctype="multipart/form-data" >
-            <div class="row">
-              
-                        <div class="text-center mb-3">
-                          <img src="<%= user.profileImage %>" id="profilePreview" class="profile-img" alt="Profile"  >
-                          <div class="mt-2">
-                            <label for="profilePic" class="change-photo-btn">
-                              <i class="fa fa-camera"></i> Change Photo
-                            </label>
-                            <input type="file" id="profilePic" name="profileImage" accept="image/*" onchange="previewPhoto()">
-                          </div>
-                          <div class="text-muted mt-1" style="font-size: 13px;">
-                            Maximum file size: 2MB. Supported formats: JPG, PNG
-                          </div>
-                        </div>
+          <form id="profileForm" action="/update-profile" method="post" enctype="multipart/form-data">
+  <div class="row">
+    <div class="col-12 text-center mb-4">
+      <% if (user && user.profileImage) { %>
+        <img src="<%= user.profileImage %>" id="profilePreview" class="profile-img">
+      <% } else { %>
+        
+        <div id="profilePreview" class="profile-img d-flex align-items-center justify-content-center bg-light text-secondary">
+          <i class="fas fa-user fa-3x"></i>
+        </div>
+      <% } %>
+      <div class="mt-3">
+        <label for="profilePic" class="change-photo-btn">
+          <i class="fa fa-camera me-2"></i> Change Photo
+        </label>
+        <input type="file" id="profilePic" name="profileImage" accept="image/*" onchange="previewPhoto()">
+      </div>
+      <div class="file-info mt-2">
+        Maximum file size: 2MB. Supported formats: JPG, PNG
+      </div>
+    </div>
 
-              <div class="col-md-6 mb-3">
-                <label class="form-label">First Name</label>
-                <input type="text" name="fname" class="form-control" placeholder="First name" value="<%=user.firstname%>">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Last Name</label>
-                <input type="text" name="lname" class="form-control" placeholder="Last name" value="<%=user.lastname%>">
-              </div>
-            </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">First Name <span class="text-danger">*</span></label>
+      <input type="text" name="fname" id="fname" class="form-control" placeholder="First name" value="<%=user.firstname%>" required>
+      <div class="invalid-feedback" id="fnameError">
+        First name is required
+      </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Last Name</label>
+      <input type="text" name="lname" class="form-control" placeholder="Last name" value="<%=user.lastname%>">
+    </div>
+  </div>
 
-            <div class="mb-4">
-              <label class="form-label">Date of Birth</label>
-             <input type="date" name="dob" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>">
-
-            </div>
-
-            <button type="submit" class="btn btn-update px-4">Update Profile</button>
-          </form>
+  <div class="mb-4 d-flex align-items-end gap-3">
+    <div class="flex-grow-1">
+      <label class="form-label">Date of Birth</label>
+      <input type="date" name="dob" class="form-control" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>">
+    </div>
+    <button type="submit" class="btn btn-update px-4">
+      <i class="fas fa-save me-2"></i>Update Profile
+    </button>
+  </div>
+</form>
 
         </div>
       </div>
     </div>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
     function previewPhoto() {
       const input = document.getElementById('profilePic');
       const preview = document.getElementById('profilePreview');
       const file = input.files[0];
-      if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          preview.src = reader.result;
-        };
-        reader.readAsDataURL(file);
+
+      if (!file) return;
+
+      const validTypes = ['image/jpeg', 'image/png'];
+      const maxSize = 2 * 1024 * 1024; 
+
+      if (!validTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid File Type',
+          text: 'Only JPG and PNG images are allowed.',
+          confirmButtonColor: '#ff4646'
+        });
+        input.value = ''; 
+        return;
       }
+
+      if (file.size > maxSize) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'File Too Large',
+          text: 'Maximum file size is 2MB.',
+          confirmButtonColor: '#ff4646'
+        });
+        input.value = ''; 
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.src = reader.result;
+      };
+      reader.readAsDataURL(file);
     }
-  document.querySelector('form').addEventListener('submit', function (e) {
-    const dobInput = document.querySelector('input[name="dob"]');
-    const dobValue = new Date(dobInput.value);
-    const today = new Date();
-
-    const age = today.getFullYear() - dobValue.getFullYear();
-    const monthDiff = today.getMonth() - dobValue.getMonth();
-    const dayDiff = today.getDate() - dobValue.getDate();
-
-    const isBirthdayPassed = monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0);
-    const actualAge = isBirthdayPassed ? age : age - 1;
-
-    if (!dobInput.value || actualAge < 13) {
-      e.preventDefault();
-      Swal.fire({
-        icon: 'warning',
-        title: 'Invalid Date of Birth',
-        text: 'You must be at least 13 years old to update your profile.',
-        confirmButtonColor: '#ff4646'
-      });
-    }
-  });
-
-  function previewPhoto() {
-    const input = document.getElementById('profilePic');
-    const preview = document.getElementById('profilePreview');
-    const file = input.files[0];
-
-    if (!file) return;
-
-    const validTypes = ['image/jpeg', 'image/png'];
-    const maxSize = 2 * 1024 * 1024; 
-
-    if (!validTypes.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid File Type',
-        text: 'Only JPG and PNG images are allowed.',
-        confirmButtonColor: '#ff4646'
-      });
-      input.value = ''; 
-      return;
-    }
-
-    if (file.size > maxSize) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'File Too Large',
-        text: 'Maximum file size is 2MB.',
-        confirmButtonColor: '#ff4646'
-      });
-      input.value = ''; 
-      return;
-    }
-
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      preview.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  }
     
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+      const firstNameInput = document.getElementById('fname');
+      const firstNameValue = firstNameInput.value.trim();
+      
+      firstNameInput.classList.remove('is-invalid');
+      document.getElementById('fnameError').style.display = 'none';
+      
+      if (!firstNameValue) {
+        e.preventDefault();
+        firstNameInput.classList.add('is-invalid');
+        document.getElementById('fnameError').style.display = 'block';
+        
+        firstNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstNameInput.focus();
+        
+        return false;
+      }
+      
+      const dobInput = document.querySelector('input[name="dob"]');
+      if (dobInput.value) {
+        const dobValue = new Date(dobInput.value);
+        const today = new Date();
+
+        const age = today.getFullYear() - dobValue.getFullYear();
+        const monthDiff = today.getMonth() - dobValue.getMonth();
+        const dayDiff = today.getDate() - dobValue.getDate();
+
+        const isBirthdayPassed = monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0);
+        const actualAge = isBirthdayPassed ? age : age - 1;
+
+        if (actualAge < 13) {
+          e.preventDefault();
+          Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Date of Birth',
+            text: 'You must be at least 13 years old to update your profile.',
+            confirmButtonColor: '#ff4646'
+          });
+          return false;
+        }
+      }
+    });
   </script>
 
 <%- include('../../views/partials/user/footer') %>
