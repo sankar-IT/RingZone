@@ -537,8 +537,8 @@ const verifyRazorPayOrder = async (req, res) => {
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
             if (order_id) {
                 await Order.findByIdAndUpdate(order_id, {
-                    status: 'Failed',
-                    paymentStatus: 'Failed',
+                    status: 'pending',
+                    paymentStatus: 'pending',
                     failureReason: 'Missing payment verification fields'
                 });
             }
@@ -553,12 +553,12 @@ const verifyRazorPayOrder = async (req, res) => {
 
         if (expectedSignature !== razorpay_signature) {
             await Order.findByIdAndUpdate(order_id, {
-                status: 'Failed',
-                paymentStatus: 'Failed',
+                status: 'Pending',
+                paymentStatus: 'Pending',
                 failureReason: 'Invalid payment signature',
                 $push: {
                     statusHistory: {
-                        status: 'Failed',
+                        status: 'Pending',
                         changedAt: new Date(),
                         changedBy: 'system'
                     }
@@ -709,8 +709,8 @@ const paymentFailurePage = async (req, res) => {
 
         if (order.status === 'Pending') {
             await Order.findByIdAndUpdate(order._id, {
-                status: 'Failed',
-                paymentStatus: 'Failed',
+                status: 'Pending',
+                paymentStatus: 'Pending',
                 failureReason: 'Payment failed or was cancelled'
             });
             order.status = 'Failed';
