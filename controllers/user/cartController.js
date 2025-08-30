@@ -88,11 +88,11 @@ const getCartPage=async(req,res)=>{
     if(req.session.user){
 
       const userId=req.session.user._id;
-
       const cartProducts= await Cart.findOne({user:userId}).populate('items.product')
-
         res.locals.cartCount = cartProducts?.items?.length || 0;
         res.render('user-cart',{cartProducts , user:req.session.user, cartCount: res.locals.cartCount})
+      
+
       
       
     }else{

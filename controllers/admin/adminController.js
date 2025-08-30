@@ -130,6 +130,68 @@ const loadDashboard = async (req, res) => {
       { $limit: 10 }
     ]);
 
+// const value="Premium Smartphones"
+//   const findCategory= await Order.aggregate([
+//     {$unwind:'$orderedItems'},
+//     {$lookup:{
+//       from:'products',
+//       localField:'orderedItems.product',
+//       foreignField:'_id',
+//       as:'productDetails'
+//     }},
+//     {$unwind:'$productDetails'},
+//     {$lookup:{
+//       from:'categories',
+//       localField:'productDetails.category',
+//       foreignField:'_id',
+//       as:'categoryDetails'
+//     }},
+//     {$unwind:'$categoryDetails'},
+//     {$match:{'categoryDetails.name':value}},
+//     {$group:{
+//       _id:'$productDetails.productName',
+//       sum:{$sum:'$orderedItems.quantity'},
+//       totalsales:{$sum:{$multiply:['$orderedItems.quantity','$orderedItems.price']}}
+//     }},
+//     {$project:{
+//       _id:1,
+//       sum:1,
+//       totalsales:1
+//     }},
+//     {$sort:{'sum':-1}},
+//     {$limit: 1}
+//   ])
+
+//   console.log(findCategory);
+
+//   if(findCategory.length>0)
+//   {
+//     const productOffer=findCategory[0]._id;
+//     await Product.findByIdAndUpdate(productOffer,{
+//       $set:{offer:20}
+//     })
+//   }
+
+
+// const findProduct= await Order.aggregate([
+//   {$unwind:'$orderedItems'},
+//   {
+//     $lookup:{
+//       from:'products',
+//       localField:'orderedItems.product',
+//       foreignField:'_id',
+//       as:'productDetails'
+//     }},
+//     {$unwind:'$productDetails'},
+//     {$match:{'$productDetails.offer':{$gte:20,$lte:50}}},
+//     {$project:{
+//       _id:0,
+//       ProductName:'$productDetails.productName',
+//       offer:'$productDetails.offer'
+//     }}
+// ])
+// console.log(findProduct);
+
    
     const categorySales = await Order.aggregate([
       { $match: dateFilter },
