@@ -118,6 +118,7 @@ const loadDashboard = async (req, res) => {
       },
       { $unwind: '$productData' },
       {
+        
         $group: {
           _id: '$productData.productName',
           totalSold: { $sum: '$orderedItems.quantity' }
