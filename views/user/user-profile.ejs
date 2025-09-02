@@ -468,81 +468,106 @@
 })
 
 document.addEventListener('DOMContentLoaded', function() {
-  const changeEmailForm = document.getElementById('changeEmailForm');
-  const emailVerificationSection = document.getElementById('emailVerificationSection');
-  const sendVerificationBtn = document.getElementById('sendVerificationBtn');
-  const submitEmailChangeBtn = document.getElementById('submitEmailChangeBtn');
-  const newEmailInput = document.getElementById('newEmail');
-  const verificationCodeInput = document.getElementById('verificationCode');
+    const changeEmailForm = document.getElementById('changeEmailForm');
+    const emailVerificationSection = document.getElementById('emailVerificationSection');
+    const sendVerificationBtn = document.getElementById('sendVerificationBtn');
+    const submitEmailChangeBtn = document.getElementById('submitEmailChangeBtn');
+    const newEmailInput = document.getElementById('newEmail');
+    const verificationCodeInput = document.getElementById('verificationCode');
 
-  if (!changeEmailForm) return;
+    if (!changeEmailForm) return;
 
-  let verificationCode = null;
+    let verificationCode = null;
 
-  changeEmailForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
+    changeEmailForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
 
-    if (!verificationCode) {
-      try {
-        const response = await fetch('/send-email-verification', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            newEmail: newEmailInput.value,
-            currentPassword: document.getElementById('currentPasswordForEmail').value
-          })
-        });
+      if (!verificationCode) {
+        try {
+          const response = await fetch('/send-email-verification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              newEmail: newEmailInput.value,
+              currentPassword: document.getElementById('currentPasswordForEmail').value
+            })
+          });
 
-        const result = await response.json();
+          const result = await response.json();
 
-        if (response.ok) {
-          verificationCode = result.tempCode; 
-          emailVerificationSection.style.display = 'block';
-          sendVerificationBtn.style.display = 'none';
-          submitEmailChangeBtn.style.display = 'block';
-          submitEmailChangeBtn.textContent = 'Verify & Change Email';
-        } else {
-          alert(result.error || 'Failed to send verification');
+          if (response.ok) {
+            verificationCode = result.tempCode; 
+            emailVerificationSection.style.display = 'block';
+            sendVerificationBtn.style.display = 'none';
+            submitEmailChangeBtn.style.display = 'block';
+            submitEmailChangeBtn.textContent = 'Verify & Change Email';
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.error || 'Failed to send verification'
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to send verification email'
+          });
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to send verification email');
-      }
-    } else {
-      
-      const enteredCode = document.getElementById('verificationCode').value;
-      if (enteredCode !== verificationCode) {
-        alert('Invalid verification code!');
-        return;
-      }
-
-      try {
-        const formData = new URLSearchParams(new FormData(changeEmailForm));
-        const response = await fetch('/resend-email-verification', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: formData
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          alert('Email changed successfully! Please log in again.');
-          window.location.reload();
-        } else {
-          alert(result.error || 'Failed to change email');
+      } else {
+        const enteredCode = document.getElementById('verificationCode').value;
+        if (enteredCode !== verificationCode) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Code',
+            text: 'The verification code you entered is incorrect.'
+          });
+          return;
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while changing email');
+
+        try {
+          const formData = new URLSearchParams(new FormData(changeEmailForm));
+          const response = await fetch('/resend-email-verification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Email Changed!',
+              text: 'Your email has been updated successfully. Please log in again.',
+              confirmButtonColor: '#ff4646'
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.error || 'Failed to change email'
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while changing email'
+          });
+        }
       }
-    }
+    });
   });
-});
 </script>
 
 </body>
