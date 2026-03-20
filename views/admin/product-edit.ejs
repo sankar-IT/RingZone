@@ -163,7 +163,7 @@
 
   <div class="sidebar">
     <h2>RingZone</h2>
-    <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="/admin/productlist" class="nav-link"><i class="fas fa-box-open"></i> Products</a>
     <a href="/admin/orders-list" class="nav-link"><i class="fas fa-receipt"></i> Order Lists</a>
     <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a>
@@ -379,10 +379,7 @@
 
     document.getElementById('editProductForm').addEventListener('submit', function(e) {
       const variants = [];
-      
- 
       document.querySelectorAll('.accordion-item').forEach(item => {
-        const variantId = item.id;
         const variant = {
           color: item.querySelector('[name="color"]').value,
           storage: item.querySelector('[name="storage"]').value,
@@ -391,11 +388,25 @@
           quantity: parseInt(item.querySelector('[name="quantity"]').value),
           images: [] 
         };
-        
         variants.push(variant);
       });
-      
       document.getElementById('variantsData').value = JSON.stringify(variants);
+    });
+
+    // Auto-update discountPrice when regularPrice changes
+    document.querySelectorAll('.accordion-item').forEach(item => {
+      const regularInput = item.querySelector('[name="regularPrice"]');
+      const discountInput = item.querySelector('[name="discountPrice"]');
+      if (regularInput && discountInput) {
+        regularInput.addEventListener('input', function() {
+          const reg = parseFloat(this.value) || 0;
+          const disc = parseFloat(discountInput.value) || 0;
+          // If discount was same as regular (no offer), keep them in sync
+          if (disc === 0 || disc >= reg) {
+            discountInput.value = reg;
+          }
+        });
+      }
     });
     
 

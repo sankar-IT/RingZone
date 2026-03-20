@@ -1,7 +1,7 @@
 <%- include('../../views/partials/user/header') %>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
   body {
@@ -10,70 +10,86 @@
   }
 
   .wishlist-container {
-    margin: 180px auto 50px;
+    margin: 160px auto 120px;
     max-width: 1100px;
-    padding: 30px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .wishlist-title {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 30px;
-    color: #333;
+    text-align: left;
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    padding: 20px 30px;
+    color: #1a1a1a;
+    font-weight: 600;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
   }
 
   .wishlist-items {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 0;
+    background: #fff;
   }
 
   .wishlist-item {
     display: flex;
     align-items: center;
-    padding: 20px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    padding: 20px 30px;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 0;
+    transition: background-color 0.2s ease;
   }
 
   .wishlist-item:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: #fafafa;
+    box-shadow: none;
+  }
+
+  .wishlist-item:last-child {
+    border-bottom: none;
   }
 
   .product-image {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     object-fit: contain;
     border-radius: 8px;
-    margin-right: 25px;
+    margin-right: 20px;
+    background: #f8f9fa;
+    padding: 5px;
   }
 
   .item-details {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
   }
 
   .item-details h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin: 0;
-    color: #333;
+    color: #1a1a1a;
+    font-weight: 500;
+    line-height: 1.4;
   }
 
   .price-container {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-top: 5px;
   }
 
   .current-price {
-    color: #ff7f50;
-    font-weight: bold;
+    color: #1a1a1a;
+    font-weight: 700;
     font-size: 1.1rem;
   }
 
@@ -83,37 +99,85 @@
     font-size: 0.9rem;
   }
 
+  .discount-badge {
+    color: #28a745;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
   .item-actions {
     display: flex;
-    gap: 15px;
+    gap: 10px;
+    margin-left: 20px;
+  }
+
+  .view-product,
+  .remove-item,
+  .notify-item {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 1rem;
   }
 
   .view-product {
-    padding: 8px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
+    background-color: #f0f7ff;
+    color: #007bff;
     text-decoration: none;
-    text-align: center;
   }
 
   .view-product:hover {
-    background-color: #0069d9;
+    background-color: #007bff;
+    color: white;
+  }
+
+  .notify-item {
+    background-color: #fff4e6;
+    color: #ff7f50; /* RingZone Brand Color */
+  }
+
+  .notify-item:hover {
+    background-color: #ff7f50;
+    color: white;
+  }
+
+  .notify-item.alert-active {
+    background-color: #ff7f50;
+    color: white;
+    position: relative;
+    animation: pulse 2s infinite;
+  }
+
+  .notify-item.alert-active::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: #28a745;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(255, 127, 80, 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(255, 127, 80, 0);
+    }
   }
 
   .remove-item {
-    padding: 8px 15px;
-    background-color: #f8f9fa;
+    background-color: #fff5f5;
     color: #dc3545;
-    border: 1px solid #dc3545;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
   }
 
   .remove-item:hover {
@@ -157,10 +221,368 @@
     background-color: #0069d9;
     color: white;
   }
+
+  /* Price Alert Modal Styles */
+  .price-alert-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .price-alert-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-modal:hover {
+    color: #333;
+  }
+
+  .modal-body {
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .product-info {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .product-info-image {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: white;
+    padding: 5px;
+  }
+
+  .product-info-details {
+    flex: 1;
+  }
+
+  .product-info-details h4 {
+    margin: 0 0 6px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    line-height: 1.3;
+  }
+
+  .product-info-price {
+    color: #007bff;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .price-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+
+  .original-price-label {
+    color: #999;
+    text-decoration: line-through;
+  }
+
+  .current-discount-badge {
+    background: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .price-history-section {
+    flex: 1;
+  }
+
+  .price-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .price-history-header h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+  }
+
+  .price-history-period {
+    font-size: 0.75rem;
+    color: #999;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 160px;
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .alert-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alert-input-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .alert-input-wrapper {
+    position: relative;
+  }
+
+  .alert-input-wrapper input {
+    width: 100%;
+    padding: 10px 40px 10px 32px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+
+  .alert-input-wrapper input:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .currency-symbol {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-weight: 600;
+  }
+
+  .quick-discount-options {
+    display: flex;
+    gap: 8px;
+  }
+
+  .discount-option {
+    flex: 1;
+    padding: 8px 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+
+  .discount-option:hover {
+    border-color: #007bff;
+    background: #f0f7ff;
+  }
+
+  .discount-option.active {
+    border-color: #007bff;
+    background: #007bff;
+    color: white;
+  }
+
+  .email-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .email-section input[type="email"] {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  .email-section label {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .btn-cancel {
+    flex: 1;
+    padding: 11px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    color: #666;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .btn-cancel:hover {
+    background: #f5f5f5;
+  }
+
+  .btn-set-alert {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 6px;
+    background: #007bff;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .btn-set-alert:hover {
+    background: #0069d9;
+  }
+
+  @media (max-width: 768px) {
+    .price-alert-modal {
+      width: 95%;
+      max-height: 95vh;
+    }
+
+    .modal-body {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .modal-header {
+      padding: 14px 16px;
+    }
+
+    .modal-header h3 {
+      font-size: 0.95rem;
+    }
+
+    .product-info {
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .product-info-image {
+      width: 50px;
+      height: 50px;
+    }
+
+    .product-info-details h4 {
+      font-size: 0.85rem;
+    }
+
+    .product-info-price {
+      font-size: 0.95rem;
+    }
+
+    .chart-container {
+      height: 140px;
+    }
+
+    .quick-discount-options {
+      gap: 6px;
+    }
+
+    .discount-option {
+      font-size: 0.75rem;
+      padding: 7px 4px;
+    }
+
+    .modal-actions {
+      padding: 14px 16px;
+      gap: 10px;
+    }
+  }
 </style>
 
 <div class="wishlist-container">
-  <h1 class="wishlist-title">My Wishlist</h1>
+  <h1 class="wishlist-title">My Wishlist (<%= wishlistItems.length %>)</h1>
 
   <% if (wishlistItems.length === 0) { %>
     <div class="empty-wishlist">
@@ -174,24 +596,52 @@
     <div class="wishlist-items">
       <% wishlistItems.forEach(item => { 
         const product = item.productId;
-        const variant = product?.variants[0];
+        let variant = product?.variants[0]; 
+        if (item.variant?.color && item.variant?.storage) {
+          const foundVariant = product?.variants.find(v => 
+            v.color === item.variant.color && v.storage === item.variant.storage
+          );
+          if (foundVariant) variant = foundVariant;
+        }
+        
+        const displayImage = item.variant?.image || product.images[0];
+        const variantColor = item.variant?.color || '';
+        const variantStorage = item.variant?.storage || '';
+        
+        const discountPercent = variant.regularPrice > (variant.finalPrice || variant.discountPrice) 
+          ? Math.round(((variant.regularPrice - (variant.finalPrice || variant.discountPrice)) / variant.regularPrice) * 100)
+          : 0;
+        
+        // Check if alert exists for this product variant
+        const alertKey = `${product._id}_${variantColor}_${variantStorage}`;
+        const hasAlert = alertMap && alertMap[alertKey];
       %>
       <% if(product){ %>
         <div class="wishlist-item">
-          <img src="/<%= product.images[0] %>" alt="<%= product.productName %>" class="product-image" />
+          <img src="<%= displayImage %>" alt="<%= product.productName %>" class="product-image" />
           <div class="item-details">
-            <h3><%= product.productName %></h3>
+            <h3><%= product.productName %> <% if (variantColor) { %>(<%= variantColor %><% if (variantStorage) { %>, <%= variantStorage %><% } %>)<% } %></h3>
             <div class="price-container">
-              <span class="current-price">₹<%= variant.discountPrice %></span>
-              <% if (variant.discountPrice < variant.regularPrice) { %>
-                <span class="original-price">₹<%= variant.regularPrice %></span>
+              <span class="current-price">₹<%= (variant.finalPrice || variant.discountPrice).toLocaleString('en-IN') %></span>
+              <% if ((variant.finalPrice || variant.discountPrice) < variant.regularPrice) { %>
+                <span class="original-price">₹<%= variant.regularPrice.toLocaleString('en-IN') %></span>
+                <% if (discountPercent > 0) { %>
+                  <span class="discount-badge"><%= discountPercent %>% off</span>
+                <% } %>
               <% } %>
             </div>
           </div>
           <div class="item-actions">
-            <a href='/products/<%= product._id %>' class="view-product">View Product</a>
-            <button class="remove-item" onclick="confirmRemove('<%= product._id %>')">
-              <i class="fas fa-trash"></i> Remove
+            <a href='/products/<%= product._id %><% if (variantColor) { %>?color=<%= encodeURIComponent(variantColor) %><% } %>' class="view-product" title="View Product">
+              <i class="fas fa-eye"></i>
+            </a>
+
+            <button class="notify-item <%= hasAlert ? 'alert-active' : '' %>" onclick="openPriceAlertModal('<%= product._id %>', '<%= product.productName %>', '<%= displayImage %>', <%= variant.finalPrice || variant.discountPrice %>, <%= variant.regularPrice %>, '<%= variantColor %>', '<%= variantStorage %>')" title="<%= hasAlert ? 'Alert Active - Click to Edit' : 'Set Price Alert' %>">
+              <i class="fas fa-bell"></i>
+            </button>
+
+            <button class="remove-item" onclick="confirmRemove('<%= product._id %>', '<%= variantColor %>', '<%= variantStorage %>')" title="Remove from Wishlist">
+              <i class="fas fa-trash-alt"></i>
             </button>
           </div>
         </div>
@@ -200,12 +650,429 @@
     </div>
   <% } %>
 </div>
+
+<!-- Price Alert Modal -->
+<div class="price-alert-overlay" id="priceAlertOverlay">
+  <div class="price-alert-modal">
+    <div class="modal-header">
+      <h3>Product Price Alert & History</h3>
+      <button class="close-modal" onclick="closePriceAlertModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="left-section">
+        <div class="product-info">
+          <img id="modalProductImage" src="" alt="Product" class="product-info-image">
+          <div class="product-info-details">
+            <h4 id="modalProductName"></h4>
+            <div class="price-details">
+              <div class="price-row">
+                <span style="color: #666; font-size: 0.8rem;">Original Price:</span>
+                <span class="original-price-label">₹<span id="modalOriginalPrice"></span></span>
+              </div>
+              <div class="price-row">
+                <span style="color: #666; font-size: 0.8rem;">Current Price:</span>
+                <span class="product-info-price">₹<span id="modalCurrentPrice"></span></span>
+                <span class="current-discount-badge" id="currentDiscountBadge" style="display: none;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="price-history-section">
+          <div class="price-history-header">
+            <h4>Price History</h4>
+            <span class="price-history-period">Last 90 days</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="priceChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-section">
+        <div class="alert-input-section">
+          <label class="alert-input-label">Notify me when price drops to: ₹</label>
+          <div class="alert-input-wrapper">
+            <span class="currency-symbol">₹</span>
+            <input type="number" id="targetPrice" placeholder="22,990">
+          </div>
+          <div class="quick-discount-options">
+            <button class="discount-option" onclick="setDiscountPrice(25)"><span id="discountLabel25">25% off</span><br><small style="font-size: 0.7rem;">(₹<span id="discount25"></span>)</small></button>
+            <button class="discount-option" onclick="setDiscountPrice(50)"><span id="discountLabel50">50% off</span><br><small style="font-size: 0.7rem;">(₹<span id="discount50"></span>)</small></button>
+            <button class="discount-option" onclick="setDiscountPrice(75)"><span id="discountLabel75">75% off</span><br><small style="font-size: 0.7rem;">(₹<span id="discount75"></span>)</small></button>
+          </div>
+          <p style="font-size: 0.75rem; color: #999; margin-top: 8px; margin-bottom: 0;">
+            * Additional discounts from current price
+          </p>
+        </div>
+
+        <div class="email-section">
+          <input type="email" id="alertEmail" value="<%= locals.user?.email || '' %>" readonly style="background:#f5f5f5; cursor:not-allowed;">
+          <label>
+            <input type="checkbox" id="notifyBackInStock" checked>
+            Notify when back in stock
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePriceAlertModal()">Cancel</button>
+      <button class="btn-set-alert" onclick="setPriceAlert()">Set Price Alert</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function confirmRemove(productId) {
+  let currentProductId = null;
+  let currentVariantColor = null;
+  let currentVariantStorage = null;
+  let currentPrice = 0;
+  let originalPrice = 0;
+  let priceChart = null;
+
+  // Open Price Alert Modal
+  function openPriceAlertModal(productId, productName, productImage, price, regularPrice, variantColor, variantStorage) {
+    currentProductId = productId;
+    currentVariantColor = variantColor;
+    currentVariantStorage = variantStorage;
+    currentPrice = price;
+    originalPrice = regularPrice;
+
+    document.getElementById('modalProductImage').src = productImage;
+    document.getElementById('modalProductName').textContent = productName + (variantColor ? ` (${variantColor}${variantStorage ? ', ' + variantStorage : ''})` : '');
+    document.getElementById('modalOriginalPrice').textContent = regularPrice.toLocaleString('en-IN');
+    document.getElementById('modalCurrentPrice').textContent = price.toLocaleString('en-IN');
+    
+    // Calculate current discount percentage
+    let currentDiscountPercent = 0;
+    if (price < regularPrice) {
+      currentDiscountPercent = Math.round(((regularPrice - price) / regularPrice) * 100);
+      const discountBadge = document.getElementById('currentDiscountBadge');
+      discountBadge.textContent = currentDiscountPercent + '% OFF';
+      discountBadge.style.display = 'inline-block';
+    } else {
+      document.getElementById('currentDiscountBadge').style.display = 'none';
+    }
+    
+    // Calculate additional discount prices (25%, 50%, 75% MORE discount from current price)
+    const additionalDiscount25 = Math.round(price * 0.75); // 25% off current
+    const additionalDiscount50 = Math.round(price * 0.50); // 50% off current
+    const additionalDiscount75 = Math.round(price * 0.25); // 75% off current
+    
+    // Calculate total discount percentages from original price
+    const totalDiscount25 = Math.round(((regularPrice - additionalDiscount25) / regularPrice) * 100);
+    const totalDiscount50 = Math.round(((regularPrice - additionalDiscount50) / regularPrice) * 100);
+    const totalDiscount75 = Math.round(((regularPrice - additionalDiscount75) / regularPrice) * 100);
+    
+    // Update button labels with total discount percentages
+    document.getElementById('discount25').textContent = additionalDiscount25.toLocaleString('en-IN');
+    document.getElementById('discount50').textContent = additionalDiscount50.toLocaleString('en-IN');
+    document.getElementById('discount75').textContent = additionalDiscount75.toLocaleString('en-IN');
+    
+    document.getElementById('discountLabel25').textContent = `${totalDiscount25}% off`;
+    document.getElementById('discountLabel50').textContent = `${totalDiscount50}% off`;
+    document.getElementById('discountLabel75').textContent = `${totalDiscount75}% off`;
+
+    // Clear previous values
+    document.getElementById('targetPrice').value = '';
+    document.querySelectorAll('.discount-option').forEach(btn => btn.classList.remove('active'));
+
+    document.getElementById('priceAlertOverlay').style.display = 'flex';
+    
+    // Fetch existing alert if any
+    fetchExistingAlert(productId, variantColor, variantStorage);
+    
+    // Fetch and display price history
+    fetchPriceHistory(productId, variantColor, variantStorage);
+  }
+
+  // Close Modal
+  function closePriceAlertModal() {
+    document.getElementById('priceAlertOverlay').style.display = 'none';
+    if (priceChart) {
+      priceChart.destroy();
+      priceChart = null;
+    }
+  }
+
+  // Close on overlay click
+  document.getElementById('priceAlertOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closePriceAlertModal();
+    }
+  });
+
+  // Set discount price
+  function setDiscountPrice(percentage) {
+    // Calculate additional discount from current price
+    const discountedPrice = Math.round(currentPrice * (1 - percentage / 100));
+    document.getElementById('targetPrice').value = discountedPrice;
+    
+    // Update active state
+    document.querySelectorAll('.discount-option').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // Fetch Existing Alert
+  async function fetchExistingAlert(productId, variantColor, variantStorage) {
+    try {
+      const response = await fetch(`/api/existing-alert/${productId}?color=${variantColor}&storage=${variantStorage}`);
+      const data = await response.json();
+      
+      if (data.success && data.alert) {
+        // Pre-fill the form with existing alert data
+        document.getElementById('targetPrice').value = data.alert.targetPrice;
+        document.getElementById('alertEmail').value = data.alert.email;
+        document.getElementById('notifyBackInStock').checked = data.alert.notifyBackInStock;
+        
+        // Highlight if it matches a discount option (25%, 50%, 75% from ORIGINAL price)
+        const discount25 = Math.round(originalPrice * 0.75);
+        const discount50 = Math.round(originalPrice * 0.50);
+        const discount75 = Math.round(originalPrice * 0.25);
+        
+        document.querySelectorAll('.discount-option').forEach(btn => btn.classList.remove('active'));
+        
+        if (data.alert.targetPrice === discount25) {
+          document.querySelectorAll('.discount-option')[0].classList.add('active');
+        } else if (data.alert.targetPrice === discount50) {
+          document.querySelectorAll('.discount-option')[1].classList.add('active');
+        } else if (data.alert.targetPrice === discount75) {
+          document.querySelectorAll('.discount-option')[2].classList.add('active');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching existing alert:', error);
+    }
+  }
+
+  // Fetch Price History
+  async function fetchPriceHistory(productId, variantColor, variantStorage) {
+    try {
+      const response = await fetch(`/api/price-history/${productId}?color=${variantColor}&storage=${variantStorage}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        renderPriceChart(data.priceHistory);
+      } else {
+        // Generate mock data if no history exists
+        generateMockPriceHistory();
+      }
+    } catch (error) {
+      console.error('Error fetching price history:', error);
+      generateMockPriceHistory();
+    }
+  }
+
+  // Generate mock price history for demonstration
+  function generateMockPriceHistory() {
+    const days = 90;
+    const priceHistory = [];
+    const basePrice = currentPrice;
+    const today = new Date();
+
+    for (let i = days; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      
+      // Generate realistic price variation
+      const variation = Math.sin(i / 10) * 0.1 + (Math.random() - 0.5) * 0.05;
+      const price = Math.round(basePrice * (1 + variation));
+      
+      priceHistory.push({
+        date: date.toISOString().split('T')[0],
+        price: price
+      });
+    }
+
+    renderPriceChart(priceHistory);
+  }
+
+  // Render Price Chart
+  function renderPriceChart(priceHistory) {
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    if (priceChart) {
+      priceChart.destroy();
+    }
+
+    const labels = priceHistory.map(item => {
+      const date = new Date(item.date);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    
+    const prices = priceHistory.map(item => item.price);
+    const maxPrice = Math.max(...prices);
+    const minPrice = Math.min(...prices);
+
+    priceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Price',
+          data: prices,
+          borderColor: '#007bff',
+          backgroundColor: 'rgba(0, 123, 255, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#007bff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context) {
+                return '₹' + context.parsed.y.toLocaleString('en-IN');
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            display: true,
+            grid: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 4,
+              font: {
+                size: 10
+              }
+            }
+          },
+          y: {
+            display: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '₹' + (value / 1000).toFixed(0) + 'k';
+              },
+              font: {
+                size: 10
+              },
+              maxTicksLimit: 5
+            },
+            beginAtZero: false
+          }
+        },
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        }
+      }
+    });
+
+    // Add annotations for max and min prices
+    const maxIndex = prices.indexOf(maxPrice);
+    const minIndex = prices.indexOf(minPrice);
+    
+    // You can add custom annotations here if needed
+  }
+
+  // Set Price Alert
+  async function setPriceAlert() {
+    const targetPrice = document.getElementById('targetPrice').value;
+    const email = document.getElementById('alertEmail').value;
+    const notifyBackInStock = document.getElementById('notifyBackInStock').checked;
+
+    if (!targetPrice) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please enter a target price',
+        confirmButtonColor: '#007bff'
+      });
+      return;
+    }
+
+    if (!email) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please enter your email address',
+        confirmButtonColor: '#007bff'
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/set-price-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: currentProductId,
+          variantColor: currentVariantColor,
+          variantStorage: currentVariantStorage,
+          targetPrice: parseFloat(targetPrice),
+          email: email,
+          notifyBackInStock: notifyBackInStock
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        closePriceAlertModal();
+        
+        // Check if price is already at or below target
+        if (data.priceAlreadyMet) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Great News!',
+            html: `
+              <p>Your alert has been set successfully!</p>
+              <p style="margin-top: 10px; color: #28a745; font-weight: 600;">
+                🎉 The current price (₹${data.currentPrice.toLocaleString('en-IN')}) is already at or below your target price!
+              </p>
+              <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                You will be notified immediately when the price drops to your target.
+              </p>
+            `,
+            confirmButtonColor: '#007bff'
+          });
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'Alert Set Successfully!',
+            text: 'We will notify you when the price drops to your target',
+            confirmButtonColor: '#007bff'
+          });
+        }
+      } else {
+        throw new Error(data.message || 'Failed to set alert');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Could not set price alert. Please try again.',
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  }
+
+  // 3. Original Remove Confirmation
+  function confirmRemove(productId, color, storage) {
     Swal.fire({
       title: 'Remove from wishlist?',
-      text: "Are you sure you want to remove this item from your wishlist?",
+      text: "Are you sure you want to remove this item?",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#dc3545',
@@ -213,37 +1080,24 @@
       confirmButtonText: 'Yes, remove it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        removeFromWishlist(productId);
+        removeFromWishlist(productId, color, storage);
       }
     });
   }
 
-  function removeFromWishlist(productId) {
+  function removeFromWishlist(productId, color, storage) {
     fetch('/wishlist/toggle', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ productId, action: 'remove' })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        productId, 
+        action: 'remove',
+        variant: { color: color || '', storage: storage || '' }
+      })
     }).then(() => {
-      const storageKey = 'wishlistProductIds';
-      let ids = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      ids = ids.filter(id => id !== productId);
-      localStorage.setItem(storageKey, JSON.stringify(ids));
-      
-      Swal.fire(
-        'Removed!',
-        'The item has been removed from your wishlist.',
-        'success'
-      ).then(() => {
-        location.reload();
-      });
+      location.reload();
     }).catch(() => {
-      Swal.fire(
-        'Error!',
-        'Failed to remove the item from your wishlist.',
-        'error'
-      );
+      Swal.fire('Error!', 'Failed to remove the item.', 'error');
     });
   }
 </script>

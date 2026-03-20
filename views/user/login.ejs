@@ -10,17 +10,71 @@
   <style>
     .forget-password-link{
       font-size: 0.875rem;
-      color:blue;
+      color: #3b82f6;
       text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .forget-password-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background-color: #3b82f6;
+      transition: width 0.3s ease;
     }
     .forget-password-link:hover{
-      color:rgb(70, 70, 213);
-      text-decoration: underline;
+      color: #2563eb;
+    }
+    .forget-password-link:hover::after {
+      width: 100%;
+    }
+    .signup-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .signup-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background-color: #3b82f6;
+      transition: width 0.3s ease;
+    }
+    .signup-link:hover {
+      color: #2563eb;
+    }
+    .signup-link:hover::after {
+      width: 100%;
     }
     .form-group{
       display: flex;
       justify-content: end;
       margin-top: 5px;
+    }
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #6b7280;
+      transition: color 0.2s;
+    }
+    .password-toggle:hover {
+      color: #374151;
     }
   </style>
 </head>
@@ -39,7 +93,14 @@
       <form  action="/login" method="post" class="space-y-4">
         <input name="email" type="email" placeholder="Email address" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
         
-        <input name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <div class="password-wrapper">
+          <input id="passwordInput" name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="padding-right: 40px;" />
+          <svg id="togglePassword" class="password-toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path id="eyeIcon" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle id="eyeCircle" cx="12" cy="12" r="3"></circle>
+            <line id="eyeSlash" x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" style="display: none;"></line>
+          </svg>
+        </div>
         <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition">Login</button>
       </form>
     
@@ -65,7 +126,7 @@
       </a>
       <p class="text-center mt-4 text-sm text-gray-600">
         Don't have an account?
-        <a href="/signup" class="text-blue-600 hover:underline">Sign up</a>
+        <a href="/signup" class="signup-link">Sign up</a>
       </p>
     </div>
   </div>
@@ -84,6 +145,22 @@ if (error === 'blocked') {
       });
 }
 
+// Password toggle functionality
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('passwordInput');
+const eyeSlash = document.getElementById('eyeSlash');
+
+togglePassword.addEventListener('click', function() {
+  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInput.setAttribute('type', type);
+  
+  // Toggle eye slash visibility
+  if (type === 'text') {
+    eyeSlash.style.display = 'block';
+  } else {
+    eyeSlash.style.display = 'none';
+  }
+});
 
   </script>
 

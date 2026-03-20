@@ -221,7 +221,7 @@
 
   <div class="sidebar">
     <h2>RingZone</h2>
-    <a href="/admin/Dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="/admin/dashboard" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="/admin/productlist" class="nav-link"><i class="fas fa-box-open"></i> Products</a>
     <a href="/admin/orders-list" class="nav-link"><i class="fas fa-receipt"></i> Order Lists</a>
     <a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a>
@@ -596,11 +596,18 @@
             setTimeout(() => {
                 if (cropper) cropper.destroy();
                 cropper = new Cropper(document.getElementById('cropperImage'), {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    autoCropArea: 0.8,
+                    aspectRatio: NaN,
+                    viewMode: 2,
+                    autoCropArea: 1,
                     responsive: true,
-                    guides: false
+                    guides: true,
+                    center: true,
+                    highlight: true,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    minContainerWidth: 200,
+                    minContainerHeight: 200
                 });
             }, 200);
         };
@@ -609,11 +616,7 @@
     }
 
     function cropAndContinue() {
-        const canvas = cropper.getCroppedCanvas({
-            width: 800,
-            height: 800,
-            minWidth: 400,
-            minHeight: 400,
+        const croppedCanvas = cropper.getCroppedCanvas({
             maxWidth: 1200,
             maxHeight: 1200,
             fillColor: '#fff',
@@ -621,12 +624,12 @@
             imageSmoothingQuality: 'high'
         });
         
-        if (!canvas) {
+        if (!croppedCanvas) {
             showError('Could not crop image. Please try again.');
             return;
         }
         
-        const imageUrl = canvas.toDataURL('image/jpeg', 0.9);
+        const imageUrl = croppedCanvas.toDataURL('image/jpeg', 0.9);
         
         if (currentUploadType === 'product') {
             uploadedImages.product.push(imageUrl);

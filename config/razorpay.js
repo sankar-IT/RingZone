@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const Razorpay = require('razorpay');
 
 const razorpayInstance = new Razorpay({

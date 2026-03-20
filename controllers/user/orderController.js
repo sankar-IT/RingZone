@@ -427,14 +427,16 @@ const createRazorpayOrder = async (req, res) => {
                     return res.status(400).json({ success: false, message: 'Insufficient stock for a variant' });
                 }
 
+                const price = matchedVariant.discountPrice || matchedVariant.regularPrice;
+                
                 activeItems.push({
                     product: dbProduct._id,
                     quantity: cartProduct.quantity,
-                    price: matchedVariant.discountPrice,
+                    price: price,
                     variant: {
                         color: matchedVariant.color,
                         storage: matchedVariant.storage,
-                        selectedImage: matchedVariant.selectedImage
+                        selectedImage: matchedVariant.images && matchedVariant.images[0] ? matchedVariant.images[0] : null
                     }
                 });
             }
@@ -449,6 +451,38 @@ const createRazorpayOrder = async (req, res) => {
         const couponData = req.session.appliedCoupon || {};
         const finalAmount = totalPrice - (couponData.discount || 0) + shippingCharge;
 
+        // Validate amount
+        if (!finalAmount || finalAmount <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid order amount. Please check your cart.' });
+        }
+
+        // Create Razorpay order FIRST before creating database order
+        const options = {
+            amount: Math.round(finalAmount * 100),
+            currency: 'INR',
+            receipt: 'receipt_order_' + Date.now()
+        };
+
+        let razorpayOrder;
+        try {
+            razorpayOrder = await razorpay.orders.create(options);
+        } catch (err) {
+            console.error('Razorpay API Error:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Error creating Razorpay order',
+                details: err.error || err.message || err
+            });
+        }
+
+        if (!razorpayOrder || !razorpayOrder.id) {
+            return res.status(500).json({
+                success: false,
+                message: 'Invalid Razorpay response'
+            });
+        }
+
+        // Only create database order after Razorpay order is successful
         const ord = await Order.create({
             user: userId,
             orderedItems: activeItems,
@@ -471,39 +505,15 @@ const createRazorpayOrder = async (req, res) => {
             coupon: {
                 couponCode: typeof couponData.code === 'string' ? couponData.code : null,
                 discountAmount: couponData.discount || 0
-            }
+            },
+            razorpayOrderId: razorpayOrder.id
         });
 
-
+        // Delete cart and clear session only after order is created
         await Cart.deleteOne({ user: userId });
         delete req.session.selectedShipment;
         delete req.session.selectedAddress;
         delete req.session.appliedCoupon;
-
-        const options = {
-            amount: Math.round(finalAmount * 100),
-            currency: 'INR',
-            receipt: 'receipt_order_' + Date.now()
-        };
-
-        let razorpayOrder;
-        try {
-            razorpayOrder = await razorpay.orders.create(options);
-        } catch (err) {
-            console.error(' Razorpay API Error:', err);
-            return res.status(500).json({
-                success: false,
-                message: 'Error creating Razorpay order',
-                details: err.error || err.message || err
-            });
-        }
-
-        if (!razorpayOrder || !razorpayOrder.id) {
-            return res.status(500).json({
-                success: false,
-                message: 'Invalid Razorpay response'
-            });
-        }
 
         return res.status(200).json({
             success: true,

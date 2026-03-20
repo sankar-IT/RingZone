@@ -64,15 +64,23 @@ const addToCart = async (req, res) => {
 
     await cart.save();
 
-   
+    // Remove from wishlist (including specific variant)
     await Wishlist.updateOne(
       { userId },
-      { $pull: { products: { productId: productId } } }
+      { 
+        $pull: { 
+          products: { 
+            productId: productId,
+            'variant.color': productVariant.color,
+            'variant.storage': productVariant.storage
+          } 
+        } 
+      }
     );
 
     res.status(200).json({
       success: true,
-      message: 'Product added to cart',
+      message: 'Product added to cart and removed from wishlist',
       cartCount: cart.items?.length
     });
 
@@ -221,7 +229,7 @@ const processCheckout = async (req, res) => {
           return res.status(400).json({ success: false, message: 'Product out of stock' });
         }
 
-        const currentDiscountPrice = matchedVariant.discountPrice;
+        const currentDiscountPrice = matchedVariant.discountPrice || matchedVariant.regularPrice;
         const cartDiscountPrice = cartProduct.discountPrice;
 
         if (Number(currentDiscountPrice) !== Number(cartDiscountPrice)) {
@@ -231,7 +239,7 @@ const processCheckout = async (req, res) => {
           });
         }
 
-        const itemPrice = currentDiscountPrice || matchedVariant.regularPrice;
+        const itemPrice = currentDiscountPrice;
         const itemTotal = itemPrice * cartProduct.quantity;
         totalPrice += itemTotal;
 
@@ -288,7 +296,8 @@ const renderCheckoutPage = async (req, res) => {
           v.color == product.variant.color && v.storage == product.variant.storage
         );
         if (matchedVariant) {
-          total += matchedVariant.discountPrice * product.quantity;
+          const price = matchedVariant.discountPrice || matchedVariant.regularPrice;
+          total += price * product.quantity;
         }
       }
       return total;
@@ -414,7 +423,8 @@ if (req.session.appliedCoupon) {
           v.color == product.variant.color && v.storage == product.variant.storage
         );
         if (matchedVariant) {
-          total += matchedVariant.discountPrice * product.quantity;
+          const price = matchedVariant.discountPrice || matchedVariant.regularPrice;
+          total += price * product.quantity;
         }
       }
       return total;
@@ -476,7 +486,8 @@ const removeCoupon = async (req, res) => {
           v.color == item.variant.color && v.storage == item.variant.storage
         );
         if (matchedVariant) {
-          total += matchedVariant.discountPrice * item.quantity;
+          const price = matchedVariant.discountPrice || matchedVariant.regularPrice;
+          total += price * item.quantity;
         }
       }
       return total;
@@ -516,7 +527,8 @@ const renderPaymentPage = async (req, res) => {
           v.color == product.variant.color && v.storage == product.variant.storage
         );
         if (matchedVariant) {
-          total += matchedVariant.discountPrice * product.quantity;
+          const price = matchedVariant.discountPrice || matchedVariant.regularPrice;
+          total += price * product.quantity;
         }
       }
       return total;

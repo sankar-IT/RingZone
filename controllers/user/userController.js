@@ -154,7 +154,7 @@ const signup = async (req, res) => {
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (!emailSent) {
-      return res.json('email-error');
+      return res.render('signup', { message: 'Failed to send verification email. Please try again.' });
     }
 
     console.log("session otp", otp);
@@ -667,6 +667,8 @@ const loadProductDetails = async (req, res) => {
 
   
     const productId = req.params.id;
+    const selectedColor = req.query.color; // Get color from query parameter
+    
     let productRes = await product.findById(productId)
       .populate('brand')
       .populate('category')
@@ -701,6 +703,15 @@ const loadProductDetails = async (req, res) => {
         appliedOffer: finalOffer
       };
     });
+
+    // Reorder variants to put selected color first
+    if (selectedColor) {
+      const selectedIndex = productRes.variants.findIndex(v => v.color === selectedColor);
+      if (selectedIndex > 0) {
+        const selectedVariant = productRes.variants.splice(selectedIndex, 1)[0];
+        productRes.variants.unshift(selectedVariant);
+      }
+    }
 
    
     let similarProducts = await product.find({
@@ -771,6 +782,7 @@ const loadProductDetails = async (req, res) => {
       product: productRes, 
       similarProducts,
       relatedProducts,
+      selectedColor: selectedColor || null
     });
 
   } catch (error) {

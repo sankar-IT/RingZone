@@ -982,6 +982,7 @@ const downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
 
+   
     const order = await Order.findById(orderId)
       .populate('orderedItems.product')
       .populate('address'); 
@@ -990,16 +991,19 @@ const downloadInvoice = async (req, res) => {
       return res.status(404).send('Order not found');
     }
 
+    
     const doc = new PDFDocument({ margin: 50 });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderId}.pdf`);
 
     doc.pipe(res);
+
+    
     doc
       .fontSize(24)
-      .fillColor('#ff7f50')
-      .text(' RingZone', { align: 'center' })
+      .fillColor('#ff7f50') 
+      .text('RingZone', { align: 'center' })
       .moveDown(0.3);
 
     doc
@@ -1008,6 +1012,7 @@ const downloadInvoice = async (req, res) => {
       .text('INVOICE', { align: 'center' })
       .moveDown();
 
+    
     doc
       .fontSize(12)
       .fillColor('#000')
@@ -1017,6 +1022,7 @@ const downloadInvoice = async (req, res) => {
       .text(`Status: ${order.status}`)
       .moveDown();
 
+    
     const addr = order.address; 
     if (addr) {
       doc
@@ -1030,6 +1036,7 @@ const downloadInvoice = async (req, res) => {
         .moveDown();
     }
 
+ 
     const tableTop = doc.y;
     const itemX = 50;
     const columns = {
@@ -1053,10 +1060,12 @@ const downloadInvoice = async (req, res) => {
 
     doc.moveDown(0.5).font('Helvetica');
 
+    
     const invoiceItems = order.orderedItems.filter(
       item => ['Delivered', 'Confirmed'].includes(item.status)
     );
 
+   
     let y = doc.y;
     invoiceItems.forEach((item, index) => {
       const totalItemPrice = item.quantity * item.price;
@@ -1070,14 +1079,16 @@ const downloadInvoice = async (req, res) => {
       y += 20;
     });
 
+  
     doc.moveTo(50, y + 10).lineTo(550, y + 10).stroke();
 
-    const labelX = 400;
+    const labelX = 350; 
     const valueX = 520;
     const lineHeight = 20;
     let summaryY = y + 30;
 
     doc.fontSize(12).font('Helvetica-Bold');
+    
     doc.text('Subtotal:', labelX, summaryY);
     doc.text(`₹${order.totalPrice}`, valueX, summaryY, { align: 'right' });
 
@@ -1093,13 +1104,21 @@ const downloadInvoice = async (req, res) => {
     doc.fontSize(14).font('Helvetica-Bold');
     doc.text('Total Amount Paid:', labelX, summaryY);
     doc.text(`₹${order.finalAmount}`, valueX, summaryY, { align: 'right' });
-    doc
-      .moveDown(2)
-      .fontSize(10)
-      .fillColor('gray')
-      .text('Thank you for shopping with us!', { align: 'center' });
 
+    
+    doc
+      .moveDown(4) 
+      .fontSize(12)
+      .font('Helvetica-Oblique') 
+      .fillColor('gray')
+      .text('Thank you for shopping with us!', 50, doc.y, { 
+        align: 'center', 
+        width: 500 
+      });
+
+  
     doc.end();
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Failed to generate invoice');
@@ -1182,7 +1201,7 @@ const verifyWalletPayment = async (req, res) => {
 const toggleWishlist = async (req, res) => {
   try {
     const userId = req.session.user._id;
-    const { productId, action } = req.body;
+    const { productId, action, variant } = req.body;
 
     let wishlist = await Wishlist.findOne({ userId });
 
@@ -1191,12 +1210,36 @@ const toggleWishlist = async (req, res) => {
     }
 
     if (action === 'add') {
-      const exists = wishlist.products.some(p => p.productId.toString() === productId);
+      
+      const exists = wishlist.products.some(p => 
+        p.productId.toString() === productId && 
+        p.variant?.color === variant?.color && 
+        p.variant?.storage === variant?.storage
+      );
+      
       if (!exists) {
-        wishlist.products.push({ productId });
+        const productData = {
+          productId
+        };
+        
+       
+        if (variant) {
+          productData.variant = {
+            color: variant.color,
+            storage: variant.storage,
+            image: variant.image
+          };
+        }
+        
+        wishlist.products.push(productData);
       }
     } else {
-      wishlist.products = wishlist.products.filter(p => p.productId.toString() !== productId);
+    
+      wishlist.products = wishlist.products.filter(p => {
+        if (p.productId.toString() !== productId) return true;
+        if (!variant) return false;
+        return !(p.variant?.color === variant.color && p.variant?.storage === variant.storage);
+      });
     }
 
     await wishlist.save();
@@ -1211,19 +1254,350 @@ const toggleWishlist = async (req, res) => {
   }
 };
 
+const checkWishlistVariant = async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const { productId, variant } = req.body;
+
+    const wishlist = await Wishlist.findOne({ userId });
+
+    if (!wishlist) {
+      return res.json({ inWishlist: false });
+    }
+
+    const exists = wishlist.products.some(p => 
+      p.productId.toString() === productId && 
+      p.variant?.color === variant?.color && 
+      p.variant?.storage === variant?.storage
+    );
+
+    res.json({ inWishlist: exists });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 const loadWishListPage = async (req, res) => {
   try {
     const userId = req.session.user._id;
-     const cart = await Cart.findOne({ user: userId });
-     const cartCount=cart?.items?.length || 0
+    const cart = await Cart.findOne({ user: userId });
+    const cartCount = cart?.items?.length || 0;
     const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
-    res.render('wishlist', { cartCount,  wishlistItems: wishlist?.products || [] });
+    
+    const User = require('../../models/userSchema');
+    const userData = await User.findById(userId);
+
+    // Get all active price alerts for this user
+    const PriceAlert = require('../../models/priceAlertSchema');
+    const priceAlerts = await PriceAlert.find({ userId, isActive: true });
+    
+    const alertMap = {};
+    priceAlerts.forEach(alert => {
+      const key = `${alert.productId}_${alert.variantColor}_${alert.variantStorage}`;
+      alertMap[key] = alert;
+    });
+    
+    res.render('wishlist', { 
+      cartCount,  
+      wishlistItems: wishlist?.products || [],
+      alertMap,
+      user: userData
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error loading wishlist');
   }
 };
+const setPriceAlert = async (req, res) => {
+    try {
+        const { productId, notifyPrice, notifyOffer } = req.body;
+        
+        // Ensure we are using the string ID from the session object
+        const userId = req.session.user?._id || req.session.user; 
 
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
+        // Use Mongoose to convert strings to ObjectIds for the query
+        const userObjId = new mongoose.Types.ObjectId(userId);
+        const productObjId = new mongoose.Types.ObjectId(productId);
+
+        const updateResult = await Wishlist.updateOne(
+            { 
+                userId: userObjId, 
+                "products.productId": productObjId 
+            },
+            { 
+                $set: { 
+                    "products.$.notifyPrice": Number(notifyPrice) || 0,
+                    "products.$.notifyOffer": Number(notifyOffer) || 0 
+                } 
+            }
+        );
+
+        if (updateResult.matchedCount > 0) {
+            return res.status(200).json({ message: 'Alert set successfully' });
+        } else {
+            // Check if the wishlist document even exists for this user
+            const wishlistExists = await Wishlist.findOne({ userId: userObjId });
+            if (!wishlistExists) {
+                return res.status(404).json({ message: 'Wishlist not found for this user' });
+            }
+            return res.status(404).json({ message: 'Product not found in your wishlist array' });
+        }
+    } catch (error) {
+        console.error("Error setting alert:", error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+const checkPriceAlerts = async (req, res) => {
+    try {
+        console.log('=== Starting Price Alert Check ===');
+        
+        // Get all wishlists with price alerts set
+        const wishlists = await Wishlist.find({
+            $or: [
+                { 'products.notifyPrice': { $gt: 0 } },
+                { 'products.notifyOffer': { $gt: 0 } }
+            ]
+        }).populate('userId').populate('products.productId');
+
+        console.log(`Found ${wishlists.length} wishlists with alerts`);
+
+        let notificationsSent = 0;
+
+        for (const wishlist of wishlists) {
+            const user = wishlist.userId;
+            if (!user || !user.email) {
+                console.log('Skipping wishlist - no user or email');
+                continue;
+            }
+
+            console.log(`Checking alerts for user: ${user.email}`);
+
+            for (const item of wishlist.products) {
+                const product = item.productId;
+                if (!product) {
+                    console.log('Skipping item - no product');
+                    continue;
+                }
+
+                // Check if alert conditions are set
+                const hasNotifyPrice = item.notifyPrice && item.notifyPrice > 0;
+                const hasNotifyOffer = item.notifyOffer && item.notifyOffer > 0;
+
+                console.log(`Product: ${product.productName}`);
+                console.log(`  Alert Price: ${item.notifyPrice}, Alert Offer: ${item.notifyOffer}`);
+
+                if (!hasNotifyPrice && !hasNotifyOffer) {
+                    console.log('  No alerts set for this product');
+                    continue;
+                }
+
+                // Find the matching variant
+                let matchingVariant = null;
+                if (item.variant && item.variant.color) {
+                    matchingVariant = product.variants.find(v => 
+                        v.color === item.variant.color && 
+                        (!item.variant.storage || v.storage === item.variant.storage)
+                    );
+                    console.log(`  Looking for variant: ${item.variant.color} ${item.variant.storage || ''}`);
+                } else {
+                    matchingVariant = product.variants[0];
+                    console.log('  Using first variant');
+                }
+
+                if (!matchingVariant) {
+                    console.log('  No matching variant found');
+                    continue;
+                }
+
+                const currentPrice = matchingVariant.finalPrice || matchingVariant.discountPrice || matchingVariant.regularPrice;
+                const currentOffer = matchingVariant.regularPrice > currentPrice 
+                    ? Math.round(((matchingVariant.regularPrice - currentPrice) / matchingVariant.regularPrice) * 100)
+                    : 0;
+
+                console.log(`  Current Price: ₹${currentPrice}, Current Offer: ${currentOffer}%`);
+
+                // Check if conditions are met
+                let shouldNotify = false;
+                let reason = '';
+
+                if (hasNotifyPrice && currentPrice <= item.notifyPrice) {
+                    shouldNotify = true;
+                    reason = `Price dropped to ₹${currentPrice.toLocaleString('en-IN')} (Your target: ₹${item.notifyPrice.toLocaleString('en-IN')})`;
+                    console.log(`  ✓ Price condition met!`);
+                }
+
+                if (hasNotifyOffer && currentOffer >= item.notifyOffer) {
+                    shouldNotify = true;
+                    if (reason) {
+                        reason += ` and offer is now ${currentOffer}% (Your target: ${item.notifyOffer}%)`;
+                    } else {
+                        reason = `Offer is now ${currentOffer}% (Your target: ${item.notifyOffer}%)`;
+                    }
+                    console.log(`  ✓ Offer condition met!`);
+                }
+
+                if (shouldNotify) {
+                    console.log(`  Sending email to ${user.email}...`);
+                    // Send email notification
+                    const emailSent = await sendPriceAlertEmail(user.email, product, matchingVariant, reason, item.variant);
+
+                    if (emailSent) {
+                        console.log(`  ✓ Email sent successfully!`);
+                        notificationsSent++;
+                        // Reset the alert after sending notification
+                        await Wishlist.updateOne(
+                            { 
+                                userId: wishlist.userId._id, 
+                                'products.productId': product._id 
+                            },
+                            { 
+                                $set: { 
+                                    'products.$.notifyPrice': 0,
+                                    'products.$.notifyOffer': 0 
+                                } 
+                            }
+                        );
+                        console.log(`  Alert reset for this product`);
+                    } else {
+                        console.log(`  ✗ Failed to send email`);
+                    }
+                } else {
+                    console.log(`  Conditions not met - no notification sent`);
+                }
+            }
+        }
+
+        console.log(`=== Price Alert Check Complete ===`);
+        console.log(`Total notifications sent: ${notificationsSent}`);
+        
+        if (res) {
+            res.json({ 
+                success: true, 
+                message: `Price alerts checked. ${notificationsSent} notifications sent.`,
+                notificationsSent 
+            });
+        }
+    } catch (error) {
+        console.error('Error checking price alerts:', error);
+        if (res) {
+            res.status(500).json({ success: false, message: 'Error checking price alerts', error: error.message });
+        }
+    }
+};
+
+const sendPriceAlertEmail = async (email, product, variant, reason, savedVariant) => {
+    try {
+        console.log(`  Attempting to send email to: ${email}`);
+        console.log(`  Using SMTP: ${process.env.NODEMAILER_EMAIL}`);
+        
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
+            }
+        });
+
+        const variantInfo = savedVariant && savedVariant.color 
+            ? `${savedVariant.color}${savedVariant.storage ? ', ' + savedVariant.storage : ''}`
+            : '';
+
+        const info = await transporter.sendMail({
+            from: `"RingZone Support" <${process.env.NODEMAILER_EMAIL}>`,
+            to: email,
+            subject: `🎉 Price Alert: ${product.productName} ${variantInfo}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+                    <div style="background-color: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h2 style="color: #1a5f4f; margin-top: 0;">🎉 Great News! Your Price Alert is Triggered!</h2>
+                        
+                        <div style="background-color: #f0f7f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h3 style="margin-top: 0; color: #333;">${product.productName}</h3>
+                            ${variantInfo ? `<p style="color: #666; margin: 5px 0;"><strong>Variant:</strong> ${variantInfo}</p>` : ''}
+                            <p style="color: #666; margin: 10px 0;"><strong>Reason:</strong> ${reason}</p>
+                            <p style="font-size: 24px; color: #1a5f4f; font-weight: bold; margin: 15px 0;">
+                                ₹${(variant.finalPrice || variant.discountPrice).toLocaleString('en-IN')}
+                            </p>
+                            ${variant.regularPrice > (variant.finalPrice || variant.discountPrice) ? 
+                                `<p style="color: #999; text-decoration: line-through;">₹${variant.regularPrice.toLocaleString('en-IN')}</p>` : ''}
+                        </div>
+
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${process.env.BASE_URL || 'http://localhost:3007'}/products/${product._id}${savedVariant && savedVariant.color ? '?color=' + encodeURIComponent(savedVariant.color) : ''}" 
+                               style="display: inline-block; background-color: #1a5f4f; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                                View Product Now
+                            </a>
+                        </div>
+
+                        <p style="color: #666; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                            This is an automated notification from RingZone. Your price alert has been automatically removed after this notification.
+                        </p>
+                    </div>
+                </div>
+            `
+        });
+
+        console.log(`  ✓ Email sent successfully! Message ID: ${info.messageId}`);
+        console.log(`  Accepted: ${info.accepted.length > 0 ? 'Yes' : 'No'}`);
+        return info.accepted.length > 0;
+    } catch (error) {
+        console.error('  ✗ Error sending price alert email:', error);
+        console.error('  Error details:', error.message);
+        return false;
+    }
+};
+
+const testPriceAlertEmail = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const user = await User.findById(userId);
+        
+        if (!user || !user.email) {
+            return res.status(400).json({ success: false, message: 'User not found or no email' });
+        }
+
+        // Get any product from wishlist for testing
+        const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
+        
+        if (!wishlist || wishlist.products.length === 0) {
+            return res.status(400).json({ success: false, message: 'No products in wishlist to test with' });
+        }
+
+        const testProduct = wishlist.products[0].productId;
+        const testVariant = testProduct.variants[0];
+        const testReason = 'This is a test email - Price dropped to your target!';
+
+        console.log(`Sending test email to: ${user.email}`);
+        const emailSent = await sendPriceAlertEmail(
+            user.email, 
+            testProduct, 
+            testVariant, 
+            testReason, 
+            wishlist.products[0].variant
+        );
+
+        if (emailSent) {
+            res.json({ 
+                success: true, 
+                message: `Test email sent successfully to ${user.email}. Check your inbox!` 
+            });
+        } else {
+            res.json({ 
+                success: false, 
+                message: 'Failed to send test email. Check console for errors.' 
+            });
+        }
+    } catch (error) {
+        console.error('Error sending test email:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 module.exports = {
   forgetpasspage,
@@ -1257,5 +1631,9 @@ module.exports = {
  createWalletOrder,
  verifyWalletPayment,
  toggleWishlist,
- loadWishListPage
+ checkWishlistVariant,
+ loadWishListPage,
+ setPriceAlert,
+ checkPriceAlerts,
+ testPriceAlertEmail
 };

@@ -5,6 +5,7 @@ const userController=require('../controllers/user/userController')
 const profileController=require('../controllers/user/profileController');
 const cartController=require('../controllers/user/cartController')
 const orderController=require('../controllers/user/orderController');
+const priceAlertController=require('../controllers/user/priceAlertController');
 const {initializeCartCount}=require('../middleware/cartMiddleware');
 const { userAuth } = require('../middleware/auth');
 const { uploadProfile } = require('../helpers/multer');
@@ -53,6 +54,18 @@ router.post('/verify-wallet-payment', userAuth, profileController.verifyWalletPa
 
 router.get('/wishlist',userAuth,profileController.loadWishListPage)
 router.post('/wishlist/toggle', userAuth,profileController.toggleWishlist);
+router.post('/wishlist/check', userAuth,profileController.checkWishlistVariant);
+
+// Price Alert Routes
+router.get('/api/price-history/:productId', userAuth, priceAlertController.getPriceHistory);
+router.get('/api/existing-alert/:productId', userAuth, priceAlertController.getExistingAlert);
+router.post('/api/set-price-alert', userAuth, priceAlertController.setPriceAlert);
+router.get('/api/manual-check-alerts', userAuth, priceAlertController.manualCheckAlerts);
+
+router.post('/set-alert', userAuth, profileController.setPriceAlert);
+router.get('/check-price-alerts', profileController.checkPriceAlerts);
+router.get('/test-price-alert-email', userAuth, profileController.testPriceAlertEmail);
+
 
 
 router.get('/view-orders',userAuth,profileController.viewOrders)

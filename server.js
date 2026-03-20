@@ -3,6 +3,7 @@ const express=require('express');
 const app=express();
 const noCache = require('nocache');
 const path=require('path');
+const cron = require('node-cron');
 const connectDB = require('./config/db')
 const userRouter=require('./routes/userRouter')
 const passport=require('./config/passport')
@@ -10,6 +11,8 @@ const session=require('express-session')
 const adminRouter=require('./routes/adminRouter')
 const {injectCartCount} = require('./middleware/cartMiddleware');
 const wishlistCountMiddleware = require('./middleware/wishlistCountMiddleware');
+const profileController = require('./controllers/user/profileController');
+const { recordDailyPrices, cleanupOldPriceHistory } = require('./helpers/priceHistoryTracker');
 
 
 connectDB()
@@ -65,6 +68,40 @@ app.use((err,req,res,next)=>{
        res.status(404).render('pageError');
 
 })
+
+
+cron.schedule('0 * * * *', async () => {
+  console.log('Running scheduled price alert check...');
+  try {
+    await profileController.checkPriceAlerts();
+    console.log('Price alert check completed');
+  } catch (error) {
+    console.error('Error in scheduled price alert check:', error);
+  }
+});
+
+
+cron.schedule('1 14 * * *', async () => {
+  console.log('Running daily price recording...');
+  try {
+    await recordDailyPrices();
+    console.log('Daily price recording completed');
+  } catch (error) {
+    console.error('Error in daily price recording:', error);
+  }
+});
+
+cron.schedule('0 3 * * 0', async () => {
+  console.log('Cleaning up old price history...');
+  try {
+    await cleanupOldPriceHistory();
+    console.log('Price history cleanup completed');
+  } catch (error) {
+    console.error('Error in price history cleanup:', error);
+  }
+});
+
+
 app.listen(process.env.PORT,()=>{console.log(`server Running on ${process.env.PORT}`)})
 
 module.exports=app;

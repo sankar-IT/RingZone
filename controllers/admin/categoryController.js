@@ -1,5 +1,6 @@
 const Category=require('../../models/categorySchema');
-const Product=require('../../models/productsSchema')
+const Product=require('../../models/productsSchema');
+const { checkAlertsForProduct } = require('../../helpers/realtimePriceAlert');
 
 
 
@@ -90,6 +91,7 @@ const addCategoryOffer = async (req, res) => {
         variant.discountPrice = variant.regularPrice - discount;
       }
       await product.save();
+      await checkAlertsForProduct(product._id.toString());
     }
 
     await Category.updateOne(
@@ -121,6 +123,7 @@ const removeCategoryOffer = async (req, res) => {
         variant.discountPrice = variant.regularPrice; 
       }
       await product.save();
+      await checkAlertsForProduct(product._id.toString());
     }
 
     await Category.updateOne(

@@ -1,13 +1,20 @@
 <%- include('../../views/partials/user/header') %>
 
+<link rel="stylesheet" href="/styles/product-details-clean.css">
+
 <style>
-  /* All your existing CSS styles remain the same. */
+  
+  
+  body {
+    background: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  }
+
   .product-detail-page .container {
     max-width: 1200px;
     margin-top: 140px;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
     padding: 0 20px;
-    font-family: 'Segoe UI', sans-serif;
   }
 
   .related-products-section {
@@ -56,6 +63,7 @@
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   }
+
 
   .related-product-image-container {
     position: relative;
@@ -263,6 +271,30 @@
     display: none;
   }
 
+  .color-option-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .color-image-preview {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 4px;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .color-option-wrapper:hover .color-image-preview {
+    border-color: #1e918b;
+    transform: scale(1.05);
+  }
+
   .color-button {
     padding: 6px 12px;
     border: 1px solid #ccc;
@@ -271,17 +303,28 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.9em;
+    text-align: center;
+    min-width: 60px;
   }
 
-  .color-options input[type="radio"]:checked+.color-button {
+  .color-options input[type="radio"]:checked + .color-option-wrapper .color-image-preview {
+    border-color: #1e918b;
+    border-width: 3px;
+    box-shadow: 0 0 0 2px rgba(30, 145, 139, 0.2);
+  }
+
+  .color-options input[type="radio"]:checked + .color-option-wrapper .color-button {
     background: #1e918b;
     color: white;
     border-color: #1e918b;
   }
 
-  .color-options input[type="radio"]:disabled+.color-button {
+  .color-options input[type="radio"]:disabled + .color-option-wrapper {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .color-options input[type="radio"]:disabled + .color-option-wrapper .color-button {
     text-decoration: line-through;
   }
 
@@ -295,6 +338,74 @@
 
   .storage-select option:disabled {
     color: #ccc;
+  }
+
+  /* Storage Card Style */
+  .storage-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .storage-options input[type="radio"] {
+    display: none;
+  }
+
+  .storage-card {
+    flex: 1;
+    min-width: 100px;
+    max-width: 140px;
+    padding: 14px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .storage-card:hover {
+    border-color: #1e918b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 145, 139, 0.15);
+  }
+
+  .storage-options input[type="radio"]:checked + .storage-card {
+    border-color: #1e918b;
+    border-width: 2px;
+    background: #f0f9f9;
+    box-shadow: 0 4px 12px rgba(30, 145, 139, 0.2);
+  }
+
+  .storage-options input[type="radio"]:disabled + .storage-card {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f5f5;
+  }
+
+  .storage-options input[type="radio"]:disabled + .storage-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .storage-size {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .storage-card.out-of-stock .storage-size {
+    text-decoration: line-through;
+    color: #999;
+  }
+
+  .out-of-stock-badge {
+    font-size: 0.75rem;
+    color: #ff4646;
+    font-weight: 600;
   }
 
   .action-buttons {
@@ -393,18 +504,128 @@
   .magnifier-glass {
     position: absolute;
     border: 3px solid #1e918b;
-    border-radius: 50%;
+    border-radius: 8px;
     cursor: none;
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     opacity: 0;
     pointer-events: none;
-    box-shadow: 0 4px 8px rgba(30,145,139,0.3);
+    box-shadow: 0 8px 24px rgba(30,145,139,0.4);
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 200%;
+    background-size: 250%;
     z-index: 10;
     transition: opacity 0.2s ease-in-out;
+    backdrop-filter: blur(0px);
+  }
+
+  .zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+
+  .zoom-overlay.active {
+    display: flex;
+  }
+
+  .zoom-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    animation: zoomIn 0.3s ease-out;
+  }
+
+  @keyframes zoomIn {
+    from {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .zoom-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    transition: transform 0.2s;
+  }
+
+  .zoom-close:hover {
+    transform: scale(1.2);
+  }
+
+  .main-image-box {
+    position: relative;
+    cursor: zoom-in;
+  }
+
+  .main-image-box:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* Inline Loading Spinner for Color Change */
+  .variant-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 8px;
+    backdrop-filter: blur(3px);
+  }
+
+  .variant-loading-overlay.active {
+    display: flex;
+  }
+
+  .variant-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1e918b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .variant-loading-text {
+    position: absolute;
+    bottom: 30%;
+    color: #1e918b;
+    font-size: 14px;
+    font-weight: 600;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 
   @media (max-width: 768px) {
@@ -469,6 +690,12 @@
       <% if (product && product._id) { %>
         <div class="product-main">
 
+          <!-- Inline Loading Overlay -->
+          <div id="variantLoadingOverlay" class="variant-loading-overlay">
+            <div class="variant-spinner"></div>
+            <div class="variant-loading-text">Updating...</div>
+          </div>
+
           <div class="wishlist-icon" data-product-id="<%= product._id %>">
             <i class="fa fa-heart-o"></i>
           </div>
@@ -498,8 +725,15 @@
                 id="mainImage"
                 src="<%= product.variants[0] && product.variants[0].images[0] ? '/' + product.variants[0].images[0] : '/images/default-product.jpg' %>"
                 alt="<%= product.productName %>"
+                onclick="openZoom(this.src)"
               >
             </div>
+          </div>
+
+          <!-- Zoom Overlay -->
+          <div id="zoomOverlay" class="zoom-overlay" onclick="closeZoom()">
+            <span class="zoom-close" onclick="closeZoom()">&times;</span>
+            <img id="zoomedImage" src="" alt="Zoomed product image">
           </div>
 
           <div class="details">
@@ -544,18 +778,38 @@
               <div class="variant-group">
                 <label>Colour</label>
                 <div class="color-options">
-                  <% product.variants.forEach((variant, index) => { %>
-                    <label>
+                  <% 
+                  // Get unique colors to avoid duplicates
+                  const uniqueColors = [];
+                  const seenColors = new Set();
+                  product.variants.forEach((variant) => {
+                    if (!seenColors.has(variant.color)) {
+                      seenColors.add(variant.color);
+                      uniqueColors.push(variant);
+                    }
+                  });
+                  %>
+                  <% uniqueColors.forEach((variant, index) => { %>
+                    <label style="cursor: pointer;">
                       <input
                         type="radio"
                         name="color"
                         value="<%= variant.color %>"
                         <%= index === 0 ? 'checked' : '' %>
                         <%= product.variants.every(v => v.color !== variant.color || v.quantity <= 0) ? 'disabled' : '' %>
+                        onchange="window.location.href='/products/<%= product._id %>?color=<%= encodeURIComponent(variant.color) %>'"
                       />
-                      <span class="color-button">
-                        <%= variant.color %>
-                      </span>
+                      <div class="color-option-wrapper">
+                        <img 
+                          src="/<%= variant.images[0] || 'images/default-product.jpg' %>" 
+                          alt="<%= variant.color %>" 
+                          class="color-image-preview"
+                          onerror="this.src='/images/default-product.jpg'"
+                        />
+                        <span class="color-button">
+                          <%= variant.color %>
+                        </span>
+                      </div>
                     </label>
                   <% }); %>
                 </div>
@@ -565,17 +819,41 @@
             <% if (product.variants.some(v => v.storage)) { %>
               <div class="variant-group">
                 <label>Storage</label>
-                <select id="storageSelect" class="storage-select">
-                  <% product.variants.forEach(variant => { %>
-                    <option
-                      value='<%- JSON.stringify(variant) %>'
-                      <%= variant.quantity <= 0 ? 'disabled' : '' %>
-                      >
-                      <%= variant.storage %>
-                      <%= variant.quantity <= 0 ? ' (Out of Stock)' : '' %>
-                    </option>
+                <div class="storage-options">
+                  <% 
+                  // Get the selected color to filter storage options
+                  const currentColor = selectedColor || product.variants[0]?.color;
+                  const storageVariants = product.variants.filter(v => v.color === currentColor);
+                  
+                  // Get unique storage options
+                  const uniqueStorage = [];
+                  const seenStorage = new Set();
+                  storageVariants.forEach((variant) => {
+                    if (!seenStorage.has(variant.storage)) {
+                      seenStorage.add(variant.storage);
+                      uniqueStorage.push(variant);
+                    }
+                  });
+                  %>
+                  <% uniqueStorage.forEach((variant, index) => { %>
+                    <label style="cursor: pointer;">
+                      <input
+                        type="radio"
+                        name="storage"
+                        value='<%- JSON.stringify(variant) %>'
+                        <%= index === 0 ? 'checked' : '' %>
+                        <%= variant.quantity <= 0 ? 'disabled' : '' %>
+                        onchange="updateStorageVariant(this.value)"
+                      />
+                      <div class="storage-card <%= variant.quantity <= 0 ? 'out-of-stock' : '' %>">
+                        <div class="storage-size"><%= variant.storage %></div>
+                        <% if (variant.quantity <= 0) { %>
+                          <div class="out-of-stock-badge">Out of Stock</div>
+                        <% } %>
+                      </div>
+                    </label>
                   <% }); %>
-                </select>
+                </div>
               </div>
             <% } %>
 
@@ -654,6 +932,149 @@
     const variants = <%- JSON.stringify(product.variants) %>;
     let currentMagnifier = null;
 
+    function openZoom(src) {
+      const overlay = document.getElementById('zoomOverlay');
+      const zoomedImage = document.getElementById('zoomedImage');
+      zoomedImage.src = src;
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeZoom() {
+      const overlay = document.getElementById('zoomOverlay');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Close zoom on ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeZoom();
+      }
+    });
+
+    // Smooth color variant change function
+    function changeColorVariant(selectedColor) {
+      // Show inline loading overlay
+      const loadingOverlay = document.getElementById('variantLoadingOverlay');
+      loadingOverlay.classList.add('active');
+
+      // Find the variant with the selected color
+      const selectedVariant = variants.find(v => v.color === selectedColor);
+      
+      if (!selectedVariant) {
+        loadingOverlay.classList.remove('active');
+        return;
+      }
+
+      // Fade out current images
+      const mainImage = document.getElementById('mainImage');
+      const thumbnails = document.querySelectorAll('.thumbnail');
+      const priceRow = document.getElementById('priceRowContainer');
+      const stockMessage = document.getElementById('stockMessageContainer');
+      
+      mainImage.style.opacity = '0';
+      thumbnails.forEach(thumb => thumb.style.opacity = '0');
+      if (priceRow) priceRow.style.opacity = '0';
+      if (stockMessage) stockMessage.style.opacity = '0';
+
+      // Wait for fade out, then update content
+      setTimeout(() => {
+        // Update gallery with new images
+        updateGallery(selectedVariant.images);
+        
+        // Update price
+        updateVariantDetails(selectedVariant);
+        
+        // Update storage dropdown if exists
+        updateStorageOptions(selectedColor);
+        
+        // Update URL without reload
+        const newUrl = `/products/<%= product._id %>?color=${encodeURIComponent(selectedColor)}`;
+        window.history.pushState({ color: selectedColor }, '', newUrl);
+        
+        // Fade in new images and hide loading
+        setTimeout(() => {
+          mainImage.style.opacity = '1';
+          document.querySelectorAll('.thumbnail').forEach(thumb => {
+            thumb.style.opacity = '1';
+          });
+          if (priceRow) priceRow.style.opacity = '1';
+          if (stockMessage) stockMessage.style.opacity = '1';
+          
+          // Hide loading overlay
+          loadingOverlay.classList.remove('active');
+        }, 200);
+      }, 400);
+    }
+
+    function updateStorageOptions(selectedColor) {
+      const storageContainer = document.querySelector('.storage-options');
+      if (!storageContainer) return;
+
+      const filteredVariants = variants.filter(v => v.color === selectedColor);
+      
+      // Get unique storage options
+      const uniqueStorage = [];
+      const seenStorage = new Set();
+      filteredVariants.forEach((variant) => {
+        if (!seenStorage.has(variant.storage)) {
+          seenStorage.add(variant.storage);
+          uniqueStorage.push(variant);
+        }
+      });
+
+      storageContainer.innerHTML = '';
+      
+      uniqueStorage.forEach((variant, index) => {
+        const label = document.createElement('label');
+        label.style.cursor = 'pointer';
+        
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'storage';
+        input.value = JSON.stringify(variant);
+        if (index === 0) input.checked = true;
+        if (variant.quantity <= 0) input.disabled = true;
+        input.onchange = function() { updateStorageVariant(this.value); };
+        
+        const card = document.createElement('div');
+        card.className = 'storage-card' + (variant.quantity <= 0 ? ' out-of-stock' : '');
+        
+        const size = document.createElement('div');
+        size.className = 'storage-size';
+        size.textContent = variant.storage;
+        
+        card.appendChild(size);
+        
+        if (variant.quantity <= 0) {
+          const badge = document.createElement('div');
+          badge.className = 'out-of-stock-badge';
+          badge.textContent = 'Out of Stock';
+          card.appendChild(badge);
+        }
+        
+        label.appendChild(input);
+        label.appendChild(card);
+        storageContainer.appendChild(label);
+      });
+
+      // Update details for the first available variant
+      const firstAvailableVariant = uniqueStorage.find(v => v.quantity > 0) || uniqueStorage[0];
+      if (firstAvailableVariant) {
+        updateVariantDetails(firstAvailableVariant);
+      }
+    }
+
+    function updateStorageVariant(variantJson) {
+      try {
+        const variant = JSON.parse(variantJson);
+        updateVariantDetails(variant);
+      } catch (e) {
+        console.error('Error parsing variant:', e);
+      }
+    }
+
     function waitForImageLoad(img) {
       return new Promise(resolve => {
         if (img.complete) resolve();
@@ -677,7 +1098,7 @@
       await waitForImageLoad(mainImage);
 
       if (currentMagnifier) currentMagnifier.destroy();
-      currentMagnifier = new Magnifier(mainImage, 2);
+      currentMagnifier = new Magnifier(mainImage, 2.5);
     }
 
     function changeImage(el, src) {
@@ -685,7 +1106,7 @@
       mainImage.src = src;
       waitForImageLoad(mainImage).then(() => {
         if (currentMagnifier) currentMagnifier.destroy();
-        currentMagnifier = new Magnifier(mainImage, 2);
+        currentMagnifier = new Magnifier(mainImage, 2.5);
         document.querySelectorAll('.thumbnail').forEach(img => img.classList.remove('active'));
         el.classList.add('active');
       });
@@ -841,40 +1262,12 @@
         updateVariantDetails(defaultVariant);
       }
 
-      colorRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-          const selectedColor = this.value;
-          const filteredVariants = variants.filter(v => v.color === selectedColor);
-
-          if (storageSelect) {
-            storageSelect.innerHTML = '';
-            filteredVariants.forEach(variant => {
-              const option = document.createElement('option');
-              option.value = JSON.stringify(variant);
-              option.text = variant.storage;
-              if (variant.quantity <= 0) option.disabled = true;
-              storageSelect.appendChild(option);
-            });
-          }
-
-          const firstAvailableVariant = filteredVariants.find(v => v.quantity > 0) || filteredVariants[0];
-          if (firstAvailableVariant) {
-            updateVariantDetails(firstAvailableVariant);
-          }
-        });
-      });
-
-      if (storageSelect) {
-        storageSelect.addEventListener('change', function() {
-          const variant = getSelectedVariant();
-          updateVariantDetails(variant);
-        });
-      }
+      
 
       const mainImage = document.getElementById('mainImage');
       await waitForImageLoad(mainImage);
       if (currentMagnifier) currentMagnifier.destroy();
-      currentMagnifier = new Magnifier(mainImage, 2);
+      currentMagnifier = new Magnifier(mainImage, 2.5);
     });
 
     document.querySelector('.add-to-basket').addEventListener('click', async function() {
@@ -927,48 +1320,215 @@
         localStorage.setItem(storageKey, JSON.stringify(ids));
       }
 
-      async function updateWishlistServer(productId, isAdding) {
+     
+      function getCurrentVariantKey() {
+        const selectedColorInput = document.querySelector('input[name="color"]:checked');
+        const selectedStorageInput = document.querySelector('input[name="storage"]:checked');
+        const productId = '<%= product._id %>';
+        
+        if (!selectedColorInput) return null;
+        
+        const color = selectedColorInput.value;
+        const storage = selectedStorageInput ? JSON.parse(selectedStorageInput.value).storage : '';
+        
+        return `${productId}_${color}_${storage}`;
+      }
+
+     
+      function getCurrentVariantData() {
+        const selectedColorInput = document.querySelector('input[name="color"]:checked');
+        const selectedStorageInput = document.querySelector('input[name="storage"]:checked');
+        const mainImage = document.getElementById('mainImage');
+        
+        if (!selectedColorInput || !mainImage) return null;
+        
+        return {
+          color: selectedColorInput.value,
+          storage: selectedStorageInput ? JSON.parse(selectedStorageInput.value).storage : '',
+          image: mainImage.src.replace(window.location.origin, '')
+        };
+      }
+
+      async function checkVariantInWishlist(productId, variantData) {
         try {
-          await fetch('/wishlist/toggle', {
+          const response = await fetch('/wishlist/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               productId,
-              action: isAdding ? 'add' : 'remove'
+              variant: variantData
             })
           });
+          
+          if (!response.ok) return false;
+          
+          const data = await response.json();
+          return data.inWishlist;
         } catch (err) {
-          console.error('Wishlist update failed', err);
+          console.error('Check wishlist failed', err);
+          return false;
         }
       }
-      const wishlist = getWishlist();
-      const icon = document.querySelector('.wishlist-icon');
-      if (icon) {
-        const productId = icon.dataset.productId;
+
+      async function updateWishlistServer(productId, isAdding, variantData) {
+        try {
+          const requestBody = {
+            productId,
+            action: isAdding ? 'add' : 'remove'
+          };
+          
+          
+          if (variantData) {
+            requestBody.variant = variantData;
+          }
+          
+          const response = await fetch('/wishlist/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+          
+          if (!response.ok) {
+            throw new Error('Server error');
+          }
+          
+          const data = await response.json();
+          return { success: true, data };
+        } catch (err) {
+          console.error('Wishlist update failed', err);
+          return { success: false };
+        }
+      }
+
+      function updateWishlistCount(count) {
+        
+        const wishlistCountElement = document.getElementById('wishlist-count');
+        if (wishlistCountElement) {
+          if (count !== undefined && count > 0) {
+            wishlistCountElement.textContent = count;
+            wishlistCountElement.style.display = 'inline-block';
+          } else if (count === 0) {
+            wishlistCountElement.style.display = 'none';
+          } else {
+            
+            const wishlist = getWishlist();
+            if (wishlist.length > 0) {
+              wishlistCountElement.textContent = wishlist.length;
+              wishlistCountElement.style.display = 'inline-block';
+            } else {
+              wishlistCountElement.style.display = 'none';
+            }
+          }
+        }
+      }
+
+      async function updateWishlistIcon() {
+        const icon = document.querySelector('.wishlist-icon');
         const heartIcon = icon.querySelector('i');
-        if (wishlist.includes(productId)) {
+        const productId = '<%= product._id %>';
+        const variantData = getCurrentVariantData();
+        
+        if (!variantData) return;
+        
+        const inWishlist = await checkVariantInWishlist(productId, variantData);
+        
+        if (inWishlist) {
           icon.classList.add('active');
           heartIcon.classList.remove('fa-heart-o');
           heartIcon.classList.add('fa-heart');
+        } else {
+          icon.classList.remove('active');
+          heartIcon.classList.remove('fa-heart');
+          heartIcon.classList.add('fa-heart-o');
         }
+      }
+
+      const icon = document.querySelector('.wishlist-icon');
+      if (icon) {
+        const productId = '<%= product._id %>';
+        const heartIcon = icon.querySelector('i');
+        
+        
+        updateWishlistIcon();
+        
         icon.addEventListener('click', async function(event) {
           event.preventDefault();
-          icon.classList.toggle('active');
+          event.stopPropagation();
+          
+          const variantData = getCurrentVariantData();
+          if (!variantData) {
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Please select a variant',
+                timer: 1500
+              });
+            }
+            return;
+          }
+          
+          const variantKey = getCurrentVariantKey();
           let ids = getWishlist();
-          const isAdding = icon.classList.contains('active');
-          if (isAdding) {
-            heartIcon.classList.remove('fa-heart-o');
-            heartIcon.classList.add('fa-heart');
-            if (!ids.includes(productId)) ids.push(productId);
+          const isCurrentlyInWishlist = ids.includes(variantKey);
+          
+          
+          icon.classList.add('active');
+          heartIcon.classList.remove('fa-heart-o');
+          heartIcon.classList.add('fa-heart');
+          
+          if (!ids.includes(variantKey)) {
+            ids.push(variantKey);
+          }
+          
+          setWishlist(ids);
+          
+          const result = await updateWishlistServer(productId, true, variantData);
+          
+          if (result.success) {
+            
+            if (result.data && result.data.count !== undefined) {
+              updateWishlistCount(result.data.count);
+            } else {
+              updateWishlistCount();
+            }
+            
+            
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'success',
+                title: 'Added to Wishlist',
+                text: 'You can view your favorite items anytime',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            }
           } else {
+            
+            icon.classList.remove('active');
             heartIcon.classList.remove('fa-heart');
             heartIcon.classList.add('fa-heart-o');
-            ids = ids.filter(id => id !== productId);
+            ids = ids.filter(id => id !== variantKey);
+            setWishlist(ids);
+            updateWishlistCount();
+            
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'error',
+                title: 'Failed to add',
+                text: 'Please try again',
+                timer: 1500
+              });
+            }
           }
-          setWishlist(ids);
-          await updateWishlistServer(productId, isAdding);
         });
       }
+
+      
+      document.querySelectorAll('input[name="color"], input[name="storage"]').forEach(input => {
+        input.addEventListener('change', function() {
+          setTimeout(updateWishlistIcon, 500); 
+        });
+      });
     });
   </script>
 

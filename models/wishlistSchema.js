@@ -13,6 +13,19 @@ const wishlistSchema = new Schema({
       ref: 'Product',
       required: true
     },
+    variant: {
+      color: String,
+      storage: String,
+      image: String
+    },
+    notifyPrice: {
+  type: Number,
+  default: 0
+},
+notifyOffer: {
+  type: Number,
+  default: 0
+},
     addedOn: {
       type: Date,
       default: Date.now
