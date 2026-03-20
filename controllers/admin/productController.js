@@ -170,7 +170,7 @@ const updateProduct = async (req, res) => {
         variantImages.push(...filesArray.map(f => `uploads/products/${f.filename}`));
       }
 
-      // discountPrice = regularPrice (offers applied separately via addProductOffer)
+      
       const regularPrice = Number(variant.regularPrice);
       const discountPrice = regularPrice;
 
@@ -179,7 +179,7 @@ const updateProduct = async (req, res) => {
 
     await Product.findByIdAndUpdate(productId, updateData, { new: true });
 
-    // Trigger real-time price alerts immediately after price update
+    
     console.log(`\n🚀 Product ${productId} updated — checking price alerts...`);
     await checkAlertsForProduct(productId);
     console.log(`✅ Alert check done`);

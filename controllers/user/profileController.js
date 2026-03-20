@@ -1288,7 +1288,7 @@ const loadWishListPage = async (req, res) => {
     const User = require('../../models/userSchema');
     const userData = await User.findById(userId);
 
-    // Get all active price alerts for this user
+   
     const PriceAlert = require('../../models/priceAlertSchema');
     const priceAlerts = await PriceAlert.find({ userId, isActive: true });
     
@@ -1313,14 +1313,14 @@ const setPriceAlert = async (req, res) => {
     try {
         const { productId, notifyPrice, notifyOffer } = req.body;
         
-        // Ensure we are using the string ID from the session object
+       
         const userId = req.session.user?._id || req.session.user; 
 
         if (!userId) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
 
-        // Use Mongoose to convert strings to ObjectIds for the query
+      
         const userObjId = new mongoose.Types.ObjectId(userId);
         const productObjId = new mongoose.Types.ObjectId(productId);
 
@@ -1340,7 +1340,7 @@ const setPriceAlert = async (req, res) => {
         if (updateResult.matchedCount > 0) {
             return res.status(200).json({ message: 'Alert set successfully' });
         } else {
-            // Check if the wishlist document even exists for this user
+            
             const wishlistExists = await Wishlist.findOne({ userId: userObjId });
             if (!wishlistExists) {
                 return res.status(404).json({ message: 'Wishlist not found for this user' });
@@ -1357,7 +1357,7 @@ const checkPriceAlerts = async (req, res) => {
     try {
         console.log('=== Starting Price Alert Check ===');
         
-        // Get all wishlists with price alerts set
+        
         const wishlists = await Wishlist.find({
             $or: [
                 { 'products.notifyPrice': { $gt: 0 } },
@@ -1385,7 +1385,7 @@ const checkPriceAlerts = async (req, res) => {
                     continue;
                 }
 
-                // Check if alert conditions are set
+                
                 const hasNotifyPrice = item.notifyPrice && item.notifyPrice > 0;
                 const hasNotifyOffer = item.notifyOffer && item.notifyOffer > 0;
 
@@ -1397,7 +1397,6 @@ const checkPriceAlerts = async (req, res) => {
                     continue;
                 }
 
-                // Find the matching variant
                 let matchingVariant = null;
                 if (item.variant && item.variant.color) {
                     matchingVariant = product.variants.find(v => 
@@ -1422,7 +1421,7 @@ const checkPriceAlerts = async (req, res) => {
 
                 console.log(`  Current Price: ₹${currentPrice}, Current Offer: ${currentOffer}%`);
 
-                // Check if conditions are met
+                
                 let shouldNotify = false;
                 let reason = '';
 
@@ -1444,13 +1443,13 @@ const checkPriceAlerts = async (req, res) => {
 
                 if (shouldNotify) {
                     console.log(`  Sending email to ${user.email}...`);
-                    // Send email notification
+                   
                     const emailSent = await sendPriceAlertEmail(user.email, product, matchingVariant, reason, item.variant);
 
                     if (emailSent) {
                         console.log(`  ✓ Email sent successfully!`);
                         notificationsSent++;
-                        // Reset the alert after sending notification
+                        
                         await Wishlist.updateOne(
                             { 
                                 userId: wishlist.userId._id, 
@@ -1562,7 +1561,7 @@ const testPriceAlertEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: 'User not found or no email' });
         }
 
-        // Get any product from wishlist for testing
+        
         const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
         
         if (!wishlist || wishlist.products.length === 0) {

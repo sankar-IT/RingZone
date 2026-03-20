@@ -9,7 +9,7 @@ async function checkAlerts() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to database\n');
     
-    // Get all alerts
+    
     const alerts = await PriceAlert.find().populate('productId');
     
     console.log(`Total alerts in database: ${alerts.length}\n`);
@@ -42,7 +42,7 @@ async function checkAlerts() {
       console.log('='.repeat(60) + '\n');
     }
     
-    // Check active, non-notified alerts
+    
     const activeAlerts = await PriceAlert.find({ 
       isActive: true, 
       notified: false 

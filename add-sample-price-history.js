@@ -1,4 +1,4 @@
-// Add sample price history with variations
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Product = require('./models/productsSchema');
@@ -9,7 +9,7 @@ async function addSamplePriceHistory() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to database\n');
     
-    // Get all products
+   
     const products = await Product.find({ isBlocked: false }).limit(5);
     
     console.log(`Adding price history for ${products.length} products...\n`);
@@ -21,37 +21,36 @@ async function addSamplePriceHistory() {
         const basePrice = variant.discountPrice || variant.regularPrice;
         console.log(`  Variant: ${variant.color} ${variant.storage} - Base Price: ₹${basePrice}`);
         
-        // Generate 90 days of price history with realistic variations
+        
         const records = [];
         const today = new Date();
         
         for (let i = 90; i >= 0; i--) {
           const date = new Date(today);
           date.setDate(date.getDate() - i);
-          date.setHours(2, 0, 0, 0); // Set to 2 AM
+          date.setHours(2, 0, 0, 0);
           
-          // Create realistic price variations
+          
           let priceVariation = 0;
           
-          // Add some price drops and increases
           if (i > 70) {
-            // 90-70 days ago: Higher prices
-            priceVariation = Math.random() * 0.15 + 0.05; // 5-20% higher
+           
+            priceVariation = Math.random() * 0.15 + 0.05; 
           } else if (i > 50) {
-            // 70-50 days ago: Gradual decrease
-            priceVariation = (70 - i) * 0.005; // Gradual drop
+          
+            priceVariation = (70 - i) * 0.005; 
           } else if (i > 30) {
-            // 50-30 days ago: Stable lower price
-            priceVariation = -0.05 + Math.random() * 0.03; // Around 5% lower
+            
+            priceVariation = -0.05 + Math.random() * 0.03; 
           } else if (i > 15) {
-            // 30-15 days ago: Price increase
-            priceVariation = -0.02 + (30 - i) * 0.003; // Gradual increase
+            
+            priceVariation = -0.02 + (30 - i) * 0.003; 
           } else if (i > 7) {
-            // 15-7 days ago: Flash sale
-            priceVariation = -0.10 - Math.random() * 0.05; // 10-15% off
+            
+            priceVariation = -0.10 - Math.random() * 0.05; 
           } else {
-            // Last 7 days: Back to normal with small variations
-            priceVariation = Math.random() * 0.05 - 0.02; // -2% to +3%
+        
+            priceVariation = Math.random() * 0.05 - 0.02; 
           }
           
           const price = Math.round(basePrice * (1 + priceVariation));
@@ -66,14 +65,14 @@ async function addSamplePriceHistory() {
           });
         }
         
-        // Delete existing history for this variant
+        
         await PriceHistory.deleteMany({
           productId: product._id,
           variantColor: variant.color,
           variantStorage: variant.storage
         });
         
-        // Insert new history
+      
         await PriceHistory.insertMany(records);
         console.log(`    ✅ Added ${records.length} price records`);
       }

@@ -451,12 +451,11 @@ const createRazorpayOrder = async (req, res) => {
         const couponData = req.session.appliedCoupon || {};
         const finalAmount = totalPrice - (couponData.discount || 0) + shippingCharge;
 
-        // Validate amount
         if (!finalAmount || finalAmount <= 0) {
             return res.status(400).json({ success: false, message: 'Invalid order amount. Please check your cart.' });
         }
 
-        // Create Razorpay order FIRST before creating database order
+        
         const options = {
             amount: Math.round(finalAmount * 100),
             currency: 'INR',
@@ -482,7 +481,7 @@ const createRazorpayOrder = async (req, res) => {
             });
         }
 
-        // Only create database order after Razorpay order is successful
+        
         const ord = await Order.create({
             user: userId,
             orderedItems: activeItems,
@@ -509,7 +508,7 @@ const createRazorpayOrder = async (req, res) => {
             razorpayOrderId: razorpayOrder.id
         });
 
-        // Delete cart and clear session only after order is created
+       
         await Cart.deleteOne({ user: userId });
         delete req.session.selectedShipment;
         delete req.session.selectedAddress;

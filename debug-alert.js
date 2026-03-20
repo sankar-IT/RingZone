@@ -9,7 +9,7 @@ async function debugAlert() {
   const Product = require('./models/productsSchema');
   const { sendPriceAlertEmail } = require('./helpers/emailService');
 
-  // Step 1: Check alerts in DB
+
   const alerts = await PriceAlert.find({ isActive: true });
   console.log(`Found ${alerts.length} active alert(s):\n`);
   alerts.forEach(a => {
@@ -29,7 +29,7 @@ async function debugAlert() {
 
   const alert = alerts[0];
 
-  // Step 2: Check product and variant
+ 
   const product = await Product.findById(alert.productId);
   if (!product) {
     console.log('❌ Product not found for alert:', alert.productId);
@@ -58,7 +58,6 @@ async function debugAlert() {
   console.log(`Target price:  ₹${alert.targetPrice}`);
   console.log(`Price meets target? ${currentPrice <= alert.targetPrice ? '✅ YES' : '❌ NO (price is higher than target)'}`);
 
-  // Step 3: Try sending email directly
   console.log(`\nAttempting to send email to ${alert.email}...`);
   const result = await sendPriceAlertEmail(alert.email, product, variant, currentPrice, alert.targetPrice);
   console.log(`Email result: ${result ? '✅ Sent!' : '❌ Failed'}`);

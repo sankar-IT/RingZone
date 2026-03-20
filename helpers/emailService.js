@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-// Create transporter
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Send price alert email
+
 async function sendPriceAlertEmail(email, product, variant, currentPrice, targetPrice) {
   try {
     const mailOptions = {

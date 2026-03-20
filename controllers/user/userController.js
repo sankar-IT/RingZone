@@ -667,7 +667,7 @@ const loadProductDetails = async (req, res) => {
 
   
     const productId = req.params.id;
-    const selectedColor = req.query.color; // Get color from query parameter
+    const selectedColor = req.query.color; 
     
     let productRes = await product.findById(productId)
       .populate('brand')
@@ -704,7 +704,7 @@ const loadProductDetails = async (req, res) => {
       };
     });
 
-    // Reorder variants to put selected color first
+   
     if (selectedColor) {
       const selectedIndex = productRes.variants.findIndex(v => v.color === selectedColor);
       if (selectedIndex > 0) {

@@ -64,7 +64,7 @@ const addToCart = async (req, res) => {
 
     await cart.save();
 
-    // Remove from wishlist (including specific variant)
+    
     await Wishlist.updateOne(
       { userId },
       { 
@@ -80,7 +80,7 @@ const addToCart = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Product added to cart and removed from wishlist',
+      message: 'Product added to cart',
       cartCount: cart.items?.length
     });
 

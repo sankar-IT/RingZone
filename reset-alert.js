@@ -1,4 +1,4 @@
-// Reset alert to trigger again
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const PriceAlert = require('./models/priceAlertSchema');
@@ -8,7 +8,7 @@ async function resetAlert() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to database\n');
     
-    // Reset all alerts to not notified
+    
     const result = await PriceAlert.updateMany(
       { notified: true },
       { $set: { notified: false } }

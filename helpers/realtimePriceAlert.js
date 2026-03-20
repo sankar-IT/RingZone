@@ -3,14 +3,10 @@ const Product = require('../models/productsSchema');
 const { sendPriceAlertEmail } = require('./emailService');
 const cron = require('node-cron');
 
-// Per-alert cron jobs keyed by alert._id string
+
 const alertCronJobs = {};
 
-/**
- * Called when admin updates product price.
- * Updates actualPrice on each alert, then checks if targetPrice >= actualPrice.
- * If yes → send email immediately, save triggered time, schedule daily cron for that user.
- */
+
 async function checkAndTriggerAlerts(productId, variantColor, variantStorage, newPrice) {
   try {
     const alerts = await PriceAlert.find({
@@ -23,11 +19,11 @@ async function checkAndTriggerAlerts(productId, variantColor, variantStorage, ne
     if (alerts.length === 0) return;
 
     for (const alert of alerts) {
-      // Always update finalPrice to reflect the latest product discountPrice
+     
       alert.finalPrice = newPrice;
       await alert.save();
 
-      // Check: if user's target price >= current final price → alert condition met
+      
       if (alert.targetPrice >= newPrice) {
         const now = new Date();
         const hour = now.getHours();
@@ -51,14 +47,14 @@ async function checkAndTriggerAlerts(productId, variantColor, variantStorage, ne
         if (emailSent) {
           console.log(`   ✅ Email sent to ${alert.email}`);
 
-          // Save triggered time for this specific user's alert
+          
           alert.triggeredHour = hour;
           alert.triggeredMinute = minute;
           alert.lastTriggeredAt = now;
           alert.notified = true;
           await alert.save();
 
-          // Schedule daily cron for this specific user at their triggered time
+          
           scheduleAlertCron(alert);
         }
       }
@@ -68,14 +64,11 @@ async function checkAndTriggerAlerts(productId, variantColor, variantStorage, ne
   }
 }
 
-/**
- * Schedule a daily cron for a specific alert using its own triggered time.
- * Each alert gets its own cron job keyed by alert._id — no sharing between users.
- */
+
 function scheduleAlertCron(alert) {
   const alertId = alert._id.toString();
 
-  // Cancel existing cron for this alert if any
+  
   if (alertCronJobs[alertId]) {
     alertCronJobs[alertId].stop();
     delete alertCronJobs[alertId];
@@ -97,7 +90,7 @@ function scheduleAlertCron(alert) {
         return;
       }
 
-      // Check if product is still in user's wishlist — if not, stop cron and deactivate alert
+      
       const Wishlist = require('../models/wishlistSchema');
       const wishlist = await Wishlist.findOne({ userId: freshAlert.userId });
       const stillInWishlist = wishlist?.products?.some(p =>
@@ -117,7 +110,7 @@ function scheduleAlertCron(alert) {
         return;
       }
 
-      // Check current finalPrice vs targetPrice
+      
       if (freshAlert.targetPrice >= freshAlert.finalPrice) {
         const freshProduct = freshAlert.productId;
         const freshVariant = freshProduct.variants.find(v =>
@@ -145,9 +138,7 @@ function scheduleAlertCron(alert) {
   alertCronJobs[alertId] = task;
 }
 
-/**
- * On server restart, restore individual cron jobs for all notified alerts.
- */
+
 async function restoreScheduledAlerts() {
   try {
     console.log('\n🔄 Restoring per-user alert cron jobs...');
@@ -168,9 +159,7 @@ async function restoreScheduledAlerts() {
   }
 }
 
-/**
- * Called when admin updates a product — checks all variants.
- */
+
 async function checkAlertsForProduct(productId) {
   try {
     const product = await Product.findById(productId);

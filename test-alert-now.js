@@ -1,4 +1,4 @@
-// Quick test script to check price alerts
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { recordDailyPrices } = require('./helpers/priceHistoryTracker');

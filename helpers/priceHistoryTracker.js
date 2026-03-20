@@ -15,7 +15,7 @@ async function recordDailyPrices() {
       for (const variant of product.variants) {
         const currentPrice = variant.discountPrice || variant.regularPrice;
         
-        // Check if we already have a record for today
+        
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
@@ -41,7 +41,7 @@ async function recordDailyPrices() {
 
     console.log(`Price recording completed. ${recordCount} records created.`);
     
-    // Check and trigger price alerts
+   
     await checkPriceAlerts();
     
   } catch (error) {
@@ -49,9 +49,7 @@ async function recordDailyPrices() {
   }
 }
 
-/**
- * Checks active price alerts and triggers notifications
- */
+
 async function checkPriceAlerts() {
   try {
     console.log('Checking price alerts...');
@@ -75,14 +73,14 @@ async function checkPriceAlerts() {
 
       const currentPrice = variant.discountPrice || variant.regularPrice;
 
-      // Check if current price is at or below target price
+      
       if (currentPrice <= alert.targetPrice) {
         console.log(`\n🔔 Price alert triggered for user ${alert.userId}`);
         console.log(`📦 Product: ${product.productName}`);
         console.log(`🎯 Target: ₹${alert.targetPrice}, Current: ₹${currentPrice}`);
         console.log(`📧 Sending email to: ${alert.email}`);
         
-        // Send notification email
+        
         const emailSent = await sendPriceAlertEmail(
           alert.email, 
           product, 
@@ -97,7 +95,7 @@ async function checkPriceAlerts() {
           console.log(`❌ Failed to send email\n`);
         }
         
-        // Mark alert as notified
+        
         alert.notified = true;
         await alert.save();
         
@@ -112,9 +110,7 @@ async function checkPriceAlerts() {
   }
 }
 
-/**
- * Cleans up old price history records (older than 180 days)
- */
+
 async function cleanupOldPriceHistory() {
   try {
     const sixMonthsAgo = new Date();

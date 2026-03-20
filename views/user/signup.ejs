@@ -185,25 +185,29 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      signform.addEventListener('submit', function (e) {
-        firstnameValidateChecking();
-        secondnameValidateChecking();
-        emailValidateChecking();
-        phoneValidateChecking();
-        passwordValidateChecking();
+    signform.addEventListener('submit', function (e) {
+      e.preventDefault();
 
-        if (
-          error1.innerHTML ||
-          error2.innerHTML ||
-          error3.innerHTML ||
-          error4.innerHTML ||
-          error5.innerHTML ||
-          error6.innerHTML
-        ) {
-          e.preventDefault();
-        }
-      });
+      firstnameValidateChecking();
+      secondnameValidateChecking();
+      emailValidateChecking();
+      phoneValidateChecking();
+      passwordValidateChecking();
+
+      const hasError =
+        error1.style.display === 'block' ||
+        error2.style.display === 'block' ||
+        error3.style.display === 'block' ||
+        error4.style.display === 'block' ||
+        error5.style.display === 'block' ||
+        error6.style.display === 'block';
+
+      if (!hasError) {
+        const btn = signform.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Registering...';
+        signform.submit();
+      }
     });
   </script>
 

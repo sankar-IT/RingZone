@@ -2,13 +2,13 @@ const PriceAlert = require('../../models/priceAlertSchema');
 const PriceHistory = require('../../models/priceHistorySchema');
 const Product = require('../../models/productsSchema');
 
-// Get price history for a product variant
+
 const getPriceHistory = async (req, res) => {
   try {
     const { productId } = req.params;
     const { color = '', storage = '' } = req.query;
 
-    // Get price history for the last 90 days
+   
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
@@ -22,7 +22,7 @@ const getPriceHistory = async (req, res) => {
     .select('price date -_id');
 
     if (priceHistory.length === 0) {
-      // If no history exists, create initial entry from current product data
+      
       const product = await Product.findById(productId);
       if (product) {
         const variant = product.variants.find(v => 
@@ -32,7 +32,7 @@ const getPriceHistory = async (req, res) => {
         if (variant) {
           const currentPrice = variant.discountPrice || variant.regularPrice;
           
-          // Create a simple history for the last 90 days
+          
           const mockHistory = [];
           for (let i = 90; i >= 0; i -= 7) {
             const date = new Date();
@@ -75,7 +75,7 @@ const getPriceHistory = async (req, res) => {
   }
 };
 
-// Get existing price alert for a product
+
 const getExistingAlert = async (req, res) => {
   try {
     const sessionUser = req.session.user;
@@ -123,7 +123,7 @@ const getExistingAlert = async (req, res) => {
   }
 };
 
-// Set price alert
+
 const setPriceAlert = async (req, res) => {
   try {
     const sessionUser = req.session.user;
@@ -144,13 +144,13 @@ const setPriceAlert = async (req, res) => {
       });
     }
 
-    // Always use the user's registered email
+   
     const User = require('../../models/userSchema');
     const user = await User.findById(userId);
     if (!user) return res.status(401).json({ success: false, message: 'User not found' });
     const email = user.email;
 
-    // Get current product price
+   
     const product = await Product.findById(productId);
     let currentPrice = 0;
     
@@ -163,7 +163,7 @@ const setPriceAlert = async (req, res) => {
       }
     }
 
-    // Check if alert already exists
+    
     const existingAlert = await PriceAlert.findOne({
       userId,
       productId,
@@ -195,7 +195,7 @@ const setPriceAlert = async (req, res) => {
       await newAlert.save();
     }
 
-    // Check if current price already meets the target
+    
     const priceAlreadyMet = currentPrice > 0 && currentPrice <= targetPrice;
 
     res.json({
@@ -214,7 +214,7 @@ const setPriceAlert = async (req, res) => {
   }
 };
 
-// Record price history (to be called periodically or on price changes)
+
 const recordPriceHistory = async (productId, variantColor, variantStorage, price, regularPrice) => {
   try {
     const newHistory = new PriceHistory({
@@ -230,7 +230,7 @@ const recordPriceHistory = async (productId, variantColor, variantStorage, price
   }
 };
 
-// Manual trigger for testing (can be called via route)
+
 const manualCheckAlerts = async (req, res) => {
   try {
     const { recordDailyPrices } = require('../../helpers/priceHistoryTracker');
