@@ -70,6 +70,10 @@ const productUploadFields = [
   { name: 'variantImages-variant-2', maxCount: 5 },
   { name: 'variantImages-variant-3', maxCount: 5 },
   { name: 'variantImages-variant-4', maxCount: 5 },
+  { name: 'variantImages-variant-5', maxCount: 5 },
+  { name: 'variantImages-variant-6', maxCount: 5 },
+  { name: 'variantImages-variant-7', maxCount: 5 },
+  { name: 'variantImages-variant-8', maxCount: 5 },
 ];
 
 const uploadProductEdit = multer({ storage: productStorage }).fields(productUploadFields);

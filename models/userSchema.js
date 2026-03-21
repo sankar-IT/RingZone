@@ -24,6 +24,7 @@ const userSchema = new Schema({
     default: null
   },
   dob: { type:  String },
+  gender: { type: String, enum: ['male', 'female', 'other'], default: null },
   profileImage: { type: String },
   googleId: {
     type: String,

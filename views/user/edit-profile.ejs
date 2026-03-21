@@ -214,6 +214,16 @@
               <input type="date" name="dob" value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>">
             </div>
 
+            <div class="mb-4">
+              <label class="form-label">Gender</label>
+              <select name="gender" class="form-select">
+                <option value="" <%= !user.gender ? 'selected' : '' %>>Prefer not to say</option>
+                <option value="male" <%= user.gender === 'male' ? 'selected' : '' %>>Male</option>
+                <option value="female" <%= user.gender === 'female' ? 'selected' : '' %>>Female</option>
+                <option value="other" <%= user.gender === 'other' ? 'selected' : '' %>>Other</option>
+              </select>
+            </div>
+
             <button type="submit" class="btn btn-update px-4">Update Profile</button>
           </form>
 

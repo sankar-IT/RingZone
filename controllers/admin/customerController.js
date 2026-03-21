@@ -2,46 +2,45 @@ const User = require('../../models/userSchema');
 
 const customerInfo = async (req, res) => {
   try {
-    let search = '';
-    if (req.query.search) {
-      search = req.query.search;
-    }
-
-    let page = 1;
-    if (req.query.page) {
-      page = parseInt(req.query.page);
-    }
-
+    const search = req.query.search || '';
+    const page = parseInt(req.query.page) || 1;
+    const sort = req.query.sort || '';
+    const gender = req.query.gender || '';
     const limit = 10;
 
-   const userData = await User.find({
-  isAdmin: false,
-  $or: [
-    { firstname: { $regex: '.*' + search + '.*', $options: 'i' } },
-    { email: { $regex: '.*' + search + '.*', $options: 'i' } },
-    { phone: { $regex: '.*' + search + '.*', $options: 'i' } } 
-  ]
-})
-.limit(limit)
-.skip((page - 1) * limit)
-.exec();
+    const query = {
+      isAdmin: false,
+      $or: [
+        { firstname: { $regex: '.*' + search + '.*', $options: 'i' } },
+        { email: { $regex: '.*' + search + '.*', $options: 'i' } },
+        { phone: { $regex: '.*' + search + '.*', $options: 'i' } }
+      ]
+    };
 
-const count = await User.countDocuments({
-  isAdmin: false,
-  $or: [
-    { firstname: { $regex: '.*' + search + '.*', $options: 'i' } },
-    { email: { $regex: '.*' + search + '.*', $options: 'i' } },
-    { phone: { $regex: '.*' + search + '.*', $options: 'i' } }
-  ]
-});
+    if (gender) {
+      query.gender = gender === 'none' ? null : gender;
+    }
 
+    let sortOption = {};
+    if (sort === 'az') sortOption = { firstname: 1 };
+    else if (sort === 'za') sortOption = { firstname: -1 };
+
+    const userData = await User.find(query)
+      .sort(sortOption)
+      .limit(limit)
+      .skip((page - 1) * limit)
+      .exec();
+
+    const count = await User.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
     res.render('users', {
-      data: userData, 
+      data: userData,
       currentPage: page,
       totalPages,
-      searchQuery: search
+      searchQuery: search,
+      sort,
+      gender
     });
 
   } catch (error) {

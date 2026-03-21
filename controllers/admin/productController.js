@@ -31,17 +31,34 @@ const addProduct = async (req, res) => {
       ? req.files.productImages.map(f => `uploads/products/${f.filename}`)
       : [];
 
-    const processedVariants = variants.map((variant, index) => {
-      const variantId = `variant-${index + 1}`;
-      const variantFiles = req.files?.[`variantImages-${variantId}`] || [];
-      const variantImages = variantFiles.map(f => `uploads/products/${f.filename}`);
+    // Track which variant block each variant came from
+    // Frontend sends images keyed by block: variantImages-variant-1, variantImages-variant-2, etc.
+    // Multiple storage rows in one block share the same images
+    // We need to figure out block boundaries from the variants array
+    // The frontend gatherVariantData pushes variants in order per block
+    // We track block by color+images grouping
+    const blockImageCache = {};
+    let blockCounter = 0;
+    let lastColor = null;
+
+    const processedVariants = variants.map((variant) => {
+      // New block when color changes (each accordion = one color block)
+      if (variant.color !== lastColor) {
+        blockCounter++;
+        lastColor = variant.color;
+      }
+      const variantId = `variant-${blockCounter}`;
+      if (!blockImageCache[variantId]) {
+        const variantFiles = req.files?.[`variantImages-${variantId}`] || [];
+        blockImageCache[variantId] = variantFiles.map(f => `uploads/products/${f.filename}`);
+      }
       return {
         color: variant.color,
         storage: variant.storage,
         regularPrice: Number(variant.regularPrice),
         discountPrice: Number(variant.regularPrice),
         quantity: Number(variant.quantity),
-        images: variantImages
+        images: blockImageCache[variantId]
       };
     });
 

@@ -35,6 +35,7 @@ router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
 router.post('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer);
 router.get('/listcategory',adminAuth,categoryController.getListCategory);
 router.get('/unlistcategory',adminAuth,categoryController.getUnlistCategory);
+router.post('/toggleCategory',adminAuth,categoryController.toggleCategory);
 router.get('/editcategory',adminAuth,categoryController.getEditCategory);
 router.post('/editCategory/:id',adminAuth,categoryController.editCategory);
 
@@ -51,7 +52,7 @@ router.get('/unBlockBrand',adminAuth,brandController.unBlockBrand)
 
 //Product Management
 router.get('/product-add',adminAuth,productController.getProductPage);
-router.post('/addProduct', storage.uploadProduct.any(), productController.addProduct);
+router.post('/addProduct', storage.uploadProductEdit, productController.addProduct);
 router.get('/productlist',adminAuth,productController.addProductList);
 router.post('/product-toggle/:id',adminAuth,productController.productBlock);
 router.get('/product-edit/:id',adminAuth,productController.editProduct);

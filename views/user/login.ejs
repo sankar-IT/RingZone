@@ -145,6 +145,15 @@ if (error === 'blocked') {
       });
 }
 
+if (error === 'admin') {
+        Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: 'Admin accounts cannot log in here. Please use the admin login page.',
+        confirmButtonColor: '#e74c3c'
+      });
+}
+
 // Password toggle functionality
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('passwordInput');

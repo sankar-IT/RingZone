@@ -345,7 +345,19 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <script>
+  const _swalFire = Swal.fire.bind(Swal);
+  Swal.fire = function(a, b, c) {
+    let opts = (typeof a === 'object' && a !== null) ? { ...a } : { title: a, text: b, icon: c };
+    const noAutoClose = opts.input || (opts.showCancelButton && ['question','warning'].includes(opts.icon));
+    if (!noAutoClose && opts.timer === undefined) {
+      opts.timer = opts.icon === 'success' ? 2000 : 2500;
+      opts.timerProgressBar = true;
+      opts.showConfirmButton = opts.showConfirmButton !== undefined ? opts.showConfirmButton : false;
+    }
+    return _swalFire(opts);
+  };
+  </script>
   <script>
   function confirmDelete(){
   return confirm('Are you sure you want to delete this brand')

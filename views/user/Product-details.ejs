@@ -187,6 +187,7 @@
   .thumbnails {
     display: flex;
     flex-direction: column;
+    transition: opacity 0.35s ease;
   }
 
   .thumbnail {
@@ -196,6 +197,7 @@
     border: 2px solid transparent;
     cursor: pointer;
     border-radius: 6px;
+    transition: opacity 0.35s ease, border-color 0.2s ease;
   }
 
   .thumbnail.active {
@@ -212,6 +214,7 @@
     max-height: 450px;
     object-fit: contain;
     border-radius: 8px;
+    transition: opacity 0.35s ease;
   }
 
   .details {
@@ -249,6 +252,7 @@
     gap: 10px;
     margin: 10px 0;
     flex-wrap: wrap;
+    transition: opacity 0.35s ease;
   }
 
   .variant-group {
@@ -587,17 +591,21 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    display: none;
+    background: rgba(255, 255, 255, 0.88);
+    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     border-radius: 8px;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
   }
 
   .variant-loading-overlay.active {
-    display: flex;
+    opacity: 1;
+    pointer-events: all;
   }
 
   .variant-spinner {
@@ -953,58 +961,35 @@
       }
     });
 
-    // Smooth color variant change function
     function changeColorVariant(selectedColor) {
-      // Show inline loading overlay
-      const loadingOverlay = document.getElementById('variantLoadingOverlay');
-      loadingOverlay.classList.add('active');
-
-      // Find the variant with the selected color
       const selectedVariant = variants.find(v => v.color === selectedColor);
-      
-      if (!selectedVariant) {
-        loadingOverlay.classList.remove('active');
-        return;
-      }
+      if (!selectedVariant) return;
 
-      // Fade out current images
+      const overlay = document.getElementById('variantLoadingOverlay');
       const mainImage = document.getElementById('mainImage');
-      const thumbnails = document.querySelectorAll('.thumbnail');
+      const thumbnailsContainer = document.getElementById('thumbnailsContainer');
       const priceRow = document.getElementById('priceRowContainer');
       const stockMessage = document.getElementById('stockMessageContainer');
-      
+
+      // Fade out content + show spinner
       mainImage.style.opacity = '0';
-      thumbnails.forEach(thumb => thumb.style.opacity = '0');
+      thumbnailsContainer.style.opacity = '0';
       if (priceRow) priceRow.style.opacity = '0';
       if (stockMessage) stockMessage.style.opacity = '0';
+      overlay.classList.add('active');
 
-      // Wait for fade out, then update content
       setTimeout(() => {
-        // Update gallery with new images
         updateGallery(selectedVariant.images);
-        
-        // Update price
         updateVariantDetails(selectedVariant);
-        
-        // Update storage dropdown if exists
         updateStorageOptions(selectedColor);
-        
-        // Update URL without reload
-        const newUrl = `/products/<%= product._id %>?color=${encodeURIComponent(selectedColor)}`;
-        window.history.pushState({ color: selectedColor }, '', newUrl);
-        
-        // Fade in new images and hide loading
-        setTimeout(() => {
-          mainImage.style.opacity = '1';
-          document.querySelectorAll('.thumbnail').forEach(thumb => {
-            thumb.style.opacity = '1';
-          });
-          if (priceRow) priceRow.style.opacity = '1';
-          if (stockMessage) stockMessage.style.opacity = '1';
-          
-          // Hide loading overlay
-          loadingOverlay.classList.remove('active');
-        }, 200);
+        window.history.pushState({ color: selectedColor }, '', `/products/<%= product._id %>?color=${encodeURIComponent(selectedColor)}`);
+
+        // Hide spinner + fade in content
+        overlay.classList.remove('active');
+        mainImage.style.opacity = '1';
+        thumbnailsContainer.style.opacity = '1';
+        if (priceRow) priceRow.style.opacity = '1';
+        if (stockMessage) stockMessage.style.opacity = '1';
       }, 400);
     }
 

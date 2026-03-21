@@ -213,7 +213,20 @@
   background-color: #5a4dcf;
 }
 
-
+.action-btn { display:inline-flex; align-items:center; padding:6px 14px; border-radius:6px; font-size:0.8rem; font-weight:600; border:none; cursor:pointer; text-decoration:none; transition:all 0.2s ease; white-space:nowrap; }
+.btn-teal { background:#1e918b; color:#fff; }
+.btn-teal:hover { background:#16c79a; color:#fff; }
+.btn-orange { background:#e67e22; color:#fff; }
+.btn-orange:hover { background:#d35400; color:#fff; }
+.btn-blue { background:#3498db; color:#fff; }
+.btn-blue:hover { background:#2980b9; color:#fff; }
+.toggle-switch { position:relative; display:inline-block; width:44px; height:24px; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:24px; transition:0.3s; }
+.toggle-slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; }
+input:checked + .toggle-slider { background:#1e918b; }
+input:checked + .toggle-slider:before { transform:translateX(20px); }
+.toggle-label { font-size:0.72rem; font-weight:600; text-align:center; }
 
   </style>
 </head>
@@ -272,57 +285,53 @@
           <table class="table table-hover">
             <thead class="table-light">
               <tr>
-                <th></th>
+                <th>#</th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Offer Price</th>
+                <th>     </th>
                 <th>Offer</th>
                 <th>Status</th>
-                <th>List/Unlist</th>
                 <th>Edit</th>
               </tr>
             </thead>
             <tbody>
-            <% cat.reverse().forEach(function(category, index) { %>
-
+            <% cat.forEach(function(category, index) { %>
   <tr>
-    <td></td>
-    <td class="text-start"><%= category.name %></td>
-    <td class="text-start"><%= category.description %></td>
-    <td>
-      <% if (category.categoryOffer) { %>
-        <%= category.categoryOffer %>
+    <td class="text-center text-muted small"><%= index + 1 %></td>
+    <td class="fw-semibold"><%= category.name %></td>
+    <td class="text-muted small"><%= category.description %></td>
+    <td class="text-center">
+      <% if (category.categoryOffer > 0) { %>
+        <span class="badge bg-success-subtle text-success fw-semibold"><%= category.categoryOffer %>%</span>
       <% } else { %>
-        0%
+        <span class="text-muted small">—</span>
       <% } %>
     </td>
-    <td class="text-start">
-      <div class="d-flex flex-column gap-2">
-        <% if (category.categoryOffer === 0) { %>
-          <a href="#" class="btn btn-info text-white" onclick="addOffer('<%= category._id %>')">Add Offer</a>
-        <% } else { %>
-          <a href="#" class="btn btn-info text-white" onclick="removeOffer('<%= category._id %>')">Remove</a>
-        <% } %>
+    <td class="text-center">
+      <% if (category.categoryOffer === 0) { %>
+        <button class="action-btn btn-teal" onclick="addOffer('<%= category._id %>')">
+          <i class="fas fa-tag me-1"></i>Add Offer
+        </button>
+      <% } else { %>
+        <button class="action-btn btn-orange" onclick="removeOffer('<%= category._id %>')">
+          <i class="fas fa-times me-1"></i>Remove
+        </button>
+      <% } %>
+    </td>
+    <td class="text-center">
+      <label class="toggle-switch" title="<%= category.isListed ? 'Click to Unlist' : 'Click to List' %>">
+        <input type="checkbox" <%= category.isListed ? 'checked' : '' %>
+               onchange="toggleStatus(this, '<%= category._id %>')">
+        <span class="toggle-slider"></span>
+      </label>
+      <div class="toggle-label mt-1 <%= category.isListed ? 'text-success' : 'text-danger' %>" id="label-<%= category._id %>">
+        <%= category.isListed ? 'Listed' : 'Unlisted' %>
       </div>
     </td>
-    <td class="text-start">
-      <%if(category.isListed){%>
-      <span class="badge rounded-pill bg-success">Listed</span>
-      <%}else{%>
-      <span class="badge rounded-pill bg-danger">Unlisted</span>
-      <%}%>
-    </td>
-    <td class="text-start">
-      <%if(category.isListed){%>
-      <div class="d-flex flex-column gap-2">
-        <a href="/admin/listCategory?id=<%=category._id%>" class="btn btn-danger text-white">Unlist</a>
-        <%}else{%>
-        <a href="/admin/unlistCategory?id=<%=category._id%>" class="btn btn-success text-white">List</a>
-      </div>
-      <%}%>
-    </td>
-    <td class="text-start">
-      <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-info text-white">Edit</a>
+    <td class="text-center">
+      <a href="/admin/editcategory?id=<%= category._id %>" class="action-btn btn-blue">
+        <i class="fas fa-pen me-1"></i>Edit
+      </a>
     </td>
   </tr>
 <% }) %>
@@ -359,6 +368,17 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
+  const _swalFire = Swal.fire.bind(Swal);
+  Swal.fire = function(a, b, c) {
+    let opts = (typeof a === 'object' && a !== null) ? { ...a } : { title: a, text: b, icon: c };
+    const noAutoClose = opts.input || (opts.showCancelButton && ['question','warning'].includes(opts.icon));
+    if (!noAutoClose && opts.timer === undefined) {
+      opts.timer = opts.icon === 'success' ? 2000 : 2500;
+      opts.timerProgressBar = true;
+      opts.showConfirmButton = opts.showConfirmButton !== undefined ? opts.showConfirmButton : false;
+    }
+    return _swalFire(opts);
+  };
   function handleFormSubmit(event) {
     event.preventDefault();
     if (!validateForm()) {
@@ -531,6 +551,33 @@ document.getElementById('clearButton').addEventListener('click', function () {
   document.getElementById('searchInput').value = '';
   document.getElementById('searchForm').submit();
 });
+
+async function toggleStatus(checkbox, categoryId) {
+  try {
+    const response = await fetch('/admin/toggleCategory', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: categoryId })
+    });
+    const data = await response.json();
+    if (data.success) {
+      const label = document.getElementById('label-' + categoryId);
+      if (data.isListed) {
+        label.textContent = 'Listed';
+        label.className = 'toggle-label mt-1 text-success';
+      } else {
+        label.textContent = 'Unlisted';
+        label.className = 'toggle-label mt-1 text-danger';
+      }
+    } else {
+      checkbox.checked = !checkbox.checked;
+      Swal.fire('Error', 'Failed to update status', 'error');
+    }
+  } catch (err) {
+    checkbox.checked = !checkbox.checked;
+    Swal.fire('Error', 'Network error', 'error');
+  }
+}
 
 </script>
 

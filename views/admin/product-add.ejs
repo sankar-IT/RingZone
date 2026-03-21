@@ -339,14 +339,41 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .storage-chip {
+      padding: 6px 16px;
+      border: 2px solid #ced4da;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #495057;
+      background: #fff;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .storage-chip:hover { border-color: #0d6efd; color: #0d6efd; }
+    .storage-chip.active { background: #0d6efd; border-color: #0d6efd; color: #fff; }
+    .storage-price-row { background: #f8f9fa; border-radius: 8px; padding: 10px 12px; }
+  </style>
   <script>
+  const _swalFire = Swal.fire.bind(Swal);
+  Swal.fire = function(a, b, c) {
+    let opts = (typeof a === 'object' && a !== null) ? { ...a } : { title: a, text: b, icon: c };
+    const noAutoClose = opts.input || (opts.showCancelButton && ['question','warning'].includes(opts.icon));
+    if (!noAutoClose && opts.timer === undefined) {
+      opts.timer = opts.icon === 'success' ? 2000 : 2500;
+      opts.timerProgressBar = true;
+      opts.showConfirmButton = opts.showConfirmButton !== undefined ? opts.showConfirmButton : false;
+    }
+    return _swalFire(opts);
+  };
     let cropper;
     let currentUploadType = "";
     let currentVariantIndex = null;
     let variantCount = 0;
     let currentFiles = [];
     let currentFileIndex = 0;
-
 
     let uploadedImages = {
         product: JSON.parse(localStorage.getItem('productImages')) || [],
@@ -355,33 +382,20 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('productForm');
-        if (form) {
-            form.addEventListener('submit', handleFormSubmit);
-        }
-        
-       
+        if (form) form.addEventListener('submit', handleFormSubmit);
         loadSavedImages();
-        
-     
         const accordions = document.querySelectorAll('.accordion-item');
         variantCount = accordions.length;
     });
 
     function loadSavedImages() {
-
         if (uploadedImages.product && uploadedImages.product.length > 0) {
-            uploadedImages.product.forEach(imgData => {
-                addImageToPreview(imgData, 'productPreview');
-            });
+            uploadedImages.product.forEach(imgData => addImageToPreview(imgData, 'productPreview'));
         }
-        
-
         if (uploadedImages.variant) {
             for (const [variantId, images] of Object.entries(uploadedImages.variant)) {
                 if (images && images.length > 0) {
-                    images.forEach(imgData => {
-                        addImageToPreview(imgData, `variantPreview-${variantId}`);
-                    });
+                    images.forEach(imgData => addImageToPreview(imgData, `variantPreview-${variantId}`));
                 }
             }
         }
@@ -396,15 +410,10 @@
         document.getElementById('productForm').reset();
         document.getElementById('productPreview').innerHTML = '';
         document.getElementById('variantAccordionArea').innerHTML = '';
-        uploadedImages = {
-            product: [],
-            variant: {}
-        };
+        uploadedImages = { product: [], variant: {} };
         variantCount = 0;
         currentFiles = [];
         currentFileIndex = 0;
-        
-
         localStorage.removeItem('productImages');
         localStorage.removeItem('variantImages');
     }
@@ -412,23 +421,17 @@
     async function handleFormSubmit(e) {
         e.preventDefault();
         if (!validateForm()) return;
-
         document.getElementById('loadingOverlay').style.display = 'flex';
-        
         try {
             const variants = gatherVariantData();
             document.getElementById('variantsData').value = JSON.stringify(variants);
             const formData = createFormData();
             const response = await submitForm(formData);
-            
             if (response.success) {
                 showSuccess('Product added successfully!');
-                
                 localStorage.removeItem('productImages');
                 localStorage.removeItem('variantImages');
-                setTimeout(() => {
-                    window.location.href = '/admin/productlist';
-                }, 2000);
+                setTimeout(() => { window.location.href = '/admin/productlist'; }, 2000);
             } else {
                 showError(response.message || 'Error adding product');
             }
@@ -445,88 +448,67 @@
         const brand = document.getElementById('brand').value;
         const category = document.getElementById('category').value;
         const description = document.getElementById('description').value;
-        
         if (!productName || !brand || !category || !description) {
             showError('Please fill all required fields');
             return false;
         }
-        
         if (uploadedImages.product.length === 0) {
             showError('Please upload at least one product image');
             return false;
         }
-        
         const accordions = document.querySelectorAll('.accordion-item');
         if (accordions.length === 0) {
             showError('Please add at least one variant');
             return false;
         }
-        
         return true;
     }
 
     function gatherVariantData() {
         const variants = [];
         const accordions = document.querySelectorAll('.accordion-item');
-        
         accordions.forEach((accordion, index) => {
-            const variantId = accordion.id;  
-            const variant = {
-                color: accordion.querySelector('[name="color"]').value,
-                storage: accordion.querySelector('[name="storage"]').value,
-                regularPrice: parseFloat(accordion.querySelector('[name="regularPrice"]').value),
-                quantity: parseInt(accordion.querySelector('[name="quantity"]').value),
-                images: uploadedImages.variant[variantId] || []
-            };
-            
-            if (!variant.color || !variant.storage || isNaN(variant.regularPrice) || isNaN(variant.quantity)) {
-                throw new Error(`Please fill all required fields for Variant ${index + 1}`);
-            }
-            
-            if (variant.images.length === 0) {
-                throw new Error(`Please upload at least one image for Variant ${index + 1}`);
-            }
-            
-            variants.push(variant);
+            const variantId = accordion.id;
+            const color = accordion.querySelector('[name="color"]').value.trim();
+            const images = uploadedImages.variant[variantId] || [];
+            if (!color) throw new Error('Please enter a color for Variant ' + (index + 1));
+            if (images.length === 0) throw new Error('Please upload at least one image for Variant ' + (index + 1));
+            const storageRows = accordion.querySelectorAll('.storage-price-row');
+            if (storageRows.length === 0) throw new Error('Please select at least one storage option for Variant ' + (index + 1));
+            storageRows.forEach(function(row) {
+                const storage = row.dataset.storage;
+                const regularPrice = parseFloat(row.querySelector('[name="regularPrice"]').value);
+                const quantity = parseInt(row.querySelector('[name="quantity"]').value);
+                if (!storage || isNaN(regularPrice) || isNaN(quantity)) {
+                    throw new Error('Please fill price and quantity for ' + storage + ' in Variant ' + (index + 1));
+                }
+                variants.push({ color: color, storage: storage, regularPrice: regularPrice, quantity: quantity, images: images });
+            });
         });
-
         return variants;
     }
 
     function createFormData() {
         const formData = new FormData(document.getElementById('productForm'));
-        
-        uploadedImages.product.forEach((imgData, index) => {
-            const file = dataURLtoFile(imgData, `product-${index}.jpg`);
-            formData.append('productImages', file);
+        uploadedImages.product.forEach(function(imgData, index) {
+            formData.append('productImages', dataURLtoFile(imgData, 'product-' + index + '.jpg'));
         });
-        
         for (const [variantId, images] of Object.entries(uploadedImages.variant)) {
-            images.forEach((imgData, index) => {
-                const file = dataURLtoFile(imgData, `variant-${variantId}-${index}.jpg`);
-                formData.append(`variantImages-${variantId}`, file);
+            images.forEach(function(imgData, index) {
+                formData.append('variantImages-' + variantId, dataURLtoFile(imgData, 'variant-' + variantId + '-' + index + '.jpg'));
             });
         }
-        
         return formData;
     }
 
     async function submitForm(formData) {
         try {
-            const response = await fetch('/admin/addproduct', {
-                method: 'POST',
-                body: formData
-            });
-            
+            const response = await fetch('/admin/addProduct', { method: 'POST', body: formData });
             const result = await response.json();
-            
             if (!response.ok) {
-                if (result.error === 'INVALID_FILE_TYPE') {
-                    throw new Error('Invalid file format. Only images are allowed.');
-                }
+                if (result.error === 'INVALID_FILE_TYPE') throw new Error('Invalid file format. Only images are allowed.');
                 throw new Error(result.message || 'Server error');
             }
-            
             return result;
         } catch (error) {
             console.error('Submission error:', error);
@@ -534,121 +516,79 @@
         }
     }
 
-    function handleImageUpload(event, type, variantId = null) {
+    function handleImageUpload(event, type, variantId) {
         const files = event.target.files;
         if (!files || files.length === 0) return;
-
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-        const invalidFiles = Array.from(files).filter(file => 
-            !allowedTypes.includes(file.type)
-        );
-        
+        const invalidFiles = Array.from(files).filter(function(f) { return !allowedTypes.includes(f.type); });
         if (invalidFiles.length > 0) {
-            showError(`Invalid file format. Only JPEG, PNG, JPG, and WEBP images are allowed.`);
+            showError('Invalid file format. Only JPEG, PNG, JPG, and WEBP images are allowed.');
             event.target.value = '';
             return;
         }
-        
         currentUploadType = type;
         if (type === 'variant') {
             currentVariantIndex = variantId;
-            if (!uploadedImages.variant[variantId]) {
-                uploadedImages.variant[variantId] = [];
-            }
+            if (!uploadedImages.variant[variantId]) uploadedImages.variant[variantId] = [];
         }
-        
         const maxImages = 5;
-        let currentCount = type === 'product' ? 
-            uploadedImages.product.length : 
-            uploadedImages.variant[variantId].length;
-        
+        const currentCount = type === 'product' ? uploadedImages.product.length : uploadedImages.variant[variantId].length;
         if (currentCount + files.length > maxImages) {
-            showError(`Maximum ${maxImages} images allowed. You can add ${maxImages - currentCount} more.`);
+            showError('Maximum ' + maxImages + ' images allowed. You can add ' + (maxImages - currentCount) + ' more.');
             event.target.value = '';
             return;
         }
-        
-      
         currentFiles = Array.from(files);
         currentFileIndex = 0;
-        
- 
         processNextFile();
     }
 
     function processNextFile() {
         if (currentFileIndex >= currentFiles.length) {
-       
-            const fileInput = document.querySelector(`input[type="file"][data-variant="${currentVariantIndex}"]`) || 
-                            document.getElementById('productImages');
+            const fileInput = document.querySelector('input[type="file"][data-variant="' + currentVariantIndex + '"]') ||
+                              document.getElementById('productImages');
             if (fileInput) fileInput.value = '';
             return;
         }
-        
         const file = currentFiles[currentFileIndex];
         const reader = new FileReader();
-        
-        reader.onload = () => {
+        reader.onload = function() {
             document.getElementById('cropperImage').src = reader.result;
             const modal = new bootstrap.Modal(document.getElementById('cropModal'));
             modal.show();
-            
-            setTimeout(() => {
+            setTimeout(function() {
                 if (cropper) cropper.destroy();
                 cropper = new Cropper(document.getElementById('cropperImage'), {
-                    aspectRatio: NaN,
-                    viewMode: 2,
-                    autoCropArea: 1,
-                    responsive: true,
-                    guides: true,
-                    center: true,
-                    highlight: true,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
+                    aspectRatio: NaN, viewMode: 2, autoCropArea: 1, responsive: true,
+                    guides: true, center: true, highlight: true,
+                    cropBoxMovable: true, cropBoxResizable: true,
                     toggleDragModeOnDblclick: false,
-                    minContainerWidth: 200,
-                    minContainerHeight: 200
+                    minContainerWidth: 200, minContainerHeight: 200
                 });
             }, 200);
         };
-        
         reader.readAsDataURL(file);
     }
 
     function cropAndContinue() {
         const croppedCanvas = cropper.getCroppedCanvas({
-            maxWidth: 1200,
-            maxHeight: 1200,
-            fillColor: '#fff',
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high'
+            maxWidth: 1200, maxHeight: 1200, fillColor: '#fff',
+            imageSmoothingEnabled: true, imageSmoothingQuality: 'high'
         });
-        
-        if (!croppedCanvas) {
-            showError('Could not crop image. Please try again.');
-            return;
-        }
-        
+        if (!croppedCanvas) { showError('Could not crop image. Please try again.'); return; }
         const imageUrl = croppedCanvas.toDataURL('image/jpeg', 0.9);
-        
         if (currentUploadType === 'product') {
             uploadedImages.product.push(imageUrl);
             addImageToPreview(imageUrl, 'productPreview');
         } else if (currentUploadType === 'variant' && currentVariantIndex) {
-            if (!uploadedImages.variant[currentVariantIndex]) {
-                uploadedImages.variant[currentVariantIndex] = [];
-            }
+            if (!uploadedImages.variant[currentVariantIndex]) uploadedImages.variant[currentVariantIndex] = [];
             uploadedImages.variant[currentVariantIndex].push(imageUrl);
-            addImageToPreview(imageUrl, `variantPreview-${currentVariantIndex}`);
+            addImageToPreview(imageUrl, 'variantPreview-' + currentVariantIndex);
         }
-        
-
         saveImagesToStorage();
-        
         cropper.destroy();
         cropper = null;
         bootstrap.Modal.getInstance(document.getElementById('cropModal')).hide();
-      
         currentFileIndex++;
         processNextFile();
     }
@@ -657,23 +597,12 @@
         const previewDiv = document.getElementById(previewId);
         if (!previewDiv) return;
         const existingImages = previewDiv.querySelectorAll('img');
-        for (const img of existingImages) {
-            if (img.src === imageUrl) return; 
-        }
-        
+        for (const img of existingImages) { if (img.src === imageUrl) return; }
         const imgContainer = document.createElement('div');
-        imgContainer.style.position = 'relative';
-        imgContainer.style.display = 'inline-block';
-        imgContainer.style.margin = '5px';
-        
+        imgContainer.style.cssText = 'position:relative;display:inline-block;margin:5px;';
         const img = document.createElement('img');
         img.src = imageUrl;
-        img.style.width = '120px';
-        img.style.height = '120px';
-        img.style.objectFit = 'cover';
-        img.style.border = '2px solid #ddd';
-        img.style.borderRadius = '8px';
-        
+        img.style.cssText = 'width:120px;height:120px;object-fit:cover;border:2px solid #ddd;border-radius:8px;';
         const removeBtn = document.createElement('span');
         removeBtn.className = 'remove-img';
         removeBtn.innerHTML = '×';
@@ -682,85 +611,81 @@
             imgContainer.remove();
             saveImagesToStorage();
         };
-        
         imgContainer.appendChild(img);
         imgContainer.appendChild(removeBtn);
         previewDiv.appendChild(imgContainer);
     }
 
-    function removeImage(imageUrl, type, variantId = null) {
+    function removeImage(imageUrl, type, variantId) {
         if (type === 'product') {
-            uploadedImages.product = uploadedImages.product.filter(img => img !== imageUrl);
+            uploadedImages.product = uploadedImages.product.filter(function(img) { return img !== imageUrl; });
         } else if (type === 'variant' && variantId) {
-            uploadedImages.variant[variantId] = uploadedImages.variant[variantId].filter(img => img !== imageUrl);
+            uploadedImages.variant[variantId] = uploadedImages.variant[variantId].filter(function(img) { return img !== imageUrl; });
+        }
+    }
+
+    function toggleStorageChip(chip) {
+        const storage = chip.dataset.storage;
+        const variantId = chip.dataset.variant;
+        const rowsContainer = document.getElementById('storage-rows-' + variantId);
+        const isActive = chip.classList.toggle('active');
+        if (isActive) {
+            const row = document.createElement('div');
+            row.className = 'row align-items-center mb-2 storage-price-row';
+            row.dataset.storage = storage;
+            row.innerHTML =
+                '<div class="col-auto fw-semibold" style="min-width:70px;">' + storage + '</div>' +
+                '<div class="col-md-3"><input type="number" class="form-control form-control-sm" placeholder="Regular Price (₹)" name="regularPrice" min="0" step="0.01" required data-storage="' + storage + '"></div>' +
+                '<div class="col-md-3"><input type="number" class="form-control form-control-sm" placeholder="Quantity" name="quantity" min="0" required data-storage="' + storage + '"></div>';
+            rowsContainer.appendChild(row);
+        } else {
+            const existing = rowsContainer.querySelector('.storage-price-row[data-storage="' + storage + '"]');
+            if (existing) existing.remove();
         }
     }
 
     function addVariantAccordion() {
         variantCount++;
-        const accordionId = `variant-${variantCount}`;
-        if (!uploadedImages.variant[accordionId]) {
-            uploadedImages.variant[accordionId] = [];
-        }
-        
-        const html = `
-            <div class="accordion-item mb-3" id="${accordionId}">
-                <h2 class="accordion-header" id="heading-${accordionId}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                            data-bs-target="#collapse-${accordionId}" aria-expanded="false" 
-                            aria-controls="collapse-${accordionId}">
-                        Variant ${variantCount}
-                    </button>
-                </h2>
-                <div id="collapse-${accordionId}" class="accordion-collapse collapse" 
-                    aria-labelledby="heading-${accordionId}" data-bs-parent="#variantAccordion">
-                    <div class="accordion-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="color-${accordionId}" class="form-label">Color</label>
-                                <input type="text" id="color-${accordionId}" class="form-control" name="color" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="storage-${accordionId}" class="form-label">Storage</label>
-                                <select id="storage-${accordionId}" class="form-select" name="storage" required>
-                                    <option value="">-- Select Storage --</option>
-                                    <option value="32GB">32GB</option>
-                                    <option value="64GB">64GB</option>
-                                    <option value="128GB">128GB</option>
-                                    <option value="256GB">256GB</option>
-                                    <option value="512GB">512GB</option>
-                                    <option value="1TB">1TB</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label">Variant Images (Max 5)</label>
-                            <input type="file" class="form-control" accept="image/jpeg, image/png, image/jpg, image/webp" multiple
-                                data-variant="${accordionId}"
-                                onchange="handleImageUpload(event, 'variant', '${accordionId}')" />
-                            <div class="image-preview mt-2" id="variantPreview-${accordionId}"></div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Regular Price (₹)</label>
-                                <input type="number" class="form-control" name="regularPrice" min="0" step="0.01" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Quantity</label>
-                                <input type="number" class="form-control" name="quantity" min="0" required>
-                            </div>
-                        </div>
-                        
-                        <button type="button" class="btn btn-danger btn-sm" 
-                                onclick="removeVariant('${accordionId}')">
-                            <i class="fas fa-trash me-1"></i> Remove Variant
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-        
+        const accordionId = 'variant-' + variantCount;
+        if (!uploadedImages.variant[accordionId]) uploadedImages.variant[accordionId] = [];
+
+        const storageOptions = ['32GB','64GB','128GB','256GB','512GB','1TB'];
+        const chipsHtml = storageOptions.map(function(s) {
+            return '<div class="storage-chip" data-storage="' + s + '" data-variant="' + accordionId + '" onclick="toggleStorageChip(this)">' + s + '</div>';
+        }).join('');
+
+        const html =
+            '<div class="accordion-item mb-3" id="' + accordionId + '">' +
+              '<h2 class="accordion-header" id="heading-' + accordionId + '">' +
+                '<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-' + accordionId + '" aria-expanded="true" aria-controls="collapse-' + accordionId + '">' +
+                  'Variant ' + variantCount +
+                '</button>' +
+              '</h2>' +
+              '<div id="collapse-' + accordionId + '" class="accordion-collapse collapse show" aria-labelledby="heading-' + accordionId + '">' +
+                '<div class="accordion-body">' +
+                  '<div class="row mb-3">' +
+                    '<div class="col-md-6">' +
+                      '<label class="form-label fw-semibold">Color</label>' +
+                      '<input type="text" class="form-control" name="color" placeholder="e.g. Midnight Black" required>' +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="mb-3">' +
+                    '<label class="form-label fw-semibold">Storage Options <small class="text-muted fw-normal">(click to select multiple)</small></label>' +
+                    '<div class="storage-chips d-flex flex-wrap gap-2" id="chips-' + accordionId + '">' + chipsHtml + '</div>' +
+                  '</div>' +
+                  '<div id="storage-rows-' + accordionId + '" class="mb-3"></div>' +
+                  '<div class="mb-4">' +
+                    '<label class="form-label fw-semibold">Variant Images <small class="text-muted fw-normal">(Max 5)</small></label>' +
+                    '<input type="file" class="form-control" accept="image/jpeg,image/png,image/jpg,image/webp" multiple data-variant="' + accordionId + '" onchange="handleImageUpload(event,\'variant\',\'' + accordionId + '\')">' +
+                    '<div class="image-preview mt-2" id="variantPreview-' + accordionId + '"></div>' +
+                  '</div>' +
+                  '<button type="button" class="btn btn-danger btn-sm" onclick="removeVariant(\'' + accordionId + '\')">' +
+                    '<i class="fas fa-trash me-1"></i> Remove Variant' +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+
         const container = document.getElementById('variantAccordionArea');
         if (!container.querySelector('.accordion')) {
             const wrapper = document.createElement('div');
@@ -771,21 +696,13 @@
         } else {
             container.querySelector('.accordion').insertAdjacentHTML('beforeend', html);
         }
-        
-        if (uploadedImages.variant[accordionId] && uploadedImages.variant[accordionId].length > 0) {
-            uploadedImages.variant[accordionId].forEach(imgData => {
-                addImageToPreview(imgData, `variantPreview-${accordionId}`);
-            });
-        }
-        
-        new bootstrap.Collapse(document.getElementById(`collapse-${accordionId}`));
     }
 
     function removeVariant(accordionId) {
         if (confirm('Are you sure you want to remove this variant?')) {
-            const variantElement = document.getElementById(accordionId);
-            if (variantElement) {
-                variantElement.remove();
+            const el = document.getElementById(accordionId);
+            if (el) {
+                el.remove();
                 delete uploadedImages.variant[accordionId];
                 variantCount--;
                 saveImagesToStorage();
@@ -799,33 +716,17 @@
         const bstr = atob(arr[1]);
         let n = bstr.length;
         const u8arr = new Uint8Array(n);
-        
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
         return new File([u8arr], filename, { type: mime });
     }
 
     function showError(message) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: message,
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
-        });
+        Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#3085d6', confirmButtonText: 'OK' });
     }
 
     function showSuccess(message) {
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: message,
-            showConfirmButton: false,
-            timer: 2000
-        });
+        Swal.fire({ icon: 'success', title: 'Success!', text: message, showConfirmButton: false, timer: 2000 });
     }
-</script>
+  </script>
 </body>
 </html>

@@ -559,12 +559,13 @@ const updateProfile = async (req, res) => {
   try {
     
     const userId = req.session.user._id;
-    const { fname, lname, dob } = req.body;
+    const { fname, lname, dob, gender } = req.body;
     
     const updateData = {
       firstname: fname,
       lastname: lname,
-      dob: dob ? new Date(dob) : null
+      dob: dob ? new Date(dob) : null,
+      gender: gender || null
     };
     
     if (req.file) {

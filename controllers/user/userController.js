@@ -25,7 +25,12 @@ const pageNotFound=async(req,res)=>{
 const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
-    const productData = await product.find({ isBlocked: false })
+    const listedCategories = await Category.find({ isListed: true }).select('_id');
+    const listedCategoryIds = listedCategories.map(c => c._id);
+    const productData = await product.find({
+      isBlocked: false,
+      category: { $in: listedCategoryIds }
+    })
      .sort({ createdAt: -1 })
      .limit(8);
 
@@ -274,13 +279,17 @@ const verifyOtp = async (req, res) => {
 
 const googleCallBack=async(req,res)=>{
   try {
-     if (req.user.isBlocked) {
-    return res.redirect('/login?error=blocked');
-  }
-  req.session.user = req.user;
-  res.redirect('/');
+    if (req.user.isAdmin) {
+      req.logout(() => {});
+      return res.redirect('/login?error=admin');
+    }
+    if (req.user.isBlocked) {
+      return res.redirect('/login?error=blocked');
+    }
+    req.session.user = req.user;
+    res.redirect('/');
   } catch (error) {
-    
+    res.redirect('/login');
   }
 }
 
@@ -334,10 +343,14 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const findUser = await User.findOne({ isAdmin: 0, email: email });
+    const findUser = await User.findOne({ email: email });
 
     if (!findUser) {
       return res.render('login', { message: 'User not found' });
+    }
+
+    if (findUser.isAdmin) {
+      return res.render('login', { message: 'Access denied. Please use the admin login.' });
     }
 
     if (findUser.isBlocked) {

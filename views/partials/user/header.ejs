@@ -293,146 +293,228 @@
     height: 150px;
   }
 }
-.navbar_menu a {
-  font-size: 20px;           
-  font-weight: 700;        
-  letter-spacing: 1px;       
-  color: #222;             
-  text-decoration: none;
-  padding: 10px 18px;       
+/* ── Professional Navbar ── */
+:root {
+  --brand-teal: #1e918b;
+  --brand-teal-light: #16c79a;
+  --nav-text: #1a1a1a;
+}
+
+.main_nav_container {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.header.scrolled .main_nav_container {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Nav links */
+.navbar_menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.navbar_menu li a {
   position: relative;
-  transition: color 0.3s ease;
+  display: inline-block;
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--nav-text);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  border-radius: 8px;
+  transition: color 0.25s ease, background 0.25s ease;
 }
 
-.navbar_menu a::after {
-  content: "";
+.navbar_menu li a::after {
+  content: '';
   position: absolute;
-  left: 0;
-  bottom: -5px;
-  width: 0;
-  height: 3px;
-  background-color: #ff7f50; 
-  transition: width 0.3s ease;
+  bottom: 3px;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand-teal), var(--brand-teal-light));
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
-.navbar_menu a:hover {
-  color: #ff7f50;
+.navbar_menu li a:hover,
+.navbar_menu li a.nav-active {
+  color: var(--brand-teal);
+  background: rgba(30, 145, 139, 0.07);
+  text-decoration: none;
 }
 
-.navbar_menu a:hover::after {
-  width: 100%; 
+.navbar_menu li a:hover::after,
+.navbar_menu li a.nav-active::after {
+  transform: scaleX(1);
+}
+
+/* Icon buttons */
+.navbar_user {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.navbar_user li a:not(.user-avatar-link):not(.wishlist-navbar-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: var(--nav-text);
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar_user li a:not(.user-avatar-link):not(.wishlist-navbar-icon):hover {
+  background: rgba(30, 145, 139, 0.1);
+  color: var(--brand-teal);
+  transform: translateY(-1px);
+}
+
+/* Wishlist icon */
+.wishlist-navbar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: var(--nav-text);
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.wishlist-navbar-icon:hover {
+  background: rgba(30, 145, 139, 0.1);
+  color: var(--brand-teal);
+  transform: translateY(-1px);
+}
+
+/* User avatar */
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.user-avatar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+.user-avatar-link { display: inline-block; }
+
+/* Logout button */
+.logout-text {
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  padding: 7px 14px !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #ff4646, #ff6b6b) !important;
+  color: white !important;
+  border: none !important;
+  letter-spacing: 0.3px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(255,70,70,0.3);
+}
+
+.logout-text:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(255,70,70,0.4) !important;
+  text-decoration: none;
+  color: white !important;
+}
+
+/* Sign-in icon */
+.signin-btn-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 10px !important;
+  background: rgba(30,145,139,0.08) !important;
+  border: none !important;
+  color: var(--brand-teal) !important;
+  font-size: 1rem;
+  transition: background 0.2s ease, transform 0.2s ease;
+  padding: 0 !important;
+}
+
+.signin-btn-icon:hover {
+  background: rgba(30,145,139,0.18) !important;
+  transform: translateY(-1px);
+}
+
+.signin-btn-icon i { color: var(--brand-teal) !important; }
+
+/* Dropdown */
+.dropdown:hover .dropdown-content { display: block; }
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: #fff;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  border-radius: 10px;
+  z-index: 1000;
+  right: 0;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.dropdown-content a {
+  color: #333;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.dropdown-content a:hover {
+  background: rgba(30,145,139,0.08);
+  color: var(--brand-teal);
 }
 
 .sign-in-link {
-  font-size: 16px;
+  font-size: 0.9rem;
   color: #333;
   text-decoration: none;
   font-weight: 600;
 }
 
-.sign-in-link:hover {
-  color: #ff7f50;
-}
-
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 18px;
-  text-transform: uppercase;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: white;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  right: 0;
-}
-
-.dropdown-content a {
-  color: black;
-  padding: 10px 16px;
-  text-decoration: none;
-  display: block;
-}
-
-.dropdown-content a[href="/logout"]:hover {
-  background-color: #ff7f50;
-  color: white !important;
-}/* navigation link enhancements */
-.navbar_menu {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  width: 100%;
-  margin: 0 auto;
-}
-.navbar_menu li a {
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 8px 12px;
-  transition: color 0.2s, background 0.2s;
-}
-.navbar_menu li a:hover {
-  color: var(--brand);
-  background: rgba(255, 70, 70, 0.1);
-  border-radius: 4px;
-}
-/* avatar and logout icon tweaks */
-.user-avatar {
-  cursor: pointer;
-}
-.user-avatar-link {
-  display: inline-block;
-}
-.logout-text {
-  font-size: 0.9rem;
-  padding: 5px 8px;
-  min-width: 80px;
-  text-align: center;
-}
-.logout-text:hover {
-  text-decoration: none;
-}
-.signin-btn {
-  font-size: 0.9rem;
-  padding: 6px 12px;
-  min-width: 85px;
-  text-align: center;
-  font-weight: 500;
-}
-.signin-btn:hover {
-  text-decoration: none;
-}
-.signin-btn-icon {
-  padding: 6px 8px !important;
-  min-width: auto !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  width: 36px;
-  height: 36px;
-  background: none !important;
-  border: none !important;
-}
-.signin-btn-icon i {
-  color: #000;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
+.sign-in-link:hover { color: var(--brand-teal); }
 
 
 .timer_num {
@@ -505,13 +587,13 @@
 
     <div class="main_nav_container">
       <div class="container">
-        <div class="row align-items-center justify-content-between">
+        <div class="row align-items-center justify-content-between" style="height: 68px; flex-wrap: nowrap;">
 
          
-          <div class="col-auto">
-            <div class="logo_container">
-               <img src="/images/logoicon.png" alt="Phone" class="w-2/3" style="width: 100px;">
-            </div>
+          <div class="col-auto d-flex align-items-center" style="height: 68px; overflow: hidden;">
+            <a href="/" class="d-flex align-items-center" style="text-decoration:none; height: 100%;">
+              <img src="/images/logoicon.png" alt="RingZone" style="height: 56px; width: auto; display: block; object-fit: contain;">
+            </a>
           </div>
 
           <div class="col">
@@ -593,6 +675,17 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  const _swalFire = Swal.fire.bind(Swal);
+  Swal.fire = function(a, b, c) {
+    let opts = (typeof a === 'object' && a !== null) ? { ...a } : { title: a, text: b, icon: c };
+    const noAutoClose = ['question', 'warning'].includes(opts.icon) && (opts.input || opts.showCancelButton);
+    if (!noAutoClose && opts.timer === undefined) {
+      opts.timer = opts.icon === 'success' ? 2000 : 2500;
+      opts.timerProgressBar = true;
+      opts.showConfirmButton = opts.showConfirmButton !== undefined ? opts.showConfirmButton : false;
+    }
+    return _swalFire(opts);
+  };
 
   function showLoader() {
     const loader = document.getElementById('pageLoader');
@@ -606,8 +699,22 @@
 
   
   document.addEventListener('DOMContentLoaded', function() {
-   
     hideLoader();
+
+    // Active nav link
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.navbar_menu li a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
+        link.classList.add('nav-active');
+      }
+    });
+
+    // Scroll shadow on header
+    const header = document.querySelector('.header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 10);
+    });
 
     document.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', function(e) {

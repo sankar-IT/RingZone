@@ -303,12 +303,30 @@
       <h1 class="m-0 fs-4 text-dark">User Management</h1>
       <a href="/admin/logout" class="btn-logout text-white"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
     </div>
-<div class="search-bar mt-3">
-  <form id="searchForm" action="/admin/users/" method="get" class="search-form d-flex align-items-center border border-1 border-grey rounded-pill overflow-hidden">
-    <input type="text" id="searchInput" class="form-control border-0 rounded-pill small-input" 
+<div class="d-flex flex-wrap align-items-center gap-2 mt-3 mb-2">
+  <form id="searchForm" action="/admin/users/" method="get" class="search-form d-flex align-items-center border border-1 border-grey rounded-pill overflow-hidden" style="max-width:320px;">
+    <input type="text" id="searchInput" class="form-control border-0 rounded-pill small-input"
            placeholder="Search customers..." name="search" value="<%= searchQuery || '' %>">
+    <input type="hidden" name="sort" value="<%= sort || '' %>">
+    <input type="hidden" name="gender" value="<%= gender || '' %>">
     <button class="btn btn-outline-secondary btn-sm ms-2 me-1" type="submit">Search</button>
     <button type="button" id="clearButton" class="btn btn-outline-danger btn-sm me-2">Clear</button>
+  </form>
+
+  <form method="get" action="/admin/users/" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="hidden" name="search" value="<%= searchQuery || '' %>">
+    <select name="sort" class="form-select form-select-sm" style="width:130px;" onchange="this.form.submit()">
+      <option value="" <%= !sort ? 'selected' : '' %>>Sort: Default</option>
+      <option value="az" <%= sort === 'az' ? 'selected' : '' %>>A → Z</option>
+      <option value="za" <%= sort === 'za' ? 'selected' : '' %>>Z → A</option>
+    </select>
+    <select name="gender" class="form-select form-select-sm" style="width:140px;" onchange="this.form.submit()">
+      <option value="" <%= !gender ? 'selected' : '' %>>All Genders</option>
+      <option value="male" <%= gender === 'male' ? 'selected' : '' %>>Male</option>
+      <option value="female" <%= gender === 'female' ? 'selected' : '' %>>Female</option>
+      <option value="other" <%= gender === 'other' ? 'selected' : '' %>>Other</option>
+      <option value="none" <%= gender === 'none' ? 'selected' : '' %>>Not Specified</option>
+    </select>
   </form>
 </div>
     <div class="content">
@@ -324,7 +342,18 @@
         <tbody>
           <% for(let i = 0; i < data.length; i++) { %>
             <tr>
-              <td><%= data[i].firstname %></td>
+              <td>
+                <% if (data[i].gender === 'male') { %>
+                  <i class="fas fa-mars" style="color:#3498db;" title="Male"></i>
+                <% } else if (data[i].gender === 'female') { %>
+                  <i class="fas fa-venus" style="color:#e91e8c;" title="Female"></i>
+                <% } else if (data[i].gender === 'other') { %>
+                  <i class="fas fa-transgender" style="color:#9b59b6;" title="Other"></i>
+                <% } else { %>
+                  <i class="fas fa-user" style="color:#aaa;" title="Not specified"></i>
+                <% } %>
+                <%= data[i].firstname %>
+              </td>
               <td><%= data[i].email %></td>
               <td><%= data[i].phone %></td>
               <td>
@@ -366,14 +395,10 @@
   document.addEventListener('DOMContentLoaded', function() {
     const clearButton = document.getElementById('clearButton');
     const searchInput = document.getElementById('searchInput');
-    const searchForm = document.getElementById('searchForm');
-    
-    if (clearButton && searchInput && searchForm) {
+    if (clearButton && searchInput) {
       clearButton.addEventListener('click', function() {
         searchInput.value = '';
-        const url = new URL(window.location.href);
-        url.searchParams.delete('search');
-        window.location.href = url.toString();
+        document.getElementById('searchForm').submit();
       });
     }
   });
@@ -412,6 +437,19 @@ function confirmUnblock(userId) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const _swalFire = Swal.fire.bind(Swal);
+Swal.fire = function(a, b, c) {
+  let opts = (typeof a === 'object' && a !== null) ? { ...a } : { title: a, text: b, icon: c };
+  const noAutoClose = opts.input || (opts.showCancelButton && ['question','warning'].includes(opts.icon));
+  if (!noAutoClose && opts.timer === undefined) {
+    opts.timer = opts.icon === 'success' ? 2000 : 2500;
+    opts.timerProgressBar = true;
+    opts.showConfirmButton = opts.showConfirmButton !== undefined ? opts.showConfirmButton : false;
+  }
+  return _swalFire(opts);
+};
+</script>
 </body>
 </html>
 

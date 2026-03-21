@@ -214,6 +214,19 @@ const editCategory = async (req, res) => {
 
 
 
+const toggleCategory = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const category = await Category.findById(id);
+    if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
+    category.isListed = !category.isListed;
+    await category.save();
+    res.json({ success: true, isListed: category.isListed });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 module.exports={
   categoryInfo,
   addCategory,
@@ -222,5 +235,6 @@ module.exports={
   getListCategory,
   getUnlistCategory,
   getEditCategory,
-  editCategory  
+  editCategory,
+  toggleCategory
 }
