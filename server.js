@@ -17,7 +17,7 @@ const { recordDailyPrices, cleanupOldPriceHistory } = require('./helpers/priceHi
 
 connectDB()
 
-
+//wanted
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
