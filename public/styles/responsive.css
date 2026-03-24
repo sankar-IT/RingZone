@@ -25,7 +25,8 @@ img { max-width: 100%; height: auto; }
   border-radius: 10px;
   cursor: pointer;
   padding: 8px;
-  z-index: 200;
+  z-index: 100000;
+  position: relative;
 }
 .nav-hamburger span {
   display: block;
@@ -41,22 +42,89 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 767px) {
   .nav-hamburger { display: flex; }
 
-  /* Hide desktop nav links */
+  /* ── Mobile side drawer ── */
   .navbar_menu {
-    display: none !important;
+    display: flex !important;
     flex-direction: column !important;
-    position: absolute;
-    top: 68px;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    position: fixed;
+    top: 0;
     left: 0;
-    right: 0;
+    width: 75%;
+    max-width: 300px;
+    height: 100vh;
     background: #fff;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    padding: 12px 0;
-    z-index: 999;
-    border-top: 1px solid #eee;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+    padding-top: 0;
+    z-index: 99999;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
   }
-  .navbar_menu.open { display: flex !important; }
-  .navbar_menu li a { padding: 12px 24px; border-radius: 0; font-size: 1rem; }
+  .navbar_menu.open { transform: translateX(0) !important; }
+
+  .navbar_menu li { width: 100%; list-style: none; }
+  .navbar_menu li a {
+    padding: 16px 24px !important;
+    border-radius: 0 !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    width: 100%;
+    display: block !important;
+    border-left: 3px solid transparent;
+    text-align: left !important;
+    color: #1a1a1a !important;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .navbar_menu li a::after { display: none !important; }
+  .navbar_menu li a:hover,
+  .navbar_menu li a.nav-active {
+    border-left-color: #1e918b !important;
+    background: rgba(30,145,139,0.06) !important;
+    color: #1e918b !important;
+  }
+
+  /* Drawer close button — only visible inside mobile drawer */
+  .drawer-close-btn {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .drawer-close-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 16px 20px;
+      background: #1e918b;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .drawer-close-btn span {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+  }
+
+  /* Dark overlay behind drawer */
+  .nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 99998;
+    transition: opacity 0.3s ease;
+  }
+  .nav-overlay.open { display: block; }
 
   /* Shrink icon buttons */
   .navbar_user li a:not(.user-avatar-link):not(.wishlist-navbar-icon),

@@ -829,23 +829,72 @@
     }
   });
 
-  // Hamburger menu toggle
+  // Hamburger menu — side drawer
   document.addEventListener('DOMContentLoaded', function() {
     const hamburger = document.getElementById('navHamburger');
     const menu = document.getElementById('navbarMenu');
-    if (hamburger && menu) {
-      hamburger.addEventListener('click', function() {
-        hamburger.classList.toggle('open');
-        menu.classList.toggle('open');
-      });
-      // Close menu when a link is clicked
-      menu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          hamburger.classList.remove('open');
-          menu.classList.remove('open');
-        });
-      });
+    if (!hamburger || !menu) return;
+
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'nav-overlay';
+    overlay.id = 'navOverlay';
+    document.body.appendChild(overlay);
+
+    // Create close button and prepend inside drawer
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'drawer-close-btn';
+    closeBtn.id = 'drawerCloseBtn';
+    closeBtn.innerHTML = 'Menu <span>&#10005;</span>';
+    closeBtn.style.display = 'none';
+    menu.insertBefore(closeBtn, menu.firstChild);
+
+    // On mobile: move drawer to body to escape header's stacking context
+    // On desktop: keep it inside nav (normal horizontal menu)
+    const navEl = document.querySelector('.navbar');
+    let movedToBody = false;
+
+    function handleResize() {
+      if (window.innerWidth <= 767 && !movedToBody) {
+        document.body.appendChild(menu);
+        closeBtn.style.display = 'flex';
+        movedToBody = true;
+      } else if (window.innerWidth > 767 && movedToBody) {
+        navEl.appendChild(menu);
+        closeBtn.style.display = 'none';
+        movedToBody = false;
+        menu.classList.remove('open');
+        overlay.classList.remove('open');
+        hamburger.classList.remove('open');
+        document.body.style.overflow = '';
+      }
     }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    function openDrawer() {
+      hamburger.classList.add('open');
+      menu.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      hamburger.classList.remove('open');
+      menu.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+
+    // Close when a nav link is clicked
+    menu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeDrawer);
+    });
 
     // Filter toggle for shopping page
     const filterBtn = document.getElementById('filterToggleBtn');
